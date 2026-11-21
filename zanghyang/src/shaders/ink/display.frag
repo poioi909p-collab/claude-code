@@ -6,6 +6,10 @@ uniform vec2 uDyeTexel;
 uniform vec3 uPaperCol;
 uniform vec3 uCool;
 uniform vec3 uWarm;
+#ifdef POSTER
+uniform sampler2D uText;
+uniform vec3 uVermilion;
+#endif
 in vec2 vUv;
 out vec4 fragColor;
 
@@ -28,7 +32,7 @@ void main() {
   vec4 r4 = texture(uDried, vUv - vec2(0.0, o.y));
   float ring = ((r1.r - r1.b) + (r2.r - r2.b) + (r3.r - r3.b) + (r4.r - r4.b)) * 0.25;
   float wetPart = dr.r - dr.b;
-  float edge = clamp(wetPart - ring, 0.0, 0.6) * (1.0 - smoothstep(0.4, 1.4, wetPart));
+  float edge = clamp(wetPart - ring, 0.0, 0.6) * (1.0 - smoothstep(0.4, 1.4, wetPart)) * (1.0 - smoothstep(0.0, 0.25, dr.b));
 
   float pig = dr.r + wt.r * 1.15;
   float temp = (dr.g + wt.g) / max(dr.r + wt.r, 1e-3);
@@ -50,5 +54,14 @@ void main() {
   vec3 col = mix(pc, inkCol, dens);
   // 젖은 종이: 약간 어둡고 차분하게
   col *= 1.0 - 0.06 * clamp(wt.b, 0.0, 1.0);
+#ifdef POSTER
+  // 주홍: 따뜻한 결의 실오라기
+  float vm = (1.0 - exp(-dr.a * 2.2)) * (1.0 - 0.25 * fiber);
+  col = mix(col, uVermilion * (0.93 + 0.1 * h), clamp(vm, 0.0, 0.92));
+  // 글씨와 낙관 (캔버스) — 종이결이 비치도록
+  vec4 tx = texture(uText, vUv);
+  float ta = tx.a * (0.86 + 0.14 * smoothstep(0.3, 0.7, h)) * (1.0 - 0.12 * fiber);
+  col = mix(col, tx.rgb, ta);
+#endif
   fragColor = vec4(col, 1.0);
 }

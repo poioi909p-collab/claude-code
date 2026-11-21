@@ -10,6 +10,7 @@ uniform vec2 uCaps;      // 시작 캡, 끝 캡
 uniform float uDry;      // 0..1
 uniform float uSeed;
 uniform float uPx;       // uv 높이 1 = CSS px
+uniform float uVerm;     // 1 이면 A 채널(주홍)에만
 in vec2 vUv;
 out vec4 fragColor;
 
@@ -64,8 +65,9 @@ void main() {
     // 마른 붓 (갈필·비백): 경계가 또렷하고 흰 결이 갈라진다
     float body = smoothstep(1.0, 0.82, dr);
     float prof = body * hairMask * (0.85 + 0.15 * fine);
-    // B 채널: 마른 붓 몫 (번짐 테두리 계산에서 제외)
-    fragColor = vec4(uValue.x * prof, uValue.x * uValue.y * prof, uValue.x * prof, 0.0);
+    // B 채널: 마른 붓 몫 (번짐 테두리 계산에서 제외), A 채널: 주홍
+    fragColor = uVerm > 0.5 ? vec4(0.0, 0.0, 0.0, uValue.x * prof)
+                            : vec4(uValue.x * prof, uValue.x * uValue.y * prof, uValue.x * prof, 0.0);
   #endif
 #endif
 }

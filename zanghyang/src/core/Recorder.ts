@@ -14,6 +14,8 @@ export interface RecordedStroke {
   dur: number;
   /** 기록 당시 화면 비 (w/h) */
   aspect: number;
+  /** 기록 당시 화면 높이 (CSS px) */
+  vh: number;
   pts: Float32Array;
   /** 현: 음 인덱스 등 */
   note?: number;
@@ -65,6 +67,7 @@ export class Recorder {
       t0: stroke.startT,
       dur: stroke.last.t - stroke.startT,
       aspect: w / h,
+      vh: h,
       pts,
       ...extra,
     });

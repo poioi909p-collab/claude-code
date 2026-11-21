@@ -155,8 +155,11 @@ export class FlowRoom extends Room {
     const ts = q.trailScale;
     this.trail = st.target(st.pw * ts, st.ph * ts, { type: st.halfType });
     st.clear(this.trail);
-    this.pointsMat.uniforms.uSize.value = Math.max(1, st.dpr * ts * 1.1);
-    this.pointsMat.uniforms.uBright.value = 0.05 * (q.tier === 'high' ? 1 : q.tier === 'mid' ? 1.35 : 1.6);
+    const size = Math.max(1, st.dpr * ts * 1.1);
+    this.pointsMat.uniforms.uSize.value = size;
+    // 화면 면적 대비 빛의 밀도를 기기와 무관하게 맞춘다 (기준: 1280×800, 10만 개)
+    const density = (st.pw * ts * st.ph * ts) / (tw * th * size * size) / 8.3;
+    this.pointsMat.uniforms.uBright.value = 0.05 * clamp(density, 0.3, 1.8);
   }
 
   resize(): void {

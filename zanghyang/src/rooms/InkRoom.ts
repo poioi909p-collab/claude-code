@@ -32,6 +32,8 @@ const ADD = {
 interface BrushState {
   last: StrokePoint;
   started: boolean;
+  /** 붓의 마름 정도 — 획을 따라 부드럽게 변한다 */
+  dry: number;
 }
 
 /** 잉크 파라미터 (먹의 성격) */
@@ -250,7 +252,7 @@ export class InkRoom extends Room {
 
   // ─────────── 입력 ───────────
   onStrokeStart(s: Stroke): void {
-    this.brushes.set(s.id, { last: s.first, started: false });
+    this.brushes.set(s.id, { last: s.first, started: false, dry: 0 });
     haptic(5);
     this.lastActivity = this.time;
   }
@@ -263,7 +265,8 @@ export class InkRoom extends Room {
       const r = this.radiusPx(p, minDim);
       const minSeg = Math.max(2.5, r * 0.4);
       if (Math.hypot(p.x - b.last.x, p.y - b.last.y) < minSeg) continue;
-      this.segment(b.last, p, !b.started, false);
+      b.dry += (this.dryness(p) - b.dry) * 0.3;
+      this.segment(b.last, p, !b.started, false, b.dry);
       b.started = true;
       b.last = p;
     }
@@ -278,7 +281,7 @@ export class InkRoom extends Room {
         // 톡 — 작은 먹점
         this.drop(p.x, p.y, 0.55 + p.intensity * 0.5, 0.6);
       } else {
-        this.segment(b.last, p, !b.started, true);
+        this.segment(b.last, p, !b.started, true, b.dry);
       }
     }
     this.brushes.delete(s.id);
@@ -302,13 +305,12 @@ export class InkRoom extends Room {
   }
 
   /** 한 마디의 붓질: 속도 · 젖은 먹 · 마른 붓을 각각의 버퍼에 */
-  private segment(a: StrokePoint, b: StrokePoint, capStart: boolean, capEnd: boolean): void {
+  private segment(a: StrokePoint, b: StrokePoint, capStart: boolean, capEnd: boolean, dry: number): void {
     const st = this.stage;
     const W = st.width;
     const H = st.height;
     const minDim = Math.min(W, H);
     const rpx = this.radiusPx(b, minDim);
-    const dry = this.dryness(b);
     const slow = 1 - smoothstep(0.2, 2.6, b.speed);
     const amount = b.intensity * (0.62 + 0.55 * slow);
     const ua = new THREE.Vector2(a.x / W, 1 - a.y / H);
