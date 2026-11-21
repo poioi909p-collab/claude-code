@@ -1,0 +1,188 @@
+{
+  "schemaVersion": 1,
+  "confirmedByParent": false,
+  "test": {
+    "type": "MAST",
+    "date": "2026-09-11",
+    "unit": "IU/mL",
+    "totalIgE": 1915,
+    "notes": [
+      "총 IgE 1915 IU/mL (높음)",
+      "약물(페니실린 계열 등) 음성"
+    ]
+  },
+  "foods": [
+    { "allergen": "효모", "status": "unknown", "tests": [
+      { "name": "효모(제빵용)", "class": 4, "value": 30.04 }
+    ] },
+    { "allergen": "굴", "status": "unknown", "tests": [
+      { "name": "굴", "class": 4, "value": 20.08 }
+    ] },
+    { "allergen": "번데기", "status": "unknown", "tests": [
+      { "name": "번데기", "class": 4, "value": 18.57 }
+    ] },
+
+    { "allergen": "땅콩", "status": "unknown", "tests": [
+      { "name": "땅콩", "class": 2, "value": 2.53 },
+      { "name": "땅콩 성분 h8", "class": 3, "value": 16.36, "component": true, "note": "땅콩 자체는 Class 2. 주요 성분 h1·h2·h3·h9는 음성" },
+      { "name": "땅콩 성분 h1", "class": 0, "value": null, "component": true },
+      { "name": "땅콩 성분 h2", "class": 0, "value": null, "component": true },
+      { "name": "땅콩 성분 h3", "class": 0, "value": null, "component": true },
+      { "name": "땅콩 성분 h9", "class": 0, "value": null, "component": true }
+    ] },
+    { "allergen": "랍스터", "status": "unknown", "tests": [
+      { "name": "랍스터", "class": 3, "value": 15.36 }
+    ] },
+    { "allergen": "새우", "status": "unknown", "tests": [
+      { "name": "새우", "class": 3, "value": 13.36, "note": "성분 Pen a 1은 음성" },
+      { "name": "새우 성분 Pen a 1", "class": 0, "value": null, "component": true }
+    ] },
+    { "allergen": "버섯", "status": "unknown", "tests": [
+      { "name": "버섯", "class": 3, "value": 12.70 }
+    ] },
+    { "allergen": "복숭아", "status": "unknown", "tests": [
+      { "name": "복숭아", "class": 2, "value": 3.06 },
+      { "name": "복숭아 성분 p4", "class": 3, "value": 10.13, "component": true, "note": "복숭아 자체는 Class 2" }
+    ] },
+    { "allergen": "아몬드", "status": "unknown", "tests": [
+      { "name": "아몬드", "class": 3, "value": 8.93 }
+    ] },
+    { "allergen": "게", "status": "unknown", "tests": [
+      { "name": "게", "class": 3, "value": 6.35 }
+    ] },
+    { "allergen": "사과", "status": "unknown", "tests": [
+      { "name": "사과", "class": 3, "value": 5.85, "note": "성분 d1·d3은 음성" },
+      { "name": "사과 성분 d1", "class": 0, "value": null, "component": true },
+      { "name": "사과 성분 d3", "class": 0, "value": null, "component": true }
+    ] },
+    { "allergen": "토마토", "status": "unknown", "tests": [
+      { "name": "토마토", "class": 3, "value": 5.76 }
+    ] },
+    { "allergen": "양파", "status": "unknown", "tests": [
+      { "name": "양파", "class": 3, "value": 5.05 }
+    ] },
+    { "allergen": "메밀", "status": "unknown", "tests": [
+      { "name": "메밀", "class": 3, "value": 4.64, "note": "성분 e2·e3은 음성" },
+      { "name": "메밀 성분 e2", "class": 0, "value": null, "component": true },
+      { "name": "메밀 성분 e3", "class": 0, "value": null, "component": true }
+    ] },
+    { "allergen": "옥수수", "status": "unknown", "tests": [
+      { "name": "옥수수", "class": 3, "value": 4.59 }
+    ] },
+    { "allergen": "호밀", "status": "unknown", "tests": [
+      { "name": "호밀", "class": 3, "value": 4.40 }
+    ] },
+    { "allergen": "쌀", "status": "unknown", "tests": [
+      { "name": "쌀", "class": 3, "value": 4.39 }
+    ] },
+    { "allergen": "셀러리", "status": "unknown", "tests": [
+      { "name": "셀러리", "class": 3, "value": 3.92 }
+    ] },
+    { "allergen": "당근", "status": "unknown", "tests": [
+      { "name": "당근", "class": 3, "value": 3.79 }
+    ] },
+    { "allergen": "해바라기씨", "status": "unknown", "tests": [
+      { "name": "해바라기씨", "class": 3, "value": 3.78 }
+    ] },
+
+    { "allergen": "마늘", "status": "unknown", "tests": [
+      { "name": "마늘", "class": 2, "value": 2.12 }
+    ] },
+    { "allergen": "밀", "status": "unknown", "tests": [
+      { "name": "밀가루", "class": 2, "value": 2.11 },
+      { "name": "밀 성분 글루텐", "class": 1, "value": 0.58, "component": true }
+    ] },
+    { "allergen": "보리", "status": "unknown", "tests": [
+      { "name": "보리", "class": 2, "value": 2.86 }
+    ] },
+    { "allergen": "오렌지", "status": "unknown", "tests": [
+      { "name": "오렌지", "class": 2, "value": 2.52 }
+    ] },
+    { "allergen": "오이", "status": "unknown", "tests": [
+      { "name": "오이", "class": 2, "value": 2.53 }
+    ] },
+    { "allergen": "감자", "status": "unknown", "tests": [
+      { "name": "감자", "class": 2, "value": 3.27 }
+    ] },
+    { "allergen": "카카오", "status": "unknown", "tests": [
+      { "name": "카카오", "class": 2, "value": 2.10 }
+    ] },
+    { "allergen": "헤이즐넛", "status": "unknown", "tests": [
+      { "name": "헤이즐넛", "class": 2, "value": 1.57 }
+    ] },
+    { "allergen": "딸기", "status": "unknown", "tests": [
+      { "name": "딸기", "class": 2, "value": 1.56 }
+    ] },
+    { "allergen": "강낭콩", "status": "unknown", "tests": [
+      { "name": "흰강낭콩", "class": 2, "value": 1.53 }
+    ] },
+    { "allergen": "브라질넛", "status": "unknown", "tests": [
+      { "name": "브라질넛", "class": 2, "value": 1.47 }
+    ] },
+    { "allergen": "참깨", "status": "unknown", "tests": [
+      { "name": "참깨", "class": 2, "value": 1.23 }
+    ] },
+    { "allergen": "코코넛", "status": "unknown", "tests": [
+      { "name": "코코넛", "class": 2, "value": 1.09 }
+    ] },
+    { "allergen": "호두", "status": "unknown", "tests": [
+      { "name": "호두", "class": 2, "value": 0.99 }
+    ] },
+    { "allergen": "콩", "status": "unknown", "tests": [
+      { "name": "콩(대두)", "class": 2, "value": 0.72 }
+    ] },
+
+    { "allergen": "계란", "status": "unknown", "tests": [
+      { "name": "계란 흰자", "class": 0, "value": null },
+      { "name": "계란 노른자", "class": 0, "value": null },
+      { "name": "계란 성분", "class": 0, "value": null, "component": true }
+    ] },
+    { "allergen": "우유", "status": "unknown", "tests": [
+      { "name": "우유", "class": 0, "value": null },
+      { "name": "우유 성분", "class": 0, "value": null, "component": true },
+      { "name": "치즈", "class": 0, "value": null }
+    ] },
+    { "allergen": "닭고기", "status": "unknown", "tests": [{ "name": "닭고기", "class": 0, "value": null }] },
+    { "allergen": "돼지고기", "status": "unknown", "tests": [{ "name": "돼지고기", "class": 0, "value": null }] },
+    { "allergen": "소고기", "status": "unknown", "tests": [{ "name": "소고기", "class": 0, "value": null }] },
+    { "allergen": "양고기", "status": "unknown", "tests": [{ "name": "양고기", "class": 0, "value": null }] },
+    { "allergen": "대구", "status": "unknown", "tests": [{ "name": "대구", "class": 0, "value": null }] },
+    { "allergen": "참치", "status": "unknown", "tests": [{ "name": "참치", "class": 0, "value": null }] },
+    { "allergen": "연어", "status": "unknown", "tests": [{ "name": "연어", "class": 0, "value": null }] },
+    { "allergen": "고등어", "status": "unknown", "tests": [{ "name": "고등어", "class": 0, "value": null }] },
+    { "allergen": "멸치", "status": "unknown", "tests": [{ "name": "멸치", "class": 0, "value": null }] },
+    { "allergen": "오징어", "status": "unknown", "tests": [{ "name": "오징어", "class": 0, "value": null }] },
+    { "allergen": "홍합", "status": "unknown", "tests": [{ "name": "홍합", "class": 0, "value": null }] },
+    { "allergen": "조개", "status": "unknown", "tests": [{ "name": "조개", "class": 0, "value": null }] },
+    { "allergen": "가리비", "status": "unknown", "tests": [{ "name": "가리비", "class": 0, "value": null }] },
+    { "allergen": "장어", "status": "unknown", "tests": [{ "name": "장어", "class": 0, "value": null }] },
+    { "allergen": "키위", "status": "unknown", "tests": [{ "name": "키위", "class": 0, "value": null }] },
+    { "allergen": "망고", "status": "unknown", "tests": [{ "name": "망고", "class": 0, "value": null }] },
+    { "allergen": "바나나", "status": "unknown", "tests": [{ "name": "바나나", "class": 0, "value": null }] },
+    { "allergen": "캐슈넛", "status": "unknown", "tests": [{ "name": "캐슈넛", "class": 0, "value": null }] },
+    { "allergen": "잣", "status": "unknown", "tests": [{ "name": "잣", "class": 0, "value": null }] },
+    { "allergen": "마카다미아", "status": "unknown", "tests": [{ "name": "마카다미아", "class": 0, "value": null }] }
+  ],
+  "nonFoods": [
+    { "name": "집먼지진드기 (Dp)", "group": "진드기", "class": 6 },
+    { "name": "집먼지진드기 (Df)", "group": "진드기", "class": 6 },
+    { "name": "집먼지진드기 성분 (Der f 2)", "group": "진드기", "class": 6 },
+    { "name": "저장진드기 (2종)", "group": "진드기", "class": 6 },
+    { "name": "고양이", "group": "동물", "class": 6 },
+    { "name": "고양이 성분", "group": "동물", "class": 6 },
+    { "name": "참나무 성분", "group": "꽃가루", "class": 6 },
+    { "name": "집먼지", "group": "먼지", "class": 5 },
+    { "name": "클라도스포륨", "group": "곰팡이", "class": 4 },
+    { "name": "칸디다", "group": "곰팡이", "class": 4 },
+    { "name": "리조푸스", "group": "곰팡이", "class": 4 },
+    { "name": "쑥 꽃가루", "group": "꽃가루", "class": 4 },
+    { "name": "참나무", "group": "꽃가루", "class": 4 },
+    { "name": "자작나무 성분 (v2)", "group": "꽃가루", "class": 4 },
+    { "name": "말", "group": "동물", "class": 4 },
+    { "name": "개", "group": "동물", "class": 3 },
+    { "name": "개 성분", "group": "동물", "class": 3 },
+    { "name": "라텍스", "group": "기타", "class": 3 },
+    { "name": "그 외 다수 꽃가루·곰팡이", "group": "꽃가루", "class": 3 }
+  ],
+  "emergencyMemo": ""
+}
