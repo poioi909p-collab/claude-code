@@ -120,6 +120,11 @@ describe("동의어 매칭", () => {
     expect(hitLine(r.hits[0]!).text).toBe("건새우, 새우젓 → 새우");
   });
 
+  it("원문 단어와 항목 이름이 같으면 한 번만 보여준다", () => {
+    const r = run({ ingredients: ["새우", "대두"] });
+    expect(r.hits.map((h) => hitLine(h).text)).toEqual(["새우", "대두 → 콩(대두)"]);
+  });
+
   it("흡입 항원은 매칭 대상이 아니다", () => {
     // '집먼지진드기'·'고양이'는 사전에 없으므로 아무것도 걸리지 않는다
     expect(levels(run({ ingredients: ["고양이 모양 젤리"] }))).toEqual({});

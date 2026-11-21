@@ -1,0 +1,18 @@
+@import "tailwindcss";
+
+/* 1rem = 18px → Tailwind text-base가 최소 글자 크기(18px)가 된다. text-sm·text-xs는 쓰지 않는다. */
+html {
+  font-size: 112.5%;
+  -webkit-text-size-adjust: 100%;
+}
+
+:root {
+  color-scheme: light dark;
+}
+
+body {
+  font-family: system-ui, -apple-system, "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic",
+    sans-serif;
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+}

@@ -110,7 +110,8 @@ export function hitLine(hit: AllergenHit): HitLine {
   const name = displayName(hit.allergen);
   return {
     icon: LEVEL_STYLE[hit.level === "none" ? "clear" : hit.level].icon,
-    text: `${words.join(", ")} → ${name}`,
+    // "새우 → 새우"처럼 같은 말이 반복되면 이름만 보여준다
+    text: words.every((w) => w === hit.allergen || w === name) ? name : `${words.join(", ")} → ${name}`,
     note: hit.crossOnly ? CROSS_NOTE : undefined,
   };
 }

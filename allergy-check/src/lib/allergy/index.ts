@@ -11,6 +11,7 @@ export * from "./lexicon";
 export * from "./parseLabel";
 export * from "./analyze";
 export * from "./messages";
+export * from "./highlight";
 
 export const SEED_PROFILE = seedProfile as AllergyProfile;
 export const SYNONYMS = synonyms as SynonymDictionary;

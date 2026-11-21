@@ -5,7 +5,7 @@
 ## 진행 상황
 
 - [x] **1단계** — 프로필 시드 데이터, 동의어 사전, 매칭 로직, 단위 테스트
-- [ ] 2단계 — 텍스트 직접 입력 → 결과 화면 (Next.js)
+- [x] **2단계** — 텍스트 직접 입력 → 결과 화면 (Next.js)
 - [ ] 3단계 — 카메라 촬영 + 이미지 분석 API
 - [ ] 4단계 — 프로필 관리, 부모 PIN, 가족 상태 설정
 - [ ] 5단계 — 기록, PWA, 응급 버튼, 내보내기·가져오기
@@ -15,8 +15,10 @@
 
 ```bash
 npm install
+npm run dev       # http://localhost:3000
 npm test          # 단위 테스트
 npm run typecheck
+npm run build
 ```
 
 ## 구조
@@ -25,6 +27,10 @@ npm run typecheck
 data/
   profile.seed.json   2026-09-11 MAST 결과 (첫 실행 때 부모가 확인·수정)
   synonyms.json       성분 동의어 사전 + 의무표시 22종 + '알레르기 아님' 단어
+src/app/              Next.js App Router (지금은 홈 = 텍스트 입력 화면)
+src/components/
+  TextCheckScreen.tsx 성분표 글자 입력 + 예시 (2단계)
+  ResultView.tsx      신호등 카드, 걸린 성분 목록, 원문 하이라이트 (3단계 사진 결과도 이걸 씀)
 src/lib/allergy/
   types.ts            데이터 모양 (LabelExtraction = 이미지 분석 API 응답 형식)
   levels.ts           Class → 등급, 가족 설정 우선, 같은 제조시설 하향
@@ -32,6 +38,7 @@ src/lib/allergy/
   parseLabel.ts       텍스트로 붙여넣은 성분표 → LabelExtraction
   analyze.ts          매칭 결과 + 프로필 → 최종 결과 (위험 판단은 전부 여기서, 코드로)
   messages.ts         결과 카드·성분 줄 문구 (중학생 눈높이)
+  highlight.ts        원문에서 걸린 단어 하이라이트 조각
 tests/                SPEC 예시 + 경계 사례
 ```
 
