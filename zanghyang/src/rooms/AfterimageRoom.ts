@@ -714,9 +714,27 @@ export class AfterimageRoom extends Room {
     document.body.appendChild(a);
     a.click();
     a.remove();
-    setTimeout(() => URL.revokeObjectURL(url), 4000);
-    this.app.toast('포스터를 저장했습니다');
+    // 다운로드가 막힌 환경(임베드 등)을 위해 이미지를 직접 띄워 둔다 — 길게 누르거나 우클릭해 저장
+    this.showPreview(url);
     haptic(10, 0);
+  }
+
+  private showPreview(url: string): void {
+    const wrap = document.createElement('div');
+    wrap.className = 'poster-preview';
+    const img = document.createElement('img');
+    img.src = url;
+    img.alt = '잔향 포스터';
+    const cap = document.createElement('p');
+    cap.textContent = matchMedia('(pointer: coarse)').matches ? '이미지를 길게 눌러 저장 · 바깥을 눌러 닫기' : '이미지를 우클릭해 저장 · 바깥을 눌러 닫기';
+    wrap.append(img, cap);
+    const close = (e: Event) => {
+      if (e.target === img) return;
+      gsap.to(wrap, { opacity: 0, duration: 0.4, onComplete: () => { wrap.remove(); URL.revokeObjectURL(url); } });
+    };
+    wrap.addEventListener('click', close);
+    document.body.appendChild(wrap);
+    gsap.fromTo(wrap, { opacity: 0 }, { opacity: 1, duration: 0.6, ease: 'sine.out' });
   }
 }
 

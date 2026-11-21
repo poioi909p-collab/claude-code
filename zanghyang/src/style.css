@@ -394,3 +394,31 @@ input {
     animation: none;
   }
 }
+
+/* ───────── 포스터 미리보기 ───────── */
+.poster-preview {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: calc(24px + var(--safe-t)) 20px calc(24px + var(--safe-b));
+  background: rgba(11, 11, 12, 0.92);
+}
+.poster-preview img {
+  max-width: 100%;
+  max-height: calc(100% - 48px);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  -webkit-touch-callout: default;
+  -webkit-user-select: auto;
+  user-select: auto;
+}
+.poster-preview p {
+  margin: 0;
+  font-size: 11px;
+  letter-spacing: 0.26em;
+  opacity: 0.7;
+}
