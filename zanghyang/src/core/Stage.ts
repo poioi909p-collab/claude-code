@@ -34,6 +34,7 @@ export function makeMaterial(fragment: string, uniforms: Uniforms, opts: PassOpt
     depthWrite: false,
     transparent: opts.transparent ?? opts.blending !== undefined,
     blending: opts.blending ?? THREE.NoBlending,
+    side: THREE.DoubleSide,
   });
   if (opts.blending === THREE.CustomBlending) {
     mat.blendSrc = opts.blendSrc ?? THREE.OneFactor;

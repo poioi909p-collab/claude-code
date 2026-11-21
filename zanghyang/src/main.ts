@@ -12,6 +12,7 @@ import { Hud } from './ui/Hud';
 import type { AppContext, Room } from './rooms/Room';
 import { EntranceRoom } from './rooms/EntranceRoom';
 import { InkRoom } from './rooms/InkRoom';
+import { StringRoom } from './rooms/StringRoom';
 
 const TOTAL = 4;
 
@@ -46,7 +47,7 @@ class Exhibition {
     };
 
     const entrance = new EntranceRoom(this.ctx);
-    this.rooms = [entrance, new InkRoom(this.ctx)];
+    this.rooms = [entrance, new InkRoom(this.ctx), new StringRoom(this.ctx)];
     this.current = entrance;
     entrance.ensureInit();
     entrance.intro();
@@ -70,6 +71,13 @@ class Exhibition {
       document.body.appendChild(this.fpsEl);
     }
 
+    // 개발용 바로가기: ?room=2
+    const startRoom = Number(new URLSearchParams(location.search).get('room'));
+    if (startRoom >= 1 && startRoom <= TOTAL) {
+      entrance.dissolve();
+      this.hud.show();
+      this.goTo(startRoom, undefined, 0.05);
+    }
     if (import.meta.env.DEV) (window as unknown as { __app: unknown }).__app = this;
     requestAnimationFrame(this.frame);
   }
