@@ -254,8 +254,6 @@ export class InkRoom extends Room {
   // ─────────── 입력 ───────────
   onStrokeStart(s: Stroke): void {
     this.brushes.set(s.id, { last: s.first, started: false, dry: 0 });
-    // 붓이 종이에 닿는 순간 — 아주 작은 물방울 소리
-    this.app.audio.drip(0.35 + 0.4 * s.first.intensity, (s.first.x / this.stage.width) * 1.6 - 0.8);
     haptic(5);
     this.lastActivity = this.time;
   }
@@ -430,7 +428,7 @@ export class InkRoom extends Room {
     // 붓 소리: 종이를 스치는 낮고 둥근 바람결 (세기를 천천히 따라간다)
     this.brushLevel *= Math.exp(-dt * 3.5);
     this.brushSmooth += (this.brushLevel - this.brushSmooth) * (1 - Math.exp(-dt * 6));
-    this.noise?.set(this.brushSmooth * 0.05, 380 + this.brushSmooth * 900);
+    this.noise?.set(this.brushSmooth * 0.06, 200 + this.brushSmooth * 380);
 
     const active = time - this.lastActivity < 7.5;
     if (active) {

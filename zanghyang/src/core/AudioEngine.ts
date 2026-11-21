@@ -259,23 +259,21 @@ export class AudioEngine {
     if (!this.ready || !this.enabled) return;
     const ctx = this.ctx!;
     const t = ctx.currentTime + 0.005;
-    const deg = low ? 3 + Math.floor(Math.random() * 3) : 8 + Math.floor(Math.random() * 5);
+    // 낮은 음역만 (D3 아래위) — 귀에 걸리는 고음 없이 둥글게
+    const deg = low ? Math.floor(Math.random() * 3) - 2 : Math.floor(Math.random() * 3);
     const f = pentatonicHz(deg);
     const p = ctx.createStereoPanner();
     p.pan.value = Math.max(-0.8, Math.min(0.8, pan));
     p.connect(this.bus);
-    const parts: [number, number, number][] = [
-      [1, 1, low ? 1.2 : 0.55],
-      [2.01, 0.18, 0.25],
-    ];
+    const parts: [number, number, number][] = [[1, 1, low ? 1.4 : 0.9]];
     for (const [m, g, d] of parts) {
       const o = ctx.createOscillator();
       o.type = 'sine';
-      o.frequency.setValueAtTime(f * m * 1.35, t);
-      o.frequency.exponentialRampToValueAtTime(f * m, t + 0.045);
+      o.frequency.setValueAtTime(f * m * 1.12, t);
+      o.frequency.exponentialRampToValueAtTime(f * m, t + 0.06);
       const e = ctx.createGain();
       e.gain.setValueAtTime(0.0001, t);
-      e.gain.exponentialRampToValueAtTime(amp * 0.16 * g, t + 0.008);
+      e.gain.exponentialRampToValueAtTime(amp * 0.2 * g, t + 0.015);
       e.gain.exponentialRampToValueAtTime(0.0001, t + d);
       o.connect(e);
       e.connect(p);
