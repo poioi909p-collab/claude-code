@@ -172,7 +172,7 @@ export class FlowRoom extends Room {
 
   enter(_info: EnterInfo): void {
     this.app.input.handler = this;
-    this.noise = this.app.audio.noise();
+    this.noise = this.app.audio.noise('bandpass');
     this.bindTilt();
   }
 
@@ -328,7 +328,7 @@ export class FlowRoom extends Room {
     this.state.swap();
 
     this.wind *= Math.exp(-dt * 2.5);
-    this.noise?.set(this.wind * 0.06, 260 + this.wind * 700);
+    this.noise?.set(this.wind * 0.07, 380 + this.wind * 1100, 0.9);
   }
 
   render(target: THREE.WebGLRenderTarget): void {

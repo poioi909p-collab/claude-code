@@ -14,7 +14,7 @@ export function pentatonicHz(index: number): number {
 }
 
 export interface NoiseVoice {
-  set(level: number, freq: number): void;
+  set(level: number, freq: number, q?: number): void;
   stop(): void;
 }
 
@@ -32,6 +32,7 @@ export class AudioEngine {
   private reverb!: ConvolverNode;
   private reverbSend!: GainNode;
   private noiseBuf!: AudioBuffer;
+  private brownBuf: AudioBuffer | null = null;
   private voices: Voice[] = [];
   private readonly listeners = new Set<(on: boolean) => void>();
 
@@ -62,12 +63,11 @@ export class AudioEngine {
   private build() {
     const ctx = this.ctx!;
     const comp = ctx.createDynamicsCompressor();
-    // 펌핑 없이 정점만 다듬는 부드러운 리미터
-    comp.threshold.value = -9;
-    comp.knee.value = 12;
-    comp.ratio.value = 2.5;
-    comp.attack.value = 0.012;
-    comp.release.value = 0.4;
+    comp.threshold.value = -16;
+    comp.knee.value = 18;
+    comp.ratio.value = 4;
+    comp.attack.value = 0.004;
+    comp.release.value = 0.25;
     comp.connect(ctx.destination);
 
     this.master = ctx.createGain();
@@ -90,23 +90,10 @@ export class AudioEngine {
     this.reverb.connect(tone);
     tone.connect(this.master);
 
-    // 갈색 잡음: 백색잡음의 쉿 소리 대신 종이·바람처럼 둥근 결
-    const len = ctx.sampleRate * 4;
+    const len = ctx.sampleRate * 2;
     this.noiseBuf = ctx.createBuffer(1, len, ctx.sampleRate);
     const d = this.noiseBuf.getChannelData(0);
-    let b = 0;
-    for (let i = 0; i < len; i++) {
-      b = (b + 0.02 * (Math.random() * 2 - 1)) / 1.02;
-      d[i] = b * 3.5;
-    }
-    // 반복 이음매에서 '틱' 소리가 나지 않도록 끝을 처음에 맞춘다
-    const drift = d[len - 1] - d[0];
-    let peak = 0;
-    for (let i = 0; i < len; i++) {
-      d[i] -= (drift * i) / (len - 1);
-      peak = Math.max(peak, Math.abs(d[i]));
-    }
-    for (let i = 0; i < len; i++) d[i] /= peak || 1;
+    for (let i = 0; i < len; i++) d[i] = Math.random() * 2 - 1;
   }
 
   /** 지수 감쇠 잡음 임펄스 — 꼬리로 갈수록 어두워지는 홀 */
@@ -152,12 +139,11 @@ export class AudioEngine {
     if (!this.ctx) return;
     const now = this.ctx.currentTime;
     this.voices = this.voices.filter((v) => v.end > now);
-    while (this.voices.length > 10) {
+    while (this.voices.length > 14) {
       const v = this.voices.shift()!;
       v.out.gain.cancelScheduledValues(now);
-      v.out.gain.setValueAtTime(v.out.gain.value, now);
-      v.out.gain.setTargetAtTime(0, now, 0.07);
-      v.nodes.forEach((n) => n.stop(now + 0.5));
+      v.out.gain.setTargetAtTime(0, now, 0.03);
+      v.nodes.forEach((n) => n.stop(now + 0.2));
     }
   }
 
@@ -182,17 +168,17 @@ export class AudioEngine {
       [4.02, 0.025 * (0.5 + bright), 0.18],
     ];
     const nodes: AudioScheduledSourceNode[] = [];
-    const a = Math.min(1, amp) * 0.17;
+    const a = Math.min(1, amp) * 0.22;
     for (const [mul, g, dk] of partials) {
       const f = freq * mul;
       if (f > 16000) continue;
       const osc = ctx.createOscillator();
       osc.type = 'sine';
-      osc.frequency.setValueAtTime(f * 1.002, t);
-      osc.frequency.exponentialRampToValueAtTime(f, t + 0.05);
+      osc.frequency.setValueAtTime(f * 1.008, t);
+      osc.frequency.exponentialRampToValueAtTime(f, t + 0.07);
       const env = ctx.createGain();
       env.gain.setValueAtTime(0.0001, t);
-      env.gain.exponentialRampToValueAtTime(a * g, t + 0.009);
+      env.gain.exponentialRampToValueAtTime(a * g, t + 0.004);
       env.gain.exponentialRampToValueAtTime(0.0001, t + decay * dk + 0.05);
       osc.connect(env);
       env.connect(out);
@@ -229,78 +215,102 @@ export class AudioEngine {
     }
   }
 
-  /** 전환 — 낮게 부풀었다 가라앉는 바람 (오디오 시계로 매끄럽게) */
+  /** 전환 — 낮게 부풀었다 가라앉는 잡음 */
   swell(duration = 2): void {
-    if (!this.ready || !this.enabled) return;
+    const v = this.noise('lowpass');
+    if (!v) return;
     const ctx = this.ctx!;
-    const t = ctx.currentTime + 0.02;
-    const src = ctx.createBufferSource();
-    src.buffer = this.noiseBuf;
-    src.loop = true;
-    const lp = ctx.createBiquadFilter();
-    lp.type = 'lowpass';
-    lp.Q.value = 0.5;
-    lp.frequency.setValueAtTime(180, t);
-    lp.frequency.linearRampToValueAtTime(700, t + duration * 0.5);
-    lp.frequency.linearRampToValueAtTime(180, t + duration);
-    const g = ctx.createGain();
-    g.gain.setValueAtTime(0, t);
-    g.gain.linearRampToValueAtTime(0.09, t + duration * 0.5);
-    g.gain.linearRampToValueAtTime(0, t + duration + 0.3);
-    src.connect(lp);
-    lp.connect(g);
-    g.connect(this.bus);
-    src.start(t, Math.random() * 3);
-    src.stop(t + duration + 0.4);
-  }
-
-  /** 물방울 — 먹이 종이에 떨어지는 '똑' (펜타토닉 음정) */
-  drip(amp = 0.2, pan = 0, low = false): void {
-    if (!this.ready || !this.enabled) return;
-    const ctx = this.ctx!;
-    const t = ctx.currentTime + 0.005;
-    // 낮은 음역만 (D3 아래위) — 귀에 걸리는 고음 없이 둥글게
-    const deg = low ? Math.floor(Math.random() * 3) - 2 : Math.floor(Math.random() * 3);
-    const f = pentatonicHz(deg);
-    const p = ctx.createStereoPanner();
-    p.pan.value = Math.max(-0.8, Math.min(0.8, pan));
-    p.connect(this.bus);
-    const parts: [number, number, number][] = [[1, 1, low ? 1.4 : 0.9]];
-    for (const [m, g, d] of parts) {
-      const o = ctx.createOscillator();
-      o.type = 'sine';
-      o.frequency.setValueAtTime(f * m * 1.12, t);
-      o.frequency.exponentialRampToValueAtTime(f * m, t + 0.06);
-      const e = ctx.createGain();
-      e.gain.setValueAtTime(0.0001, t);
-      e.gain.exponentialRampToValueAtTime(amp * 0.2 * g, t + 0.015);
-      e.gain.exponentialRampToValueAtTime(0.0001, t + d);
-      o.connect(e);
-      e.connect(p);
-      o.start(t);
-      o.stop(t + d + 0.05);
+    const steps = 24;
+    for (let i = 0; i <= steps; i++) {
+      const x = i / steps;
+      const lvl = Math.sin(Math.PI * x) ** 2 * 0.11;
+      setTimeout(() => v.set(lvl, 260 + 900 * Math.sin(Math.PI * x)), x * duration * 1000);
     }
+    setTimeout(() => v.stop(), duration * 1000 + 400);
+    void ctx;
   }
 
   /** 지속 잡음 성부 (붓 마찰, 바람) */
-  noise(): NoiseVoice | null {
+  noise(type: BiquadFilterType = 'bandpass'): NoiseVoice | null {
     if (!this.ctx) return null;
     const ctx = this.ctx;
     const src = ctx.createBufferSource();
     src.buffer = this.noiseBuf;
     src.loop = true;
+    src.playbackRate.value = 0.5 + Math.random() * 0.2;
+    const filt = ctx.createBiquadFilter();
+    filt.type = type;
+    filt.frequency.value = 1200;
+    filt.Q.value = 0.7;
+    const g = ctx.createGain();
+    g.gain.value = 0;
+    src.connect(filt);
+    filt.connect(g);
+    g.connect(this.bus);
+    src.start();
+    let stopped = false;
+    return {
+      set: (level, freq, q) => {
+        if (stopped) return;
+        const t = ctx.currentTime;
+        g.gain.setTargetAtTime(Math.max(0, level), t, 0.06);
+        filt.frequency.setTargetAtTime(Math.max(40, freq), t, 0.08);
+        if (q !== undefined) filt.Q.setTargetAtTime(q, t, 0.1);
+      },
+      stop: () => {
+        if (stopped) return;
+        stopped = true;
+        const t = ctx.currentTime;
+        g.gain.setTargetAtTime(0, t, 0.08);
+        src.stop(t + 0.6);
+      },
+    };
+  }
+
+  // ─────────── 먹실 전용 소리 ───────────
+
+  /** 갈색 잡음 (먹실 붓결): 이음매 없이 반복되도록 끝을 처음에 맞춘다 */
+  private brown(): AudioBuffer {
+    if (this.brownBuf) return this.brownBuf;
+    const ctx = this.ctx!;
+    const len = ctx.sampleRate * 4;
+    const buf = ctx.createBuffer(1, len, ctx.sampleRate);
+    const d = buf.getChannelData(0);
+    let b = 0;
+    for (let i = 0; i < len; i++) {
+      b = (b + 0.02 * (Math.random() * 2 - 1)) / 1.02;
+      d[i] = b;
+    }
+    const drift = d[len - 1] - d[0];
+    let peak = 0;
+    for (let i = 0; i < len; i++) {
+      d[i] -= (drift * i) / (len - 1);
+      peak = Math.max(peak, Math.abs(d[i]));
+    }
+    for (let i = 0; i < len; i++) d[i] /= peak || 1;
+    this.brownBuf = buf;
+    return buf;
+  }
+
+  /** 먹실 붓결: 종이를 스치는 낮고 둥근 소리. 세기는 느린 시정수로 따라간다 */
+  inkBrush(): NoiseVoice | null {
+    if (!this.ctx) return null;
+    const ctx = this.ctx;
+    const src = ctx.createBufferSource();
+    src.buffer = this.brown();
+    src.loop = true;
     const hp = ctx.createBiquadFilter();
     hp.type = 'highpass';
-    hp.frequency.value = 110;
-    const filt = ctx.createBiquadFilter();
-    filt.type = 'lowpass';
-    filt.frequency.value = 600;
-    filt.Q.value = 0.4;
+    hp.frequency.value = 90;
+    const lp = ctx.createBiquadFilter();
+    lp.type = 'lowpass';
+    lp.frequency.value = 300;
+    lp.Q.value = 0.4;
     const g = ctx.createGain();
     g.gain.value = 0;
     src.connect(hp);
-    hp.connect(filt);
-    filt.connect(g);
+    hp.connect(lp);
+    lp.connect(g);
     g.connect(this.bus);
     src.start(ctx.currentTime, Math.random() * 3);
     let stopped = false;
@@ -310,14 +320,13 @@ export class AudioEngine {
       set: (level, freq) => {
         if (stopped) return;
         const t = ctx.currentTime;
-        // 변화가 있을 때만, 느린 시정수로 — 프레임마다 튀지 않게
         if (Math.abs(level - lastL) > 0.0015) {
           lastL = level;
           g.gain.setTargetAtTime(Math.max(0, level), t, level > g.gain.value ? 0.09 : 0.28);
         }
         if (Math.abs(freq - lastF) > 25) {
           lastF = freq;
-          filt.frequency.setTargetAtTime(Math.max(60, freq), t, 0.25);
+          lp.frequency.setTargetAtTime(Math.max(60, freq), t, 0.25);
         }
       },
       stop: () => {
@@ -330,6 +339,29 @@ export class AudioEngine {
         src.stop(t + 1.2);
       },
     };
+  }
+
+  /** 먹실 톡 — 낮고 둥근 물방울 (110~150Hz) */
+  drip(amp = 0.2, pan = 0): void {
+    if (!this.ready || !this.enabled) return;
+    const ctx = this.ctx!;
+    const t = ctx.currentTime + 0.005;
+    const f = pentatonicHz(Math.floor(Math.random() * 3) - 2);
+    const p = ctx.createStereoPanner();
+    p.pan.value = Math.max(-0.8, Math.min(0.8, pan));
+    p.connect(this.bus);
+    const o = ctx.createOscillator();
+    o.type = 'sine';
+    o.frequency.setValueAtTime(f * 1.12, t);
+    o.frequency.exponentialRampToValueAtTime(f, t + 0.06);
+    const e = ctx.createGain();
+    e.gain.setValueAtTime(0.0001, t);
+    e.gain.exponentialRampToValueAtTime(amp * 0.2, t + 0.015);
+    e.gain.exponentialRampToValueAtTime(0.0001, t + 1.4);
+    o.connect(e);
+    e.connect(p);
+    o.start(t);
+    o.stop(t + 1.45);
   }
 
   /** 잔상실의 낮은 지속음 */

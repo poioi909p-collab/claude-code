@@ -238,7 +238,7 @@ export class InkRoom extends Room {
 
   enter(info: EnterInfo): void {
     this.app.input.handler = this;
-    this.noise = this.app.audio.noise();
+    this.noise = this.app.audio.inkBrush();
     if (info.x !== undefined && info.y !== undefined) {
       // 입구에서 처음 만진 자리 — 큰 먹 한 방울이 피어난다
       this.drop(info.x, info.y, 1.9, 1.25);
@@ -281,7 +281,7 @@ export class InkRoom extends Room {
       if (s.isTap && !b.started) {
         // 톡 — 작은 먹점
         this.drop(p.x, p.y, 0.55 + p.intensity * 0.5, 0.6);
-        this.app.audio.drip(0.6, (p.x / this.stage.width) * 1.6 - 0.8, true);
+        this.app.audio.drip(0.6, (p.x / this.stage.width) * 1.6 - 0.8);
       } else {
         this.segment(b.last, p, !b.started, true, b.dry);
       }
