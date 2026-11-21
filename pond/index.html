@@ -1,0 +1,758 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<title>연못</title>
+<meta name="theme-color" content="#0a1213">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@200&display=swap&text=%EB%AC%BC%EC%9D%84%20%EB%A7%8C%EC%A0%B8%EB%B3%B4%EC%84%B8%EC%9A%94">
+<style>
+/* 한 화면 전체가 연못. 물(WebGL) 위에 수면 레이어(2D), 그 위에 글자 한 줄. */
+:root {
+  --ink: #0a1213;        /* 먹색 */
+  --deep-teal: #14393a;  /* 깊은 청록 */
+  --cream: #efe6d4;      /* 크림 */
+  --apricot: #e6b08c;    /* 살구 */
+  --vermilion: #c4573f;  /* 주홍 */
+  --lotus: #5d7a4c;      /* 연잎 초록 */
+  --blossom: #e9bcc0;    /* 연분홍 */
+  --serif: 'Noto Serif KR', 'Nanum Myeongjo', 'AppleMyungjo', 'Batang', serif;
+  color-scheme: dark;
+}
+html, body {
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+  background: var(--ink);
+  overscroll-behavior: none;
+  touch-action: none;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+}
+#pond {
+  position: fixed;
+  inset: 0;
+  background: var(--ink);
+  touch-action: none;
+}
+#pond canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  touch-action: none;
+}
+#hint {
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: 44%;
+  margin: 0;
+  text-align: center;
+  font-family: var(--serif);
+  font-weight: 200;
+  font-size: clamp(17px, 4.8vw, 25px);
+  letter-spacing: 0.42em;
+  text-indent: 0.42em;
+  color: var(--cream);
+  text-shadow: 0 0 24px rgba(10, 18, 19, 0.85);
+  opacity: 0;
+  filter: blur(4px);
+  transform: translateY(6px);
+  pointer-events: none;
+  transition:
+    opacity 3.2s cubic-bezier(0.25, 0.1, 0.25, 1),
+    filter 3.2s cubic-bezier(0.25, 0.1, 0.25, 1),
+    transform 3.6s cubic-bezier(0.22, 0.61, 0.36, 1),
+    letter-spacing 3.6s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+#hint.on { opacity: 0.8; filter: blur(0); transform: none; }
+#hint.gone { opacity: 0; filter: blur(5px); letter-spacing: 0.62em; transform: translateY(-4px); }
+#hint span { display: inline-block; animation: breathe 6s ease-in-out infinite; }
+@keyframes breathe { 0%, 100% { opacity: 1; } 50% { opacity: 0.62; } }
+@media (prefers-reduced-motion: reduce) {
+  #hint span { animation: none; }
+}
+</style>
+</head>
+<body>
+<div id="pond" aria-label="물고기가 사는 작은 연못. 화면을 만지면 물결이 일어요." role="img">
+  <canvas id="water"></canvas>
+  <canvas id="surface"></canvas>
+</div>
+<p id="hint"><span>물을 만져보세요</span></p>
+
+<script>
+(() => {
+'use strict';
+
+/* ============================================================
+   공통
+   ============================================================ */
+const TAU = Math.PI * 2;
+const clamp = (v, a, b) => (v < a ? a : v > b ? b : v);
+const lerp = (a, b, t) => a + (b - a) * t;
+const smoothstep = (a, b, x) => { const t = clamp((x - a) / (b - a), 0, 1); return t * t * (3 - 2 * t); };
+function mulberry32(seed) {
+  return function () {
+    seed |= 0; seed = (seed + 0x6D2B79F5) | 0;
+    let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+const stage = document.getElementById('pond');
+const glCanvas = document.getElementById('water');
+const fxCanvas = document.getElementById('surface');
+const fx = fxCanvas.getContext('2d');
+const hint = document.getElementById('hint');
+
+let W = 0, H = 0;           // CSS px
+let DPR = 1;                // 기기 픽셀 비율
+let RS = 1;                 // 물 렌더 배율 (성능에 따라 자동 조정)
+let FXS = 1;                // 수면 레이어 배율
+let now = 0;                // 초
+
+/* ============================================================
+   물결 — 높이맵 시뮬레이션 (CPU, 60Hz 고정 스텝)
+   ============================================================ */
+const sim = { cell: 4, cols: 0, rows: 0, cur: null, prev: null, damp: null, bytes: null };
+const C2 = 0.3;            // 파동 속도² (셀/스텝)
+const DAMP = 0.988;        // 속도 감쇠
+const GMAX = 0.55;         // 기울기 인코딩 범위
+const LMAX = 0.5;          // 곡률 인코딩 범위
+
+function initSim() {
+  const cell = Math.max(3.5, Math.sqrt((W * H) / 52000));
+  sim.cell = cell;
+  sim.cols = Math.ceil(W / cell) + 3;
+  sim.rows = Math.ceil(H / cell) + 3;
+  const n = sim.cols * sim.rows;
+  sim.cur = new Float32Array(n);
+  sim.prev = new Float32Array(n);
+  sim.bytes = new Uint8Array(n * 4);
+  for (let i = 0; i < n; i++) { sim.bytes[i * 4] = sim.bytes[i * 4 + 1] = sim.bytes[i * 4 + 2] = 128; sim.bytes[i * 4 + 3] = 255; }
+  // 가장자리는 물결을 조금 더 빨리 잠재워서 벽 반사가 거슬리지 않게
+  sim.damp = new Float32Array(n);
+  const band = 7;
+  for (let y = 0; y < sim.rows; y++) {
+    for (let x = 0; x < sim.cols; x++) {
+      const d = Math.min(x, y, sim.cols - 1 - x, sim.rows - 1 - y);
+      sim.damp[y * sim.cols + x] = d >= band ? 1 : 1 - 0.05 * (1 - d / band);
+    }
+  }
+}
+
+function simStep() {
+  const { cols, rows, damp } = sim;
+  const cur = sim.cur, prev = sim.prev;
+  for (let y = 1; y < rows - 1; y++) {
+    let i = y * cols + 1;
+    for (let x = 1; x < cols - 1; x++, i++) {
+      const c = cur[i];
+      // 9점 라플라시안: 물결이 네모나지 않고 동그랗게 퍼짐
+      const lap = (4 * (cur[i - 1] + cur[i + 1] + cur[i - cols] + cur[i + cols])
+        + cur[i - cols - 1] + cur[i - cols + 1] + cur[i + cols - 1] + cur[i + cols + 1]
+        - 20 * c) / 6;
+      prev[i] = (c + (c - prev[i]) * DAMP + C2 * lap) * 0.9993 * damp[i];
+    }
+  }
+  sim.cur = prev; sim.prev = cur;
+}
+
+function enc(v) {
+  v = v > 1 ? 1 : v < -1 ? -1 : v;
+  return (128.5 + (v < 0 ? -Math.sqrt(-v) : Math.sqrt(v)) * 127) | 0;
+}
+// 기울기(R,G)와 곡률(B)을 텍스처로 — 작은 물결도 정밀하게 sqrt 인코딩
+function encodeSim() {
+  const { cols, rows, bytes } = sim;
+  const h = sim.cur;
+  for (let y = 1; y < rows - 1; y++) {
+    let i = y * cols + 1, j = i * 4;
+    for (let x = 1; x < cols - 1; x++, i++, j += 4) {
+      const gx = (h[i + 1] - h[i - 1]) * 0.5;
+      const gy = (h[i + cols] - h[i - cols]) * 0.5;
+      const lap = h[i - 1] + h[i + 1] + h[i - cols] + h[i + cols] - 4 * h[i];
+      bytes[j] = enc(gx / GMAX);
+      bytes[j + 1] = enc(gy / GMAX);
+      bytes[j + 2] = enc(lap / LMAX);
+    }
+  }
+}
+
+// 화면 좌표(px)에 부드러운 눌림을 더함 → 동심원
+function disturb(px, py, rPx, amt) {
+  const { cell, cols, rows } = sim;
+  const cur = sim.cur, prev = sim.prev;
+  const cx = px / cell + 1, cy = py / cell + 1;
+  const r = Math.max(1.6, rPx / cell), r2 = r * r;
+  const x0 = Math.max(1, Math.floor(cx - r)), x1 = Math.min(cols - 2, Math.ceil(cx + r));
+  const y0 = Math.max(1, Math.floor(cy - r)), y1 = Math.min(rows - 2, Math.ceil(cy + r));
+  for (let y = y0; y <= y1; y++) {
+    const dy = y - cy;
+    for (let x = x0; x <= x1; x++) {
+      const dx = x - cx, d2 = dx * dx + dy * dy;
+      if (d2 >= r2) continue;
+      const f = 0.5 + 0.5 * Math.cos(Math.PI * Math.sqrt(d2 / r2));
+      const i = y * cols + x;
+      cur[i] -= amt * f;
+      prev[i] -= amt * f * 0.55;
+    }
+  }
+}
+
+// 수면 기울기 (수면 위 물체가 물결에 밀리게 할 때 사용)
+function slopeAt(px, py, out) {
+  const { cell, cols, rows } = sim;
+  const x = clamp(Math.round(px / cell + 1), 1, cols - 2);
+  const y = clamp(Math.round(py / cell + 1), 1, rows - 2);
+  const i = y * cols + x, h = sim.cur;
+  out.x = (h[i + 1] - h[i - 1]) * 0.5;
+  out.y = (h[i + cols] - h[i - cols]) * 0.5;
+  out.h = h[i];
+  return out;
+}
+
+/* ============================================================
+   물살 — 성긴 속도장. 손가락이 지나간 길에 약한 흐름이 남음
+   ============================================================ */
+const flow = { cell: 26, cols: 0, rows: 0, vx: null, vy: null, tx: null, ty: null };
+function initFlow() {
+  flow.cols = Math.ceil(W / flow.cell) + 2;
+  flow.rows = Math.ceil(H / flow.cell) + 2;
+  const n = flow.cols * flow.rows;
+  flow.vx = new Float32Array(n); flow.vy = new Float32Array(n);
+  flow.tx = new Float32Array(n); flow.ty = new Float32Array(n);
+}
+function addFlow(px, py, vx, vy) {
+  const gx = px / flow.cell, gy = py / flow.cell;
+  const x0 = Math.floor(gx) - 1, y0 = Math.floor(gy) - 1;
+  for (let y = y0; y <= y0 + 3; y++) {
+    if (y < 0 || y >= flow.rows) continue;
+    for (let x = x0; x <= x0 + 3; x++) {
+      if (x < 0 || x >= flow.cols) continue;
+      const dx = x + 0.5 - gx, dy = y + 0.5 - gy;
+      const w = Math.exp(-(dx * dx + dy * dy) / 1.4);
+      const i = y * flow.cols + x;
+      flow.vx[i] += vx * w; flow.vy[i] += vy * w;
+    }
+  }
+}
+function stepFlow(dt) {
+  const { cols, rows, vx, vy, tx, ty } = flow;
+  const decay = Math.exp(-dt * 0.9), k = Math.min(1, dt * 6);
+  for (let y = 0; y < rows; y++) {
+    for (let x = 0; x < cols; x++) {
+      const i = y * cols + x;
+      const l = x > 0 ? i - 1 : i, r = x < cols - 1 ? i + 1 : i;
+      const u = y > 0 ? i - cols : i, d = y < rows - 1 ? i + cols : i;
+      tx[i] = lerp(vx[i], (vx[l] + vx[r] + vx[u] + vx[d]) * 0.25, k) * decay;
+      ty[i] = lerp(vy[i], (vy[l] + vy[r] + vy[u] + vy[d]) * 0.25, k) * decay;
+    }
+  }
+  flow.vx = tx; flow.vy = ty; flow.tx = vx; flow.ty = vy;
+}
+// 흐름 + 연못 전체의 아주 느린 맴돌이
+function flowAt(px, py, out) {
+  const gx = clamp(px / flow.cell - 0.5, 0, flow.cols - 1.001);
+  const gy = clamp(py / flow.cell - 0.5, 0, flow.rows - 1.001);
+  const x = gx | 0, y = gy | 0, fx_ = gx - x, fy_ = gy - y;
+  const i = y * flow.cols + x, c = flow.cols;
+  const x1 = x + 1 < flow.cols ? 1 : 0, y1 = y + 1 < flow.rows ? c : 0;
+  const vx = flow.vx, vy = flow.vy;
+  out.x = lerp(lerp(vx[i], vx[i + x1], fx_), lerp(vx[i + y1], vx[i + y1 + x1], fx_), fy_);
+  out.y = lerp(lerp(vy[i], vy[i + x1], fx_), lerp(vy[i + y1], vy[i + y1 + x1], fx_), fy_);
+  const cx = W * 0.5, cy = H * 0.52, dx = px - cx, dy = py - cy;
+  const swirl = 0.011;
+  out.x += -dy * swirl + Math.sin(now * 0.05 + py * 0.004) * 1.5;
+  out.y += dx * swirl + Math.cos(now * 0.04 + px * 0.004) * 1.5;
+  return out;
+}
+
+/* ============================================================
+   연못 바닥 — 한 번 그려서 텍스처로 사용
+   ============================================================ */
+function makeBottom() {
+  const s = Math.min(1.5, DPR, 1600 / Math.max(W, H));
+  const bw = Math.max(2, Math.round(W * s)), bh = Math.max(2, Math.round(H * s));
+  const c = document.createElement('canvas');
+  c.width = bw; c.height = bh;
+  const g = c.getContext('2d');
+  const rnd = mulberry32(20261121);
+  const L = Math.max(bw, bh);
+
+  g.fillStyle = '#24362f';
+  g.fillRect(0, 0, bw, bh);
+
+  // 진흙과 모래의 얼룩
+  for (let i = 0; i < 80; i++) {
+    const x = rnd() * bw, y = rnd() * bh, r = (0.05 + rnd() * 0.25) * L;
+    const light = rnd() < 0.45;
+    const gr = g.createRadialGradient(x, y, 0, x, y, r);
+    gr.addColorStop(0, light ? 'rgba(92,104,80,0.14)' : 'rgba(4,10,10,0.22)');
+    gr.addColorStop(1, 'rgba(0,0,0,0)');
+    g.fillStyle = gr;
+    g.fillRect(x - r, y - r, r * 2, r * 2);
+  }
+
+  // 가라앉은 잎
+  for (let i = 0; i < 7; i++) {
+    const x = rnd() * bw, y = rnd() * bh, len = (14 + rnd() * 18) * s, a = rnd() * TAU;
+    g.save(); g.translate(x, y); g.rotate(a);
+    g.fillStyle = `rgba(${44 + rnd() * 20 | 0},${34 + rnd() * 10 | 0},20,0.42)`;
+    g.beginPath();
+    g.moveTo(-len, 0);
+    g.quadraticCurveTo(0, -len * 0.42, len, 0);
+    g.quadraticCurveTo(0, len * 0.42, -len, 0);
+    g.fill();
+    g.strokeStyle = 'rgba(20,16,10,0.35)'; g.lineWidth = Math.max(0.6, s * 0.7);
+    g.beginPath(); g.moveTo(-len * 0.95, 0); g.lineTo(len * 1.15, 0); g.stroke();
+    g.restore();
+  }
+
+  // 조약돌 — 가장자리(얕은 곳)에 많고 가운데는 드물게
+  const stoneCols = [[60, 70, 62], [74, 74, 63], [47, 61, 57], [86, 86, 72], [63, 58, 50], [52, 66, 52]];
+  const count = Math.round((bw * bh) / (380 * s * s));
+  for (let i = 0; i < count; i++) {
+    const x = rnd() * bw, y = rnd() * bh;
+    const e = Math.min(x / bw, 1 - x / bw, y / bh, 1 - y / bh);
+    const shore = 1 - smoothstep(0.0, 0.24, e + (rnd() - 0.5) * 0.06);
+    if (rnd() > 0.04 + 0.96 * Math.pow(shore, 1.6)) continue;
+    const big = rnd() < 0.12;
+    const r = (big ? 5 + rnd() * 7 + shore * 5 : 1.2 + rnd() * 3.2) * s;
+    const ry = r * (0.62 + rnd() * 0.35), rot = rnd() * TAU;
+    const [cr, cg, cb] = stoneCols[(rnd() * stoneCols.length) | 0];
+    const v = 0.62 + rnd() * 0.42;
+    g.save(); g.translate(x, y); g.rotate(rot);
+    g.fillStyle = 'rgba(3,8,8,0.34)';
+    g.beginPath(); g.ellipse(r * 0.18, r * 0.26, r * 1.08, ry * 1.1, 0, 0, TAU); g.fill();
+    g.fillStyle = `rgb(${cr * v | 0},${cg * v | 0},${cb * v | 0})`;
+    g.beginPath(); g.ellipse(0, 0, r, ry, 0, 0, TAU); g.fill();
+    const hl = g.createRadialGradient(-r * 0.35, -ry * 0.45, 0, -r * 0.2, -ry * 0.25, r * 1.1);
+    hl.addColorStop(0, big ? 'rgba(232,226,202,0.18)' : 'rgba(232,226,202,0.1)');
+    hl.addColorStop(1, 'rgba(232,226,202,0)');
+    g.fillStyle = hl;
+    g.beginPath(); g.ellipse(0, 0, r, ry, 0, 0, TAU); g.fill();
+    if (rnd() < 0.3) { // 이끼
+      g.fillStyle = 'rgba(70,96,58,0.25)';
+      g.beginPath(); g.ellipse(r * 0.2, ry * 0.2, r * 0.7, ry * 0.6, 0, 0, TAU); g.fill();
+    }
+    g.restore();
+  }
+
+  // 모래 알갱이
+  const img = g.getImageData(0, 0, bw, bh), d = img.data;
+  for (let i = 0; i < d.length; i += 4) {
+    const n = (rnd() - 0.5) * 14;
+    d[i] += n; d[i + 1] += n; d[i + 2] += n * 0.8;
+  }
+  g.putImageData(img, 0, 0);
+
+  // 물속이라 살짝 흐리게 (줄였다 키우기 — 모든 브라우저에서 동작)
+  {
+    const t = document.createElement('canvas');
+    t.width = Math.max(2, Math.round(bw * 0.55)); t.height = Math.max(2, Math.round(bh * 0.55));
+    const tg = t.getContext('2d');
+    tg.imageSmoothingQuality = 'high';
+    tg.drawImage(c, 0, 0, t.width, t.height);
+    g.imageSmoothingQuality = 'high';
+    g.drawImage(t, 0, 0, bw, bh);
+  }
+
+  // 물의 깊이: 왼쪽 위는 얕은 청록, 오른쪽 아래로 갈수록 먹색
+  g.globalCompositeOperation = 'multiply';
+  g.fillStyle = '#8bbab0';
+  g.fillRect(0, 0, bw, bh);
+  g.globalCompositeOperation = 'source-over';
+  const lg = g.createLinearGradient(bw * 0.05, 0, bw * 0.75, bh);
+  lg.addColorStop(0, 'rgba(30,84,80,0.10)');
+  lg.addColorStop(0.5, 'rgba(12,42,44,0.36)');
+  lg.addColorStop(1, 'rgba(7,15,17,0.74)');
+  g.fillStyle = lg;
+  g.fillRect(0, 0, bw, bh);
+  const cx = bw * 0.55, cy = bh * 0.55;
+  const rg = g.createRadialGradient(cx, cy, 0, cx, cy, L * 0.5);
+  rg.addColorStop(0, 'rgba(6,14,16,0.6)');
+  rg.addColorStop(0.7, 'rgba(6,14,16,0.25)');
+  rg.addColorStop(1, 'rgba(6,14,16,0)');
+  g.fillStyle = rg;
+  g.fillRect(0, 0, bw, bh);
+  return c;
+}
+
+/* ============================================================
+   WebGL — 굴절, 빛 모임, 수면 반짝임, 비네팅
+   ============================================================ */
+const VERT = `
+attribute vec2 aPos;
+varying vec2 vUv;
+void main() {
+  vUv = vec2(aPos.x * 0.5 + 0.5, 0.5 - aPos.y * 0.5);
+  gl_Position = vec4(aPos, 0.0, 1.0);
+}`;
+const FRAG = `
+#ifdef GL_FRAGMENT_PRECISION_HIGH
+precision highp float;
+#else
+precision mediump float;
+#endif
+varying vec2 vUv;
+uniform sampler2D uBottom;
+uniform sampler2D uWave;
+uniform vec2 uView;
+uniform vec4 uSim;
+uniform float uTime;
+uniform float uRefract;
+uniform float uNormal;
+
+vec3 wave(vec2 suv) {
+  vec3 e = texture2D(uWave, suv).rgb * (255.0 / 127.0) - (128.0 / 127.0);
+  return sign(e) * e * e;
+}
+float hash(vec2 p) { return fract(sin(dot(p, vec2(12.9898, 78.233))) * 43758.5453); }
+
+void main() {
+  vec2 suv = vUv * uSim.xy + uSim.zw;
+  vec3 w = wave(suv);
+  vec2 g = w.xy * ${GMAX.toFixed(3)};
+  float lap = w.z * ${LMAX.toFixed(3)};
+
+  // 굴절: 기울어진 수면 너머로 바닥이 밀려 보임
+  vec2 off = g * uRefract / uView;
+  vec3 col = texture2D(uBottom, vUv - off).rgb;
+
+  // 물결이 렌즈처럼 빛을 모으고 흩음 (마루 아래는 밝게, 골 아래는 어둡게)
+  col *= clamp(1.0 - lap * 4.0, 0.6, 1.9);
+  col += vec3(0.10, 0.16, 0.14) * clamp(-lap * 3.0, 0.0, 1.0);
+
+  // 수면 반사
+  vec3 n = normalize(vec3(-g * uNormal, 1.0));
+  vec3 Ld = normalize(vec3(-0.5, -0.66, 0.56));
+  vec3 Hh = normalize(Ld + vec3(0.0, 0.0, 1.0));
+  float nh = max(dot(n, Hh), 0.0);
+  float spec = pow(nh, 50.0) * 0.28 + pow(nh, 360.0) * 0.9;
+  col += vec3(1.0, 0.95, 0.86) * spec;
+  float sky = dot(n.xy, -Ld.xy);
+  col += vec3(0.30, 0.42, 0.40) * max(sky, 0.0) * 0.85 - col * clamp(-sky * 1.6, 0.0, 0.45);
+
+  // 은은한 하늘빛 (왼쪽 위에서 들어오는 빛)
+  float glow = 1.0 - smoothstep(0.0, 1.0, length((vUv - vec2(0.2, 0.1)) * vec2(1.0, uView.y / uView.x * 0.6)));
+  col += vec3(0.07, 0.11, 0.10) * glow * glow;
+
+  // 비네팅: 먹색으로 스며들게
+  vec2 q = vUv - 0.5;
+  q.x *= mix(1.0, uView.x / uView.y, 0.35) * 1.15;
+  float v = smoothstep(0.32, 0.92, length(q) * 1.15);
+  col = mix(col, vec3(0.024, 0.043, 0.047), v * 0.78);
+
+  col += (hash(gl_FragCoord.xy + fract(uTime * 7.0)) - 0.5) / 255.0;
+  gl_FragColor = vec4(col, 1.0);
+}`;
+
+let gl = null, prog = null, U = {}, texWave = null, texBottom = null, bottomCanvas = null, glOK = false;
+
+function compile(type, src) {
+  const s = gl.createShader(type);
+  gl.shaderSource(s, src);
+  gl.compileShader(s);
+  if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) { console.error(gl.getShaderInfoLog(s)); return null; }
+  return s;
+}
+function makeTex() {
+  const t = gl.createTexture();
+  gl.bindTexture(gl.TEXTURE_2D, t);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+  return t;
+}
+function initGL() {
+  const opts = { alpha: false, antialias: false, depth: false, stencil: false, premultipliedAlpha: false, preserveDrawingBuffer: false, powerPreference: 'high-performance' };
+  gl = glCanvas.getContext('webgl', opts) || glCanvas.getContext('experimental-webgl', opts);
+  if (!gl) return false;
+  const vs = compile(gl.VERTEX_SHADER, VERT), fs = compile(gl.FRAGMENT_SHADER, FRAG);
+  if (!vs || !fs) return false;
+  prog = gl.createProgram();
+  gl.attachShader(prog, vs); gl.attachShader(prog, fs);
+  gl.linkProgram(prog);
+  if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) { console.error(gl.getProgramInfoLog(prog)); return false; }
+  gl.useProgram(prog);
+  const buf = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
+  const loc = gl.getAttribLocation(prog, 'aPos');
+  gl.enableVertexAttribArray(loc);
+  gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
+  for (const n of ['uBottom', 'uWave', 'uView', 'uSim', 'uTime', 'uRefract', 'uNormal']) U[n] = gl.getUniformLocation(prog, n);
+  gl.pixelStorei(gl.UNPACK_ALIGNMENT, 1);
+  texBottom = makeTex();
+  texWave = makeTex();
+  gl.uniform1i(U.uBottom, 0);
+  gl.uniform1i(U.uWave, 1);
+  return true;
+}
+function uploadBottom() {
+  if (!glOK) return;
+  gl.activeTexture(gl.TEXTURE0);
+  gl.bindTexture(gl.TEXTURE_2D, texBottom);
+  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, bottomCanvas);
+}
+function allocWaveTex() {
+  if (!glOK) return;
+  gl.activeTexture(gl.TEXTURE1);
+  gl.bindTexture(gl.TEXTURE_2D, texWave);
+  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, sim.cols, sim.rows, 0, gl.RGBA, gl.UNSIGNED_BYTE, sim.bytes);
+}
+function uploadWave() {
+  gl.activeTexture(gl.TEXTURE1);
+  gl.bindTexture(gl.TEXTURE_2D, texWave);
+  gl.texSubImage2D(gl.TEXTURE_2D, 0, 0, 0, sim.cols, sim.rows, gl.RGBA, gl.UNSIGNED_BYTE, sim.bytes);
+}
+function renderGL() {
+  gl.viewport(0, 0, glCanvas.width, glCanvas.height);
+  gl.uniform2f(U.uView, W, H);
+  // 화면 uv → 시뮬레이션 텍스처 uv (셀 i의 중심은 화면 (i-1)*cell px)
+  const sx = W / (sim.cell * sim.cols), sy = H / (sim.cell * sim.rows);
+  gl.uniform4f(U.uSim, sx, sy, 1.5 / sim.cols, 1.5 / sim.rows);
+  gl.uniform1f(U.uTime, now % 1000);
+  gl.uniform1f(U.uRefract, 26 * Math.sqrt(sim.cell / 4));
+  gl.uniform1f(U.uNormal, 5.5);
+  gl.drawArrays(gl.TRIANGLES, 0, 3);
+}
+
+/* ============================================================
+   수면 위 — 떠다니는 작은 티끌 (물살이 눈에 보이게)
+   ============================================================ */
+const motes = [];
+function initMotes() {
+  motes.length = 0;
+  const rnd = mulberry32(99);
+  const n = Math.round(clamp((W * H) / 9000, 24, 70));
+  for (let i = 0; i < n; i++) {
+    motes.push({ x: rnd() * W, y: rnd() * H, r: 0.5 + rnd() * 1.1, a: 0.10 + rnd() * 0.22, ph: rnd() * TAU, vx: 0, vy: 0 });
+  }
+}
+const tmpF = { x: 0, y: 0 }, tmpS = { x: 0, y: 0, h: 0 };
+function updateMotes(dt) {
+  for (const m of motes) {
+    flowAt(m.x, m.y, tmpF);
+    slopeAt(m.x, m.y, tmpS);
+    // 물결의 경사를 따라 미끄러지고, 물살을 따라 흐름 (관성으로 부드럽게)
+    const tx = tmpF.x - tmpS.x * 90 + Math.sin(now * 0.31 + m.ph) * 1.2;
+    const ty = tmpF.y - tmpS.y * 90 + Math.cos(now * 0.27 + m.ph) * 1.2;
+    const k = 1 - Math.exp(-dt * 2.2);
+    m.vx += (tx - m.vx) * k; m.vy += (ty - m.vy) * k;
+    m.x += m.vx * dt; m.y += m.vy * dt;
+    if (m.x < -10) m.x += W + 20; else if (m.x > W + 10) m.x -= W + 20;
+    if (m.y < -10) m.y += H + 20; else if (m.y > H + 10) m.y -= H + 20;
+  }
+}
+function drawSurface() {
+  fx.setTransform(FXS, 0, 0, FXS, 0, 0);
+  fx.clearRect(0, 0, W, H);
+  for (const m of motes) {
+    const tw = 0.75 + 0.25 * Math.sin(now * 0.8 + m.ph * 3);
+    fx.fillStyle = `rgba(239,230,212,${(m.a * tw).toFixed(3)})`;
+    fx.beginPath(); fx.arc(m.x, m.y, m.r, 0, TAU); fx.fill();
+  }
+}
+
+/* ============================================================
+   손가락 — 톡(동심원), 쓸기(물결 + 물살), 가만히 대기, 두 번 톡
+   ============================================================ */
+const pointers = new Map();
+let touched = false;
+let lastTap = { t: -1, x: 0, y: 0 };
+const listeners = { tap: [], doubleTap: [], hold: [] };
+
+function firstTouch() {
+  if (touched) return;
+  touched = true;
+  hint.classList.remove('on');
+  hint.classList.add('gone');
+}
+
+function onDown(e) {
+  e.preventDefault();
+  firstTouch();
+  const x = e.clientX, y = e.clientY, t = performance.now() / 1000;
+  pointers.set(e.pointerId, { x, y, lx: x, ly: y, lt: t, downT: t, downX: x, downY: y, moved: 0, stillT: 0, nextPulse: 1.2 });
+  disturb(x, y, 10, 1.35);
+  if (t - lastTap.t < 0.34 && Math.hypot(x - lastTap.x, y - lastTap.y) < 44) {
+    lastTap.t = -1;
+    for (const f of listeners.doubleTap) f(x, y);
+  }
+  for (const f of listeners.tap) f(x, y);
+}
+
+function moveTo(p, x, y, t) {
+  const dx = x - p.lx, dy = y - p.ly, dist = Math.hypot(dx, dy);
+  if (dist < 0.5) return;
+  const dt = Math.max(1 / 240, t - p.lt);
+  const speed = dist / dt;
+  const n = Math.ceil(dist / (sim.cell * 0.9));
+  const amt = clamp(speed / 2600, 0.03, 0.32) / Math.sqrt(n) * 0.9;
+  const fvx = clamp(dx / dt, -900, 900) * 0.05, fvy = clamp(dy / dt, -900, 900) * 0.05;
+  for (let k = 1; k <= n; k++) {
+    const sx = p.lx + dx * (k / n), sy = p.ly + dy * (k / n);
+    disturb(sx, sy, 10, amt);
+    if (k === n || k % 3 === 0) addFlow(sx, sy, fvx, fvy);
+  }
+  p.moved += dist;
+  if (Math.hypot(x - p.downX, y - p.downY) > 8) { p.stillT = 0; p.downX = x; p.downY = y; }
+  p.lx = x; p.ly = y; p.lt = t; p.x = x; p.y = y;
+}
+
+function onMove(e) {
+  const p = pointers.get(e.pointerId);
+  if (!p) return;
+  e.preventDefault();
+  const evs = e.getCoalescedEvents ? e.getCoalescedEvents() : null;
+  const t = performance.now() / 1000;
+  if (evs && evs.length > 1) for (const ce of evs) moveTo(p, ce.clientX, ce.clientY, t - (evs.length - 1 - evs.indexOf(ce)) / 240);
+  else moveTo(p, e.clientX, e.clientY, t);
+}
+
+function onUp(e) {
+  const p = pointers.get(e.pointerId);
+  if (!p) return;
+  const t = performance.now() / 1000;
+  if (t - p.downT < 0.3 && p.moved < 14) lastTap = { t, x: p.x, y: p.y };
+  pointers.delete(e.pointerId);
+}
+
+// 손가락을 가만히 대고 있으면 아주 작은 떨림 물결
+function updatePointers(dt) {
+  for (const p of pointers.values()) {
+    p.stillT += dt;
+    if (p.stillT > p.nextPulse) {
+      p.nextPulse = p.stillT + 1.3 + Math.random() * 0.6;
+      disturb(p.x, p.y, 7, 0.16);
+    }
+    if (p.stillT > 0.6) for (const f of listeners.hold) f(p.x, p.y, p.stillT);
+  }
+}
+
+stage.addEventListener('pointerdown', onDown, { passive: false });
+window.addEventListener('pointermove', onMove, { passive: false });
+window.addEventListener('pointerup', onUp);
+window.addEventListener('pointercancel', onUp);
+// 스크롤·줌·당겨서 새로고침·길게 눌러 메뉴 막기
+const stop = (e) => { if (e.cancelable) e.preventDefault(); };
+document.addEventListener('touchmove', stop, { passive: false });
+document.addEventListener('touchstart', (e) => { if (e.touches.length > 1) stop(e); }, { passive: false });
+document.addEventListener('gesturestart', stop, { passive: false });
+document.addEventListener('dblclick', stop, { passive: false });
+document.addEventListener('contextmenu', stop);
+window.addEventListener('wheel', stop, { passive: false });
+
+/* ============================================================
+   크기 / 성능
+   ============================================================ */
+function sizeCanvases() {
+  glCanvas.width = Math.max(1, Math.round(W * RS));
+  glCanvas.height = Math.max(1, Math.round(H * RS));
+  fxCanvas.width = Math.max(1, Math.round(W * FXS));
+  fxCanvas.height = Math.max(1, Math.round(H * FXS));
+}
+function layout() {
+  W = Math.max(1, stage.clientWidth || window.innerWidth);
+  H = Math.max(1, stage.clientHeight || window.innerHeight);
+  DPR = Math.min(window.devicePixelRatio || 1, 3);
+  RS = Math.min(DPR, 2) * qualityScale;
+  FXS = Math.min(DPR, 2);
+  sizeCanvases();
+  initSim();
+  initFlow();
+  initMotes();
+  bottomCanvas = makeBottom();
+  uploadBottom();
+  allocWaveTex();
+}
+let qualityScale = 1;
+let resizeTimer = 0;
+window.addEventListener('resize', () => {
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(layout, 160);
+});
+
+// 프레임이 버거우면 물 렌더 해상도를 조금씩 낮춤
+const perf = { acc: 0, n: 0, slow: 0 };
+function watchPerf(dt) {
+  perf.acc += dt; perf.n++;
+  if (perf.acc < 1.5) return;
+  const avg = perf.acc / perf.n;
+  perf.acc = 0; perf.n = 0;
+  if (avg > 1 / 50) perf.slow++; else perf.slow = 0;
+  if (perf.slow >= 2 && RS > 1.0) {
+    perf.slow = 0;
+    qualityScale = Math.max(1 / Math.min(DPR, 2), qualityScale - 0.15);
+    RS = Math.min(DPR, 2) * qualityScale;
+    sizeCanvases();
+  }
+}
+
+/* ============================================================
+   메인 루프
+   ============================================================ */
+const STEP = 1 / 60;
+let acc = 0, lastT = performance.now(), nextAmbient = 3;
+
+function ambient() {
+  // 가끔 어디선가 아주 작은 물방울
+  if (now > nextAmbient) {
+    nextAmbient = now + 5 + Math.random() * 7;
+    disturb(W * (0.15 + Math.random() * 0.7), H * (0.15 + Math.random() * 0.7), 6, 0.22);
+  }
+}
+
+function frame(ts) {
+  const dt = Math.min(0.1, (ts - lastT) / 1000);
+  lastT = ts;
+  now += dt;
+  acc += dt;
+  let steps = 0;
+  while (acc >= STEP && steps < 4) { simStep(); acc -= STEP; steps++; }
+  if (steps === 4) acc = 0;
+  ambient();
+  updatePointers(dt);
+  stepFlow(dt);
+  updateMotes(dt);
+  if (glOK && !gl.isContextLost()) {
+    if (steps) { encodeSim(); uploadWave(); }
+    renderGL();
+  }
+  drawSurface();
+  watchPerf(dt);
+  requestAnimationFrame(frame);
+}
+
+function start() {
+  glOK = initGL();
+  glCanvas.addEventListener('webglcontextlost', (e) => { e.preventDefault(); glOK = false; });
+  glCanvas.addEventListener('webglcontextrestored', () => { glOK = initGL(); uploadBottom(); allocWaveTex(); });
+  layout();
+  if (!glOK) { // WebGL이 없으면 바닥만이라도
+    glCanvas.style.display = 'none';
+    stage.style.background = `center / cover url(${bottomCanvas.toDataURL()})`;
+  }
+  setTimeout(() => { if (!touched) hint.classList.add('on'); }, 700);
+  requestAnimationFrame((t) => { lastT = t; frame(t); });
+}
+
+// 다음 단계(물고기, 연잎, 소리)가 쓸 연결점
+window.__pond = { disturb, flowAt, slopeAt, listeners, get size() { return { W, H }; } };
+
+start();
+})();
+</script>
+</body>
+</html>
