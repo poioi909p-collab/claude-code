@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, type ReactNode } from "react";
 import {
   DISCLAIMER,
   LEVEL_STYLE,
@@ -16,13 +16,13 @@ import { BADGE, CARD_CLASS, MARK_CLASS, ROW_CLASS } from "./levelStyles";
 interface Props {
   result: AnalysisResult;
   label: LabelExtraction;
-  /** 다시 찍기 / 다시 입력 */
-  onRetry: () => void;
-  retryLabel: string;
-  sourceLabel: string;
+  /** 사진으로 찍었으면 줄인 사진의 object URL ("원본 사진 보기") */
+  photoUrl?: string;
+  /** 다시 찍기 / 다시 입력 등 하단 버튼 */
+  actions: ReactNode;
 }
 
-export function ResultView({ result, label, onRetry, retryLabel, sourceLabel }: Props) {
+export function ResultView({ result, label, photoUrl, actions }: Props) {
   const card = resultCard(result);
   const headingRef = useRef<HTMLHeadingElement>(null);
 
@@ -101,11 +101,26 @@ export function ResultView({ result, label, onRetry, retryLabel, sourceLabel }: 
         </p>
       )}
 
+      {photoUrl && (
+        <details className="group rounded-2xl border border-gray-300 dark:border-gray-700">
+          <summary className="flex min-h-14 cursor-pointer list-none items-center justify-between px-5 text-lg font-bold">
+            🖼 원본 사진 보기
+            <span aria-hidden className="text-base transition-transform group-open:rotate-180">
+              ▼
+            </span>
+          </summary>
+          <div className="px-5 pb-5">
+            {/* eslint-disable-next-line @next/next/no-img-element -- 메모리 속 사진(blob URL) */}
+            <img src={photoUrl} alt="찍은 성분표 사진" className="w-full rounded-xl" />
+          </div>
+        </details>
+      )}
+
       {/* 성분표 원문 (하이라이트) */}
       {sections.length > 0 && (
         <details className="group rounded-2xl border border-gray-300 dark:border-gray-700">
           <summary className="flex min-h-14 cursor-pointer list-none items-center justify-between px-5 text-lg font-bold">
-            {sourceLabel}
+            {photoUrl ? "읽은 글자 보기" : "입력한 성분표 보기"}
             <span aria-hidden className="text-base transition-transform group-open:rotate-180">
               ▼
             </span>
@@ -139,13 +154,7 @@ export function ResultView({ result, label, onRetry, retryLabel, sourceLabel }: 
         </details>
       )}
 
-      <button
-        type="button"
-        onClick={onRetry}
-        className="min-h-14 rounded-2xl bg-gray-900 px-6 text-xl font-bold text-white active:scale-[0.98] dark:bg-gray-100 dark:text-gray-950"
-      >
-        {retryLabel}
-      </button>
+      <div className="flex flex-col gap-3">{actions}</div>
 
       <p className="border-t border-gray-200 pt-4 text-base text-gray-600 dark:border-gray-800 dark:text-gray-400">
         {DISCLAIMER}

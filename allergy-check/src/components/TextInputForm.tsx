@@ -1,17 +1,8 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import {
-  SEED_PROFILE,
-  analyzeLabel,
-  defaultLexicon,
-  parseLabelText,
-  type AnalysisResult,
-  type LabelExtraction,
-} from "@/lib/allergy";
-import { ResultView } from "./ResultView";
+import { useState } from "react";
 
-/** 2단계: 카메라 없이 성분표 글자를 붙여넣어 결과 화면을 검증한다. */
+/** 카메라 대신 성분표 글자를 붙여넣는 입력 (폰의 '사진 속 글자 복사' 기능과 함께 쓰기 좋음) */
 const EXAMPLES: { name: string; text: string }[] = [
   {
     name: "라면",
@@ -35,51 +26,21 @@ const EXAMPLES: { name: string; text: string }[] = [
   },
 ];
 
-export function TextCheckScreen() {
-  const lexicon = useMemo(() => defaultLexicon(), []);
-  const [text, setText] = useState("");
-  const [checked, setChecked] = useState<{ label: LabelExtraction; result: AnalysisResult } | null>(
-    null,
-  );
+interface Props {
+  initialText?: string;
+  onSubmit: (text: string) => void;
+}
 
-  // TODO(4단계): IndexedDB에 저장된 프로필로 교체
-  const profile = SEED_PROFILE;
-
-  function check() {
-    const label = parseLabelText(text);
-    setChecked({ label, result: analyzeLabel(label, profile, lexicon) });
-  }
-
-  if (checked) {
-    return (
-      <ResultView
-        result={checked.result}
-        label={checked.label}
-        onRetry={() => setChecked(null)}
-        retryLabel="✏️ 다시 입력하기"
-        sourceLabel="입력한 성분표 보기"
-      />
-    );
-  }
+export function TextInputForm({ initialText = "", onSubmit }: Props) {
+  const [text, setText] = useState(initialText);
 
   return (
     <div className="flex flex-col gap-5">
-      {!profile.confirmedByParent && (
-        <p
-          role="note"
-          className="rounded-2xl border-2 border-amber-500 bg-amber-50 px-4 py-3 text-lg font-bold text-amber-950 dark:bg-amber-950/60 dark:text-amber-100"
-        >
-          👪 부모님 확인 필요 — 알레르기 정보를 아직 부모님이 확인하지 않았어요
-        </p>
-      )}
-
-      <h1 className="text-3xl font-black">안녕! 오늘 뭐 먹어?</h1>
-
       <form
         className="flex flex-col gap-4"
         onSubmit={(e) => {
           e.preventDefault();
-          check();
+          if (text.trim()) onSubmit(text);
         }}
       >
         <label htmlFor="label-text" className="text-xl font-bold">
