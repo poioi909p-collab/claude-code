@@ -85,6 +85,7 @@ export class InkRoom extends Room {
   private seed = Math.random() * 100;
   private noise: NoiseVoice | null = null;
   private brushLevel = 0;
+  private brushSmooth = 0;
   private time = 0;
 
   constructor(app: AppContext) {
@@ -237,7 +238,7 @@ export class InkRoom extends Room {
 
   enter(info: EnterInfo): void {
     this.app.input.handler = this;
-    this.noise = this.app.audio.noise('bandpass');
+    this.noise = this.app.audio.noise();
     if (info.x !== undefined && info.y !== undefined) {
       // 입구에서 처음 만진 자리 — 큰 먹 한 방울이 피어난다
       this.drop(info.x, info.y, 1.9, 1.25);
@@ -253,6 +254,8 @@ export class InkRoom extends Room {
   // ─────────── 입력 ───────────
   onStrokeStart(s: Stroke): void {
     this.brushes.set(s.id, { last: s.first, started: false, dry: 0 });
+    // 붓이 종이에 닿는 순간 — 아주 작은 물방울 소리
+    this.app.audio.drip(0.35 + 0.4 * s.first.intensity, (s.first.x / this.stage.width) * 1.6 - 0.8);
     haptic(5);
     this.lastActivity = this.time;
   }
@@ -280,6 +283,7 @@ export class InkRoom extends Room {
       if (s.isTap && !b.started) {
         // 톡 — 작은 먹점
         this.drop(p.x, p.y, 0.55 + p.intensity * 0.5, 0.6);
+        this.app.audio.drip(0.6, (p.x / this.stage.width) * 1.6 - 0.8, true);
       } else {
         this.segment(b.last, p, !b.started, true, b.dry);
       }
@@ -337,7 +341,7 @@ export class InkRoom extends Room {
     }
 
     // 붓 소리 (종이 마찰)
-    this.brushLevel = Math.max(this.brushLevel, clamp(b.speed / 3) * (0.35 + 0.65 * b.intensity));
+    this.brushLevel = Math.max(this.brushLevel, clamp(b.speed / 2.5) * (0.45 + 0.55 * b.intensity));
   }
 
   private splat(
@@ -423,8 +427,10 @@ export class InkRoom extends Room {
     }
 
     // 붓 소리
-    this.brushLevel *= Math.exp(-dt * 7);
-    this.noise?.set(this.brushLevel * 0.09, 1500 + this.brushLevel * 2600, 0.6);
+    // 붓 소리: 종이를 스치는 낮고 둥근 바람결 (세기를 천천히 따라간다)
+    this.brushLevel *= Math.exp(-dt * 3.5);
+    this.brushSmooth += (this.brushLevel - this.brushSmooth) * (1 - Math.exp(-dt * 6));
+    this.noise?.set(this.brushSmooth * 0.05, 380 + this.brushSmooth * 900);
 
     const active = time - this.lastActivity < 7.5;
     if (active) {

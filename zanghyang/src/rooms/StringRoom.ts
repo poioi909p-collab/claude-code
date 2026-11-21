@@ -383,7 +383,7 @@ export class StringRoom extends Room {
         const i = str.crossing(a.x, a.y, b.x, b.y);
         if (i < 0) continue;
         const lastT = st.lastPluck.get(str) ?? -1e9;
-        if (now - lastT < 90) continue;
+        if (now - lastT < 220) continue;
         st.lastPluck.set(str, now);
         st.crossed.add(str);
         const v = clamp(b.speed / 3, 0.15, 1.2);
