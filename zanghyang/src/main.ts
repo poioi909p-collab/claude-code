@@ -13,6 +13,7 @@ import type { AppContext, Room } from './rooms/Room';
 import { EntranceRoom } from './rooms/EntranceRoom';
 import { InkRoom } from './rooms/InkRoom';
 import { StringRoom } from './rooms/StringRoom';
+import { FlowRoom } from './rooms/FlowRoom';
 
 const TOTAL = 4;
 
@@ -47,7 +48,7 @@ class Exhibition {
     };
 
     const entrance = new EntranceRoom(this.ctx);
-    this.rooms = [entrance, new InkRoom(this.ctx), new StringRoom(this.ctx)];
+    this.rooms = [entrance, new InkRoom(this.ctx), new StringRoom(this.ctx), new FlowRoom(this.ctx)];
     this.current = entrance;
     entrance.ensureInit();
     entrance.intro();

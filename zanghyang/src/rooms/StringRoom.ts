@@ -610,7 +610,7 @@ export class StringRoom extends Room {
       pw.push(s.w[n - 1]);
       pf.push(s.flash[n - 1]);
       const e = clamp(s.energy * 0.6);
-      const alpha = glow ? s.alpha * (0.12 + 0.9 * e) : s.alpha * (0.75 + 0.25 * e);
+      const alpha = glow ? s.alpha * (0.12 + 0.9 * e) * clamp(this.dt * 60, 0.25, 4) : s.alpha * (0.75 + 0.25 * e);
       pushStrip(alpha, s.temp, glow);
       if (!glow) {
         // 양 끝의 작은 못 (안족)
