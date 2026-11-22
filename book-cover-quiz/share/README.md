@@ -53,10 +53,14 @@ CoverFX.placeholder({ title, sub });  // 임시 표지 canvas 생성
 | `titlemask` | 제목 가리기 | 2 | 가림막 → 제목 모자이크 → 공개 (`regions` 필요) | `block` |
 | `shuffle` | 조각 재배치 | 3 | 섞임·회전·반전 → 회전 풀림 → 절반 제자리 → 공개 | `grid:5`, `invert:0.3` |
 | `invert` | 색상 반전 | 2 | 반전+좌우반전+무지개 → 카드 뒤집기 → 원형으로 색 복원 | `rainbow`, `mosaic` |
-| `strips` | 흔들리는 띠 | 2 | 띠 섞임+큰 물결 → 제자리+약한 물결 → 공개 | `count:12`, `amp` |
+| `strips` | 흔들리는 띠 | 2 | 띠 섞임+잔잔한 일렁임 → 제자리 → 공개 | `count:12`, `amp` |
 | `mosaic` | 모자이크 | 3 | 블록이 점점 작아짐 | `blocks:[10,20,40]` |
 | `spotlight` | 손전등 | 3 | 어둠 속 움직이는 빛이 점점 커짐 | `radius`, `count` |
 | `zoom` | 초근접 줌 | 3 | 아주 가까이에서 점점 멀어짐 | `zoom:[6,3,1.7]`, `focus:{x,y}` |
+| `tiles` | 타일 뒤집기 | 3 | 번호판이 뒤집히며 드러남, 제목 칸은 마지막 | `cols:5`, `open:[0.22,0.42,0.65]` |
+| `scratch` | 복권 긁기 | 3 | 은박을 동전으로 긁어낸 자리가 보임 | `strokes:[3,4,5]`, `width` |
+| `blinds` | 블라인드 | 3 | 블라인드 틈새가 점점 넓어짐 | `count:10`, `open` |
+| `fog` | 뿌연 안개 | 3 | 흐리고 색 빠진 표지가 점점 선명해짐 | `blur`, `sat`, `haze` |
 
 ## 효과 추가하기
 ```js

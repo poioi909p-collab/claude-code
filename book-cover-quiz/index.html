@@ -341,7 +341,7 @@ const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&':
 
 // ═════════════════════ 기본 설정 ═════════════════════
 const STORE_KEY = 'bookCoverQuiz.config.v1';
-const ICONS = { titlemask: '🙈', shuffle: '🧩', invert: '🌈', strips: '🌊', mosaic: '🟪', spotlight: '🔦', zoom: '🔍' };
+const ICONS = { titlemask: '🙈', shuffle: '🧩', invert: '🌈', strips: '🌊', mosaic: '🟪', spotlight: '🔦', zoom: '🔍', tiles: '🎴', scratch: '🪙', blinds: '🪟', fog: '🌫️' };
 const DEFAULTS = {
   title: '표지 보고 책 제목 맞히기',
   subtitle: '2026 송년회',
@@ -354,7 +354,7 @@ const DEFAULTS = {
       img: { path: 'covers/2.jpg' }, regions: [{ x: 0.1, y: 0, w: 0.82, h: 0.25 }, { x: 0.27, y: 0.26, w: 0.52, h: 0.13 }, { x: 0.25, y: 0.845, w: 0.5, h: 0.045 }] },
     { id: 'r3', answer: '지구 끝의 온실', sub: '김초엽 · 자이언트북스 (2021)', effect: 'invert', protect: true,
       img: { path: 'covers/3.jpg' }, regions: [{ x: 0.2, y: 0.07, w: 0.6, h: 0.165 }, { x: 0.3, y: 0.79, w: 0.4, h: 0.05 }] },
-    { id: 'r4', answer: '물고기는 존재하지 않는다', sub: '룰루 밀러 · 곰출판 (2021)', effect: 'strips', protect: true,
+    { id: 'r4', answer: '물고기는 존재하지 않는다', sub: '룰루 밀러 · 곰출판 (2021)', effect: 'spotlight', protect: true,
       img: { path: 'covers/4.jpg' }, regions: [{ x: 0.17, y: 0.05, w: 0.66, h: 0.27 }, { x: 0.28, y: 0.64, w: 0.44, h: 0.075 }, { x: 0.9, y: 0.45, w: 0.08, h: 0.17 }] },
   ],
 };

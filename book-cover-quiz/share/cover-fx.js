@@ -802,9 +802,9 @@
   // 4) 흔들리는 띠 ── ① 띠 순서 섞임 + 큰 물결 ② 띠 제자리 + 약한 물결 → 공개
   register('strips', {
     label: '흔들리는 띠',
-    desc: '표지가 세로 띠로 잘려 뒤섞이고 물결처럼 출렁여요.',
+    desc: '표지가 세로 띠로 잘려 뒤섞이고 잔잔하게 일렁여요.',
     stages: 2,
-    defaults: { count: 12, amp: 0.09, amp1: 0.025, speed: 0.55 },
+    defaults: { count: 12, amp: 0.04, amp1: 0.012, speed: 0.22 },
     animated: (t, o, S) => t < S,
     init({ opts, rand }) {
       const n = Math.max(2, opts.count | 0);
@@ -836,7 +836,7 @@
         const lift = Math.sin(Math.PI * u);
         const phase = time * s.opts.speed * Math.PI * 2 + i * 0.75 + st.ph[i] * 0.3;
         const dy = amp * Math.sin(phase) - lift * h * 0.05;
-        const rot = (amp / h) * 0.9 * Math.cos(phase);
+        const rot = (amp / h) * 0.25 * Math.cos(phase);
         const sc = 1 + lift * 0.08;
         ctx.save();
         ctx.translate(x + sw / 2, h / 2 + dy);
@@ -977,6 +977,301 @@
       ctx.scale(z, z);
       ctx.translate(-fx, -fy);
       ctx.drawImage(src, 0, 0);
+      ctx.restore();
+    },
+  });
+
+  // 8) (예비) 타일 뒤집기 ── 번호판이 하나씩 뒤집히며 표지가 드러남 (제목 칸은 마지막에)
+  const TILE_COLORS = [['#3b1a7a', '#6a2fc2'], ['#1c2f7a', '#2f5ad0']];
+  function tileLayout(s) {
+    const st = s.state;
+    const cols = Math.max(2, s.opts.cols | 0);
+    const rows = Math.max(2, Math.round((cols * s.h) / s.w));
+    const key = s.w + 'x' + s.h + ':' + s.regions.map((g) => [g.x, g.y, g.w, g.h].join(',')).join('|');
+    if (st.key === key) return st;
+    const N = cols * rows, tw = s.w / cols, th = s.h / rows;
+    const pr = [];
+    for (let i = 0; i < N; i++) {
+      const x = (i % cols) * tw, y = Math.floor(i / cols) * th;
+      let title = 0;
+      for (const g of s.regions) {
+        const ox = Math.min(x + tw, g.x + g.w) - Math.max(x, g.x);
+        const oy = Math.min(y + th, g.y + g.h) - Math.max(y, g.y);
+        if (ox > 0 && oy > 0 && ox * oy > tw * th * 0.12) title = 1;
+      }
+      pr.push({ i, p: rng(st.seed + i * 7919)() + title * 2 });
+    }
+    pr.sort((a, b) => a.p - b.p);
+    const S = s.stages, open = s.opts.open;
+    const openAt = new Array(N), delay = new Array(N);
+    pr.forEach((o, rank) => {
+      const f = rank / N;
+      let k = 0;
+      while (k < S && !(f < open[Math.min(k, open.length - 1)])) k++;
+      openAt[o.i] = k;
+      delay[o.i] = rng(st.seed + i2(o.i))();
+    });
+    function i2(v) { return v * 104729 + 17; }
+    Object.assign(st, { key, cols, rows, N, tw, th, openAt, delay });
+    return st;
+  }
+  register('tiles', {
+    label: '타일 뒤집기',
+    desc: '번호판이 하나씩 뒤집히며 표지가 드러나요. 제목 칸은 맨 마지막에!',
+    stages: (o) => (o.open || []).length || 3,
+    defaults: { cols: 5, open: [0.22, 0.42, 0.65] },
+    init({ rand }) { return { seed: (rand() * 1e9) | 0 }; },
+    render(ctx, s) {
+      const st = tileLayout(s);
+      const { w, t, src } = s;
+      const { cols, tw, th, N } = st;
+      const gap = Math.max(1, w * 0.005);
+      const fs = Math.min(tw, th) * 0.42;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.font = '400 ' + fs + 'px "Black Han Sans", "Noto Sans KR", sans-serif';
+      for (let i = 0; i < N; i++) {
+        const k = st.openAt[i];
+        const f = k === 0 ? 1 : Ease.inOut(stagger(seg(t, k - 1, k), st.delay[i], 0.55));
+        const x = (i % cols) * tw, y = Math.floor(i / cols) * th;
+        const sx = Math.cos(Math.PI * f);
+        if (Math.abs(sx) < 0.01) continue;
+        const lift = 1 + 0.12 * Math.sin(Math.PI * f);
+        ctx.save();
+        ctx.translate(x + tw / 2, y + th / 2);
+        ctx.scale(Math.abs(sx) * lift, lift);
+        if (sx > 0) {
+          const c = TILE_COLORS[((i % cols) + Math.floor(i / cols)) % 2];
+          const g = ctx.createLinearGradient(0, -th / 2, 0, th / 2);
+          g.addColorStop(0, c[1]); g.addColorStop(1, c[0]);
+          ctx.fillStyle = g;
+          roundRect(ctx, -tw / 2 + gap / 2, -th / 2 + gap / 2, tw - gap, th - gap, Math.min(tw, th) * 0.08);
+          ctx.fill();
+          ctx.lineWidth = Math.max(1, gap * 0.8);
+          ctx.strokeStyle = 'rgba(255,224,130,0.7)';
+          ctx.stroke();
+          ctx.fillStyle = '#ffd54f';
+          ctx.fillText(String(i + 1), 0, fs * 0.04);
+        } else {
+          ctx.drawImage(src, x, y, tw, th, -tw / 2, -th / 2, tw, th);
+        }
+        const shade = 1 - Math.abs(sx);
+        if (shade > 0.02) {
+          ctx.fillStyle = 'rgba(0,0,0,' + (0.45 * shade).toFixed(3) + ')';
+          ctx.fillRect(-tw / 2, -th / 2, tw, th);
+        }
+        ctx.restore();
+      }
+    },
+  });
+
+  // 9) (예비) 복권 긁기 ── 은박을 긁어낸 자리로 표지가 보임
+  function makeFoil(w, h) {
+    const c = makeCanvas(w, h), g = c.getContext('2d');
+    const gr = g.createLinearGradient(0, 0, w, h);
+    gr.addColorStop(0, '#e9ecf2'); gr.addColorStop(0.35, '#a8afbd'); gr.addColorStop(0.6, '#dfe3ea'); gr.addColorStop(1, '#8f97a6');
+    g.fillStyle = gr; g.fillRect(0, 0, w, h);
+    const r = rng(4242);
+    for (let i = 0; i < (w * h) / 900; i++) {
+      g.fillStyle = r() < 0.5 ? 'rgba(255,255,255,0.35)' : 'rgba(60,66,80,0.18)';
+      g.fillRect(r() * w, r() * h, 1 + r() * 2, 1 + r() * 2);
+    }
+    const fs = w * 0.09;
+    g.font = '400 ' + fs + 'px "Black Han Sans", "Noto Sans KR", sans-serif';
+    g.textAlign = 'center'; g.textBaseline = 'middle';
+    g.save(); g.translate(w / 2, h / 2); g.rotate(-0.35);
+    g.fillStyle = 'rgba(70,76,92,0.16)';
+    for (let yy = -h; yy < h; yy += fs * 1.8) for (let xx = -w; xx < w; xx += fs * 4.2) g.fillText('?  ★', xx + (yy / (fs * 1.8)) % 2 * fs, yy);
+    g.restore();
+    g.fillStyle = 'rgba(55,60,75,0.55)';
+    g.font = '400 ' + w * 0.075 + 'px "Black Han Sans", "Noto Sans KR", sans-serif';
+    g.fillText('긁어서 확인하세요!', w / 2, h * 0.93);
+    g.lineWidth = Math.max(2, w * 0.012);
+    g.strokeStyle = '#d4a52b';
+    g.strokeRect(g.lineWidth / 2, g.lineWidth / 2, w - g.lineWidth, h - g.lineWidth);
+    return c;
+  }
+  register('scratch', {
+    label: '복권 긁기',
+    desc: '은박을 긁어낼수록 표지가 보여요. 어디를 긁을지는 운!',
+    stages: (o) => (o.strokes || []).length || 3,
+    defaults: { strokes: [3, 4, 5], width: 0.075 },
+    init({ opts, rand }) {
+      const groups = opts.strokes.map((n) => {
+        const list = [];
+        for (let k = 0; k < n; k++) {
+          const cx = 0.12 + rand() * 0.76, cy = 0.1 + rand() * 0.8, ang = rand() * Math.PI;
+          const len = 0.24 + rand() * 0.2, zig = 5 + Math.floor(rand() * 4), amp = 0.05 + rand() * 0.05;
+          const pts = [];
+          for (let j = 0; j <= zig; j++) {
+            const along = -len / 2 + (len * j) / zig, side = (j % 2 ? 1 : -1) * amp * (0.6 + rand() * 0.6);
+            pts.push([Math.cos(ang) * along - Math.sin(ang) * side, Math.sin(ang) * along + Math.cos(ang) * side]);
+          }
+          list.push({ cx, cy, pts });
+        }
+        return list;
+      });
+      return { groups };
+    },
+    render(ctx, s) {
+      const { w, h, t, src, state: st } = s;
+      const S = s.stages;
+      ctx.drawImage(src, 0, 0);
+      if (!st.foil || st.foil.width !== w || st.foil.height !== h) { st.foil = makeFoil(w, h); st.layer = makeCanvas(w, h); }
+      const g = st.layer.getContext('2d');
+      g.globalCompositeOperation = 'source-over';
+      g.clearRect(0, 0, w, h);
+      g.drawImage(st.foil, 0, 0);
+      g.globalCompositeOperation = 'destination-out';
+      g.lineCap = 'round'; g.lineJoin = 'round';
+      g.lineWidth = w * s.opts.width;
+      g.strokeStyle = '#000';
+      const tips = [];
+      st.groups.forEach((list, gi) => {
+        if (gi >= S) return;
+        const prog = gi === 0 ? 1 : seg(t, gi - 1, gi);
+        list.forEach((sk, k) => {
+          const u = Ease.inOut(stagger(prog, k / Math.max(1, list.length), 0.6));
+          if (u <= 0) return;
+          const P = sk.pts.map(([dx, dy]) => [sk.cx * w + dx * w, sk.cy * h + dy * w]);
+          let total = 0;
+          for (let j = 1; j < P.length; j++) total += Math.hypot(P[j][0] - P[j - 1][0], P[j][1] - P[j - 1][1]);
+          let left = total * u;
+          g.beginPath(); g.moveTo(P[0][0], P[0][1]);
+          let tip = P[0];
+          for (let j = 1; j < P.length && left > 0; j++) {
+            const d = Math.hypot(P[j][0] - P[j - 1][0], P[j][1] - P[j - 1][1]);
+            const q = Math.min(1, left / d);
+            tip = [lerp(P[j - 1][0], P[j][0], q), lerp(P[j - 1][1], P[j][1], q)];
+            g.lineTo(tip[0], tip[1]);
+            left -= d;
+          }
+          g.stroke();
+          if (u < 1) tips.push(tip);
+        });
+      });
+      g.globalCompositeOperation = 'source-over';
+      const fade = seg(t, S - 1, S);
+      ctx.save();
+      ctx.globalAlpha = 1 - fade;
+      ctx.translate(0, -fade * h * 0.08);
+      ctx.drawImage(st.layer, 0, 0);
+      ctx.restore();
+      // 긁는 동전
+      for (const [x, y] of tips) {
+        const r = w * 0.045;
+        ctx.save();
+        ctx.translate(x, y); ctx.rotate(-0.5);
+        const cg = ctx.createRadialGradient(-r * 0.3, -r * 0.3, r * 0.1, 0, 0, r);
+        cg.addColorStop(0, '#fff3c4'); cg.addColorStop(0.6, '#f2c14e'); cg.addColorStop(1, '#b8860b');
+        ctx.fillStyle = cg;
+        ctx.shadowColor = 'rgba(0,0,0,0.45)'; ctx.shadowBlur = r * 0.6;
+        ctx.beginPath(); ctx.arc(0, 0, r, 0, Math.PI * 2); ctx.fill();
+        ctx.shadowBlur = 0;
+        ctx.fillStyle = '#8a6200';
+        ctx.font = '700 ' + r * 1.1 + 'px sans-serif';
+        ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.fillText('₩', 0, r * 0.05);
+        ctx.restore();
+      }
+    },
+  });
+
+  // 10) (예비) 블라인드 ── 블라인드 틈새로 엿보기, 단계마다 더 열림
+  register('blinds', {
+    label: '블라인드',
+    desc: '블라인드 틈새로 엿보기. 단계마다 조금씩 더 열려요.',
+    stages: (o) => (o.open || []).length || 3,
+    defaults: { count: 10, open: [0.14, 0.3, 0.52] },
+    render(ctx, s) {
+      const { w, h, t, src } = s;
+      const S = s.stages, open = s.opts.open, n = Math.max(2, s.opts.count | 0), bh = h / n;
+      ctx.drawImage(src, 0, 0);
+      const i = Math.min(Math.floor(t), S - 1), u = t - i;
+      const from = open[i], to = i + 1 >= S ? 1 : open[i + 1];
+      const fade = seg(t, S - 1, S);
+      for (let k = 0; k < n; k++) {
+        const uk = Ease.inOut(stagger(u, k / n, 0.5));
+        const o = lerp(from, to, uk);
+        const thick = bh * (1 - o);
+        if (thick < 0.5) continue;
+        const y = k * bh + (bh - thick) / 2;
+        const g = ctx.createLinearGradient(0, y, 0, y + thick);
+        g.addColorStop(0, '#fbf8f1'); g.addColorStop(0.45, '#e3ddd0'); g.addColorStop(1, '#b7ae9c');
+        ctx.fillStyle = g;
+        ctx.fillRect(0, y, w, thick);
+        ctx.fillStyle = 'rgba(0,0,0,0.28)';
+        ctx.fillRect(0, y + thick, w, Math.min(bh * 0.06, (bh - thick) / 2));
+        ctx.fillStyle = 'rgba(255,255,255,0.7)';
+        ctx.fillRect(0, y, w, Math.max(1, thick * 0.06));
+      }
+      ctx.save();
+      ctx.globalAlpha = 0.75 * (1 - fade);
+      ctx.fillStyle = '#9a917f';
+      for (const fx of [0.2, 0.8]) ctx.fillRect(w * fx - w * 0.003, 0, w * 0.006, h);
+      ctx.restore();
+    },
+  });
+
+  // 11) (예비) 뿌연 안개 ── 흐리고 색이 빠진 표지가 점점 선명해짐
+  const FILTER_OK = (() => {
+    try { const c = document.createElement('canvas').getContext('2d'); c.filter = 'blur(2px)'; return c.filter === 'blur(2px)'; }
+    catch (e) { return false; }
+  })();
+  register('fog', {
+    label: '뿌연 안개',
+    desc: '뿌연 안개 속의 표지. 안개가 걷히며 색과 모양이 살아나요.',
+    stages: (o) => (o.blur || []).length || 3,
+    defaults: { blur: [0.04, 0.018, 0.007], sat: [0.4, 0.7, 0.95], haze: [0.22, 0.12, 0.05] },
+    animated: (t, o, S) => t < S,
+    init({ rand }) {
+      const blobs = [];
+      for (let k = 0; k < 4; k++) blobs.push({ x: rand(), y: rand(), r: 0.35 + rand() * 0.3, sp: 0.02 + rand() * 0.03, ph: rand() * 6.28 });
+      return { blobs };
+    },
+    render(ctx, s) {
+      const { w, h, t, src, state: st, time } = s;
+      const S = s.stages, o = s.opts;
+      const i = Math.min(Math.floor(t), S - 1), u = t - i;
+      const val = (arr, fin) => lerp(arr[i], i + 1 >= S ? fin : arr[i + 1], u);
+      const r = val(o.blur, 0) * w, sat = val(o.sat, 1), haze = val(o.haze, 0);
+      ctx.save();
+      ctx.beginPath(); ctx.rect(0, 0, w, h); ctx.clip();
+      if (FILTER_OK) {
+        ctx.filter = 'blur(' + r.toFixed(2) + 'px) saturate(' + sat.toFixed(3) + ')';
+        const m = r * 2;
+        ctx.drawImage(src, -m, -m, w + 2 * m, h + 2 * m);
+        ctx.filter = 'none';
+      } else {
+        const k = Math.max(1, r / 1.5);
+        if (k > 1.2) {
+          const small = shrink(src, 0, 0, w, h, w / k, h / k);
+          ctx.imageSmoothingEnabled = true;
+          ctx.drawImage(small, 0, 0, Math.round(w / k), Math.round(h / k), 0, 0, w, h);
+        } else ctx.drawImage(src, 0, 0);
+        if (sat < 0.999) {
+          ctx.globalCompositeOperation = 'saturation';
+          ctx.globalAlpha = 1 - sat;
+          ctx.fillStyle = '#808080';
+          ctx.fillRect(0, 0, w, h);
+          ctx.globalCompositeOperation = 'source-over';
+          ctx.globalAlpha = 1;
+        }
+      }
+      if (haze > 0.005) {
+        ctx.fillStyle = 'rgba(225,230,242,' + haze.toFixed(3) + ')';
+        ctx.fillRect(0, 0, w, h);
+        for (const b of st.blobs) {
+          const bx = (b.x + 0.15 * Math.sin(time * b.sp * 6.28 + b.ph)) * w;
+          const by = (b.y + 0.1 * Math.cos(time * b.sp * 5 + b.ph)) * h;
+          const br = b.r * w;
+          const g = ctx.createRadialGradient(bx, by, 0, bx, by, br);
+          g.addColorStop(0, 'rgba(240,243,250,' + (haze * 1.4).toFixed(3) + ')');
+          g.addColorStop(1, 'rgba(240,243,250,0)');
+          ctx.fillStyle = g;
+          ctx.fillRect(0, 0, w, h);
+        }
+      }
       ctx.restore();
     },
   });
