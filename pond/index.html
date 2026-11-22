@@ -776,6 +776,7 @@ function tint(c, a, alpha) {
 const KC = {
   cream: hexRGB('#efe6d4'), apricot: hexRGB('#e6b08c'), verm: hexRGB('#c4573f'),
   ink: hexRGB('#23282a'), rust: hexRGB('#c9684a'), ash: hexRGB('#b4b2a6'),
+  peach: hexRGB('#f1dcc6'), paleApricot: hexRGB('#ebc6a5'),
 };
 // 머리 → 꼬리 몸통 너비 (통통하게)
 const PROF = [0.52, 0.78, 0.92, 0.99, 1.0, 0.95, 0.85, 0.71, 0.55, 0.40, 0.27, 0.18];
@@ -793,8 +794,14 @@ function makePattern(kind, rnd) {
       for (let i = 0; i < 5; i++) patch(KC.ink, 0.22 + rnd() * 0.55, j() * 1.5, 0.026 + rnd() * 0.022, 1.15);
       return { base: KC.cream, fin: KC.cream, spots };
     case 'tancho':
-      patch(KC.verm, 0.12, 0, 0.06, 1.0);
+      patch(KC.verm, 0.12, j() * 0.12, 0.055 + rnd() * 0.02, 1.0);
       return { base: KC.cream, fin: KC.cream, spots };
+    case 'tanchoApricot': // 아주 옅은 살구빛 단정
+      patch(KC.verm, 0.12, j() * 0.12, 0.06, 1.0);
+      return { base: KC.peach, fin: KC.cream, spots };
+    case 'chagoiPale':
+      for (let i = 0; i < 10; i++) patch(KC.cream, 0.18 + rnd() * 0.6, j() * 1.3, 0.012, 1, 0.3);
+      return { base: KC.paleApricot, fin: KC.paleApricot, spots };
     case 'showa':
       patch(KC.verm, 0.12, 0.25, 0.11); patch(KC.cream, 0.34, -0.45, 0.085);
       patch(KC.verm, 0.55, 0.3, 0.1); patch(KC.cream, 0.74, -0.1, 0.07);
@@ -821,7 +828,7 @@ listeners.gulp = [];
 
 function initFish() {
   const rnd = mulberry32(5);
-  const kinds = ['kohaku', 'tancho', 'sanke', 'chagoi', 'showa', 'ochiba', 'kohaku', 'bekko', 'benigoi'];
+  const kinds = ['tancho', 'chagoi', 'tancho', 'kohaku', 'tanchoApricot', 'tancho', 'chagoiPale', 'tancho', 'chagoi'];
   const n = clamp(Math.round((W * H) / 48000), 6, 9);
   const baseL = clamp(Math.min(W, H) * 0.2, 54, 120);
   for (let i = 0; i < n; i++) {
