@@ -5,20 +5,20 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>CoverFX 예제</title>
 <style>
-  :root { --bg:#14112b; --panel:#1f1a40; --line:#3a3270; --text:#f2efff; --muted:#a9a2d6; --acc:#ffd54f; }
+  :root { --bg:#0d1520; --panel:#131e2d; --line:rgba(214,178,110,.28); --text:#efe7d6; --muted:#97a1b3; --acc:#d6b26e; }
   * { box-sizing: border-box; }
   body { margin:0; background:var(--bg); color:var(--text); font-family: "Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif; }
   .wrap { display:grid; grid-template-columns: minmax(0,1fr) 380px; gap:24px; padding:24px; min-height:100vh; }
   @media (max-width: 900px) { .wrap { grid-template-columns: 1fr; } #box { height: 70vh !important; } }
   /* ↓ 효과가 들어갈 div. 크기만 정해 주면 된다 */
-  #box { height: calc(100vh - 48px); background: radial-gradient(circle at 50% 40%, #2a2160, #120f26 70%); border-radius: 16px; overflow: hidden; }
+  #box { height: calc(100vh - 48px); background: radial-gradient(circle at 50% 40%, #233350, #0f1722 70%); border-radius: 6px; overflow: hidden; }
   aside { background:var(--panel); border:1px solid var(--line); border-radius:16px; padding:20px; display:flex; flex-direction:column; gap:16px; }
   h1 { font-size:20px; margin:0; }
   h2 { font-size:13px; margin:0 0 8px; color:var(--muted); font-weight:600; letter-spacing:.04em; }
   .fx-list { display:grid; grid-template-columns: 1fr 1fr; gap:8px; }
-  button { font:inherit; color:var(--text); background:#2c2560; border:1px solid var(--line); border-radius:10px; padding:9px 12px; cursor:pointer; }
-  button:hover { background:#3a3180; }
-  button.on { background:var(--acc); color:#241a00; border-color:var(--acc); font-weight:700; }
+  button { font:inherit; color:var(--text); background:transparent; border:1px solid var(--line); border-radius:4px; padding:9px 12px; cursor:pointer; }
+  button:hover { border-color:var(--acc); }
+  button.on { background:var(--acc); color:#0d1520; border-color:var(--acc); font-weight:700; }
   .row { display:flex; gap:8px; flex-wrap:wrap; }
   .row > button { flex:1; }
   .stage { font-size:28px; font-weight:800; }

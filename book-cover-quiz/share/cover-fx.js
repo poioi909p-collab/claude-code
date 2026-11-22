@@ -154,7 +154,7 @@
     ctx.beginPath(); ctx.arc(cx, cy, Math.max(1, r), 0, Math.PI * 2);
     ctx.lineWidth = Math.max(2, w * 0.018);
     ctx.strokeStyle = 'rgba(255,255,255,' + (0.85 * s).toFixed(3) + ')';
-    ctx.shadowColor = 'rgba(255,240,200,0.9)';
+    ctx.shadowColor = 'rgba(240,217,162,0.95)';
     ctx.shadowBlur = w * 0.05;
     ctx.stroke();
     ctx.restore();
@@ -169,6 +169,9 @@
     g.arcTo(x, y, x + w, y, r);
     g.closePath();
   }
+
+  const SERIF = '"Gowun Batang", "Nanum Myeongjo", "AppleMyungjo", "Batang", serif';
+  const LATIN = '"Playfair Display", Georgia, "Times New Roman", serif';
 
   const Helpers = { clamp, lerp, seg, stagger, Ease, rng, shuffled, derange, makeCanvas, pixelate, invert, rainbow, sweep, ring, roundRect };
 
@@ -268,7 +271,7 @@
     g.textAlign = 'center'; g.textBaseline = 'middle';
     let lines;
     for (;;) {
-      g.font = '900 ' + fs + 'px "Noto Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif';
+      g.font = '700 ' + fs + 'px ' + SERIF;
       lines = wrapText(g, title, w * T.w * 0.92);
       if (lines.length * fs * 1.15 <= h * T.h * 0.78 || fs < 14) break;
       fs *= 0.9;
@@ -582,39 +585,45 @@
   // 1) 제목 가리기 ── ① 가림막 ② 제목 모자이크 → 공개
   function makePanel(w, h) {
     const c = makeCanvas(w, h), g = c.getContext('2d');
-    const r = Math.min(w, h) * 0.12;
+    const m = Math.min(w, h);
+    const r = m * 0.05;
     roundRect(g, 0, 0, w, h, r);
     g.save();
     g.clip();
-    const gr = g.createLinearGradient(0, 0, w, h);
-    gr.addColorStop(0, '#2e0b63');
-    gr.addColorStop(0.5, '#8e24aa');
-    gr.addColorStop(1, '#e0306f');
+    const gr = g.createLinearGradient(0, 0, 0, h);
+    gr.addColorStop(0, '#8a3242'); gr.addColorStop(1, '#5e1f2c');
     g.fillStyle = gr;
     g.fillRect(0, 0, w, h);
-    const lw = Math.max(3, Math.min(w, h) * 0.07);
-    g.globalAlpha = 0.13;
-    g.strokeStyle = '#fff';
-    g.lineWidth = lw;
-    g.beginPath();
-    for (let k = -h; k < w + h; k += lw * 3) { g.moveTo(k, -2); g.lineTo(k - h, h + 2); }
-    g.stroke();
+    // 천 결
+    const rr = rng(w * 31 + h);
+    g.globalAlpha = 0.07;
+    g.fillStyle = '#000';
+    for (let y = 0; y < h; y += 2) g.fillRect(0, y, w, 1);
+    g.fillStyle = '#fff';
+    for (let i = 0; i < (w * h) / 60; i++) g.fillRect(rr() * w, rr() * h, 1, 1);
     g.globalAlpha = 1;
-    const n = clamp(Math.round((w / h) * 1.1), 1, 6);
-    const fs = Math.min(h * 0.72, (w / n) * 0.9);
-    g.font = '900 ' + fs + 'px "Black Han Sans", "Noto Sans KR", sans-serif';
+    const sh = g.createRadialGradient(w * 0.3, h * 0.2, 0, w * 0.3, h * 0.2, Math.max(w, h));
+    sh.addColorStop(0, 'rgba(255,255,255,0.12)'); sh.addColorStop(1, 'rgba(0,0,0,0.25)');
+    g.fillStyle = sh; g.fillRect(0, 0, w, h);
+    // 금박 이중 테두리
+    const in1 = m * 0.07, in2 = m * 0.1;
+    g.strokeStyle = '#e2c27f';
+    g.lineWidth = Math.max(1.5, m * 0.018);
+    g.strokeRect(in1, in1, w - in1 * 2, h - in1 * 2);
+    g.lineWidth = Math.max(1, m * 0.008);
+    g.strokeRect(in2, in2, w - in2 * 2, h - in2 * 2);
+    // 물음표
+    const n = clamp(Math.round((w / h) * 0.9), 1, 5);
+    const fs = Math.min(h * 0.62, (w / n) * 0.75);
+    g.font = 'italic 700 ' + fs + 'px ' + LATIN;
     g.textAlign = 'center';
     g.textBaseline = 'middle';
-    g.shadowColor = 'rgba(255,214,79,0.9)';
-    g.shadowBlur = fs * 0.25;
-    g.fillStyle = '#ffd54f';
-    for (let k = 0; k < n; k++) g.fillText('?', (w * (k + 0.5)) / n, h * 0.54);
+    const fg = g.createLinearGradient(0, h * 0.2, 0, h * 0.8);
+    fg.addColorStop(0, '#f7e6b8'); fg.addColorStop(0.55, '#d6b26e'); fg.addColorStop(1, '#9b7a3e');
+    g.fillStyle = fg;
+    g.shadowColor = 'rgba(0,0,0,0.45)'; g.shadowBlur = fs * 0.08; g.shadowOffsetY = fs * 0.03;
+    for (let k = 0; k < n; k++) g.fillText('?', (w * (k + 0.5)) / n, h * 0.53);
     g.restore();
-    const bw = Math.max(2, Math.min(w, h) * 0.045);
-    roundRect(g, bw / 2, bw / 2, w - bw, h - bw, r);
-    g.lineWidth = bw;
-    g.strokeStyle = '#ffe082';
-    g.stroke();
     return c;
   }
   register('titlemask', {
@@ -712,7 +721,7 @@
       const s1 = seg(t, 0, 1), s2 = seg(t, 1, 2), s3 = seg(t, 2, 3);
       ctx.save();
       ctx.globalAlpha = 1 - s3;
-      ctx.fillStyle = 'rgba(10,8,30,0.92)';
+      ctx.fillStyle = 'rgba(9,14,22,0.94)';
       ctx.fillRect(0, 0, w, h);
       ctx.restore();
       const gap = Math.max(1, w * 0.008) * (1 - s3);
@@ -820,7 +829,7 @@
       const amp = lerp(lerp(s.opts.amp, s.opts.amp1, a), 0, b) * h;
       ctx.save();
       ctx.globalAlpha = 1 - b;
-      ctx.fillStyle = 'rgba(10,8,30,0.88)';
+      ctx.fillStyle = 'rgba(9,14,22,0.9)';
       ctx.fillRect(0, 0, w, h);
       ctx.restore();
       const gap = w * 0.006 * (1 - b);
@@ -970,7 +979,7 @@
       const rot = ((s.opts.rotate * Math.PI) / 180) * m;
       ctx.save();
       ctx.beginPath(); ctx.rect(0, 0, w, h); ctx.clip();
-      ctx.fillStyle = '#0a0818';
+      ctx.fillStyle = '#0b111a';
       ctx.fillRect(0, 0, w, h);
       ctx.translate(w / 2, h / 2);
       ctx.rotate(rot);
@@ -982,7 +991,7 @@
   });
 
   // 8) (예비) 타일 뒤집기 ── 번호판이 하나씩 뒤집히며 표지가 드러남 (제목 칸은 마지막에)
-  const TILE_COLORS = [['#3b1a7a', '#6a2fc2'], ['#1c2f7a', '#2f5ad0']];
+  const TILE_COLORS = [['#5e1f2c', '#8a3242'], ['#183329', '#2a5646']];
   function tileLayout(s) {
     const st = s.state;
     const cols = Math.max(2, s.opts.cols | 0);
@@ -1029,7 +1038,7 @@
       const fs = Math.min(tw, th) * 0.42;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
-      ctx.font = '400 ' + fs + 'px "Black Han Sans", "Noto Sans KR", sans-serif';
+      ctx.font = 'italic 700 ' + fs + 'px ' + LATIN;
       for (let i = 0; i < N; i++) {
         const k = st.openAt[i];
         const f = k === 0 ? 1 : Ease.inOut(stagger(seg(t, k - 1, k), st.delay[i], 0.55));
@@ -1048,9 +1057,9 @@
           roundRect(ctx, -tw / 2 + gap / 2, -th / 2 + gap / 2, tw - gap, th - gap, Math.min(tw, th) * 0.08);
           ctx.fill();
           ctx.lineWidth = Math.max(1, gap * 0.8);
-          ctx.strokeStyle = 'rgba(255,224,130,0.7)';
+          ctx.strokeStyle = 'rgba(226,194,127,0.75)';
           ctx.stroke();
-          ctx.fillStyle = '#ffd54f';
+          ctx.fillStyle = '#ecd29a';
           ctx.fillText(String(i + 1), 0, fs * 0.04);
         } else {
           ctx.drawImage(src, x, y, tw, th, -tw / 2, -th / 2, tw, th);
@@ -1077,17 +1086,17 @@
       g.fillRect(r() * w, r() * h, 1 + r() * 2, 1 + r() * 2);
     }
     const fs = w * 0.09;
-    g.font = '400 ' + fs + 'px "Black Han Sans", "Noto Sans KR", sans-serif';
+    g.font = 'italic 700 ' + fs + 'px ' + LATIN;
     g.textAlign = 'center'; g.textBaseline = 'middle';
     g.save(); g.translate(w / 2, h / 2); g.rotate(-0.35);
     g.fillStyle = 'rgba(70,76,92,0.16)';
     for (let yy = -h; yy < h; yy += fs * 1.8) for (let xx = -w; xx < w; xx += fs * 4.2) g.fillText('?  ★', xx + (yy / (fs * 1.8)) % 2 * fs, yy);
     g.restore();
     g.fillStyle = 'rgba(55,60,75,0.55)';
-    g.font = '400 ' + w * 0.075 + 'px "Black Han Sans", "Noto Sans KR", sans-serif';
+    g.font = '700 ' + w * 0.07 + 'px ' + SERIF;
     g.fillText('긁어서 확인하세요!', w / 2, h * 0.93);
     g.lineWidth = Math.max(2, w * 0.012);
-    g.strokeStyle = '#d4a52b';
+    g.strokeStyle = '#c9a45c';
     g.strokeRect(g.lineWidth / 2, g.lineWidth / 2, w - g.lineWidth, h - g.lineWidth);
     return c;
   }
