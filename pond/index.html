@@ -411,6 +411,8 @@ uniform vec4 uSim;
 uniform float uTime;
 uniform float uRefract;
 uniform float uNormal;
+uniform sampler2D uFish;
+uniform sampler2D uShadow;
 
 vec3 wave(vec2 suv) {
   vec3 e = texture2D(uWave, suv).rgb * (255.0 / 127.0) - (128.0 / 127.0);
@@ -431,6 +433,13 @@ void main() {
   // 물결이 렌즈처럼 빛을 모으고 흩음 (마루 아래는 밝게, 골 아래는 어둡게)
   col *= clamp(1.0 - lap * 4.0, 0.6, 1.9);
   col += vec3(0.10, 0.16, 0.14) * clamp(-lap * 3.0, 0.0, 1.0);
+
+  // 물고기 그림자: 바닥에 떨어지고, 굴절로 더 크게 일렁임
+  float sh = texture2D(uShadow, vUv - off * 1.5).a;
+  col *= 1.0 - sh * 0.62;
+  // 물고기: 수면 가까이 있어서 굴절은 조금만
+  vec4 fsh = texture2D(uFish, vUv - off * 0.55);
+  col = fsh.rgb * clamp(1.0 - lap * 1.5, 0.8, 1.3) + col * (1.0 - fsh.a);
 
   // 수면 반사
   vec3 n = normalize(vec3(-g * uNormal, 1.0));
@@ -456,7 +465,7 @@ void main() {
   gl_FragColor = vec4(col, 1.0);
 }`;
 
-let gl = null, prog = null, U = {}, texWave = null, texBottom = null, bottomCanvas = null, glOK = false;
+let gl = null, prog = null, U = {}, texWave = null, texBottom = null, texFish = null, texShadow = null, bottomCanvas = null, glOK = false;
 
 function compile(type, src) {
   const s = gl.createShader(type);
@@ -491,10 +500,15 @@ function initGL() {
   const loc = gl.getAttribLocation(prog, 'aPos');
   gl.enableVertexAttribArray(loc);
   gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
-  for (const n of ['uBottom', 'uWave', 'uView', 'uSim', 'uTime', 'uRefract', 'uNormal']) U[n] = gl.getUniformLocation(prog, n);
+  for (const n of ['uBottom', 'uWave', 'uView', 'uSim', 'uTime', 'uRefract', 'uNormal', 'uFish', 'uShadow']) U[n] = gl.getUniformLocation(prog, n);
   gl.pixelStorei(gl.UNPACK_ALIGNMENT, 1);
   texBottom = makeTex();
   texWave = makeTex();
+  texFish = makeTex();
+  texShadow = makeTex();
+  gl.uniform1i(U.uFish, 2);
+  gl.uniform1i(U.uShadow, 3);
+  gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, true);
   gl.uniform1i(U.uBottom, 0);
   gl.uniform1i(U.uWave, 1);
   return true;
@@ -515,6 +529,14 @@ function uploadWave() {
   gl.activeTexture(gl.TEXTURE1);
   gl.bindTexture(gl.TEXTURE_2D, texWave);
   gl.texSubImage2D(gl.TEXTURE_2D, 0, 0, 0, sim.cols, sim.rows, gl.RGBA, gl.UNSIGNED_BYTE, sim.bytes);
+}
+function uploadLayers() {
+  gl.activeTexture(gl.TEXTURE2);
+  gl.bindTexture(gl.TEXTURE_2D, texFish);
+  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, fishCanvas);
+  gl.activeTexture(gl.TEXTURE3);
+  gl.bindTexture(gl.TEXTURE_2D, texShadow);
+  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, shadowCanvas);
 }
 function renderGL() {
   gl.viewport(0, 0, glCanvas.width, glCanvas.height);
@@ -563,6 +585,7 @@ function drawSurface() {
     fx.fillStyle = `rgba(239,230,212,${(m.a * tw).toFixed(3)})`;
     fx.beginPath(); fx.arc(m.x, m.y, m.r, 0, TAU); fx.fill();
   }
+  drawPellets();
 }
 
 /* ============================================================
@@ -571,7 +594,7 @@ function drawSurface() {
 const pointers = new Map();
 let touched = false;
 let lastTap = { t: -1, x: 0, y: 0 };
-const listeners = { tap: [], doubleTap: [], hold: [] };
+const listeners = { tap: [], doubleTap: [], hold: [], stir: [] };
 
 function firstTouch() {
   if (touched) return;
@@ -606,6 +629,7 @@ function moveTo(p, x, y, t) {
     disturb(sx, sy, 10, amt);
     if (k === n || k % 3 === 0) addFlow(sx, sy, fvx, fvy);
   }
+  for (const f of listeners.stir) f(x, y, speed);
   p.moved += dist;
   if (Math.hypot(x - p.downX, y - p.downY) > 8) { p.stillT = 0; p.downX = x; p.downY = y; }
   p.lx = x; p.ly = y; p.lt = t; p.x = x; p.y = y;
@@ -655,9 +679,481 @@ document.addEventListener('contextmenu', stop);
 window.addEventListener('wheel', stop, { passive: false });
 
 /* ============================================================
+   물고기 — 통통한 비단잉어, 느긋한 군집
+   ============================================================ */
+const fishCanvas = document.createElement('canvas');
+const fc = fishCanvas.getContext('2d');
+const shadowCanvas = document.createElement('canvas');
+const sc = shadowCanvas.getContext('2d');
+let FS = 1;
+const SS = 0.25;           // 그림자는 낮은 해상도로 → 저절로 부드럽게 번짐
+const SEG = 12;            // 몸통 마디 수
+const WATER = [16, 46, 48];
+const hexRGB = (h) => [parseInt(h.slice(1, 3), 16), parseInt(h.slice(3, 5), 16), parseInt(h.slice(5, 7), 16)];
+function tint(c, a, alpha) {
+  return `rgba(${(c[0] + (WATER[0] - c[0]) * a) | 0},${(c[1] + (WATER[1] - c[1]) * a) | 0},${(c[2] + (WATER[2] - c[2]) * a) | 0},${alpha === undefined ? 1 : alpha})`;
+}
+const KC = {
+  cream: hexRGB('#efe6d4'), apricot: hexRGB('#e6b08c'), verm: hexRGB('#c4573f'),
+  ink: hexRGB('#23282a'), rust: hexRGB('#c9684a'), ash: hexRGB('#b4b2a6'),
+};
+// 머리 → 꼬리 몸통 너비 (통통하게)
+const PROF = [0.52, 0.78, 0.92, 0.99, 1.0, 0.95, 0.85, 0.71, 0.55, 0.40, 0.27, 0.18];
+
+function makePattern(kind, rnd) {
+  const spots = [];
+  const patch = (c, t, s, r, st = 1.35, al = 1) => spots.push({ c, t, s, r, st, al });
+  const j = () => (rnd() - 0.5);
+  switch (kind) {
+    case 'kohaku':
+      for (let i = 0, k = 2 + (rnd() < 0.5 ? 1 : 0); i < k; i++) patch(KC.verm, 0.1 + i * 0.25 + rnd() * 0.07, j() * 0.7, 0.1 + rnd() * 0.05);
+      return { base: KC.cream, fin: KC.cream, spots };
+    case 'sanke':
+      patch(KC.verm, 0.12, j() * 0.5, 0.11); patch(KC.verm, 0.45, j() * 0.6, 0.12);
+      for (let i = 0; i < 5; i++) patch(KC.ink, 0.22 + rnd() * 0.55, j() * 1.5, 0.026 + rnd() * 0.022, 1.15);
+      return { base: KC.cream, fin: KC.cream, spots };
+    case 'tancho':
+      patch(KC.verm, 0.12, 0, 0.06, 1.0);
+      return { base: KC.cream, fin: KC.cream, spots };
+    case 'showa':
+      patch(KC.verm, 0.12, 0.25, 0.11); patch(KC.cream, 0.34, -0.45, 0.085);
+      patch(KC.verm, 0.55, 0.3, 0.1); patch(KC.cream, 0.74, -0.1, 0.07);
+      return { base: KC.ink, fin: KC.ink, spots };
+    case 'chagoi':
+      for (let i = 0; i < 12; i++) patch(KC.cream, 0.18 + rnd() * 0.6, j() * 1.3, 0.012, 1, 0.3);
+      return { base: KC.apricot, fin: KC.apricot, spots };
+    case 'ochiba':
+      patch(KC.apricot, 0.2, j() * 0.6, 0.1); patch(KC.apricot, 0.52, j() * 0.6, 0.11);
+      return { base: KC.ash, fin: KC.ash, spots };
+    case 'bekko':
+      for (let i = 0; i < 6; i++) patch(KC.ink, 0.15 + i * 0.1 + rnd() * 0.05, j() * 0.9, 0.025 + rnd() * 0.016, 1.15);
+      return { base: KC.cream, fin: KC.cream, spots };
+    default: // benigoi
+      patch(KC.cream, 0.03, 0, 0.09, 1.2);
+      return { base: KC.rust, fin: KC.cream, spots };
+  }
+}
+
+const fish = [];
+const hold = { x: 0, y: 0, t: -10, still: 0 };
+const pellets = [];
+listeners.gulp = [];
+
+function initFish() {
+  const rnd = mulberry32(5);
+  const kinds = ['kohaku', 'tancho', 'sanke', 'chagoi', 'showa', 'ochiba', 'kohaku', 'bekko', 'benigoi'];
+  const n = clamp(Math.round((W * H) / 48000), 6, 9);
+  const baseL = clamp(Math.min(W, H) * 0.2, 54, 120);
+  for (let i = 0; i < n; i++) {
+    const L = baseL * (0.8 + rnd() * 0.38);
+    const a = rnd() * TAU, r = Math.min(W, H) * (0.08 + rnd() * 0.25);
+    const f = {
+      L, x: W * 0.5 + Math.cos(a) * r, y: H * 0.5 + Math.sin(a) * r,
+      ang: rnd() * TAU, speed: L * 0.3, phase: rnd() * TAU, seed: rnd() * 100,
+      fear: 0, fleeA: 0, wary: 0, depth: 0.25 + rnd() * 0.4, restDepth: 0.4, depthT: rnd() * 6,
+      wanderA: 0, gulp: -1, gulpFood: null, ate: false, nextGulp: 6 + rnd() * 20, curious: rnd(), wake: 0,
+      seg: (L / (SEG - 1)) * 0.86,
+      px: new Float32Array(SEG), py: new Float32Array(SEG), rx: new Float32Array(SEG), ry: new Float32Array(SEG),
+      nx: new Float32Array(SEG), ny: new Float32Array(SEG), w: new Float32Array(SEG), fwdX: 1, fwdY: 0,
+      pat: makePattern(kinds[i % kinds.length], rnd),
+    };
+    for (let k = 0; k < SEG; k++) { f.px[k] = f.x - Math.cos(f.ang) * f.seg * k; f.py[k] = f.y - Math.sin(f.ang) * f.seg * k; }
+    fish.push(f);
+  }
+}
+function clampFish() {
+  for (const f of fish) { f.x = clamp(f.x, 0, W); f.y = clamp(f.y, 0, H); }
+}
+
+// 놀람: 가까울수록 크게, 방향은 조금씩 흩어지게
+function scare(x, y, radius, strength) {
+  for (const f of fish) {
+    const d = Math.hypot(f.x - x, f.y - y);
+    if (d > radius) continue;
+    const s = clamp(strength * Math.pow(1 - d / radius, 0.6), 0, 1);
+    if (s < f.fear * 0.9) continue;
+    if (f.fear < 0.3 && s > 0.45) disturb(f.px[SEG - 1], f.py[SEG - 1], 7, 0.3); // 꼬리로 물을 탁
+    f.fear = Math.max(f.fear, s);
+    f.fleeA = Math.atan2(f.y - y, f.x - x) + (Math.random() - 0.5) * 1.1;
+    f.wary = 3.2;
+  }
+}
+listeners.tap.push((x, y) => scare(x, y, 100, 0.65));
+listeners.stir.push((x, y, speed) => { if (speed > 160) scare(x, y, 90 + Math.min(speed, 1500) * 0.07, clamp(speed / 700, 0.35, 1)); });
+listeners.hold.push((x, y, still) => { hold.x = x; hold.y = y; hold.t = now; hold.still = still; });
+
+// 먹이: 두 번 톡
+function dropFood(x, y) {
+  const n = 5 + ((Math.random() * 3) | 0);
+  for (let i = 0; i < n; i++) {
+    const a = Math.random() * TAU, r = Math.random() * 22;
+    pellets.push({ x: x + Math.cos(a) * r, y: y + Math.sin(a) * r, vx: 0, vy: 0, born: now + i * 0.07 + Math.random() * 0.05, landed: false, life: 50, eaten: false, ph: Math.random() * TAU });
+  }
+  while (pellets.length > 42) pellets.shift();
+}
+listeners.doubleTap.push(dropFood);
+
+function updatePellets(dt) {
+  for (const p of pellets) {
+    if (now < p.born) continue;
+    if (!p.landed) {
+      if (now - p.born > 0.32) { p.landed = true; disturb(p.x, p.y, 5, 0.3); }
+      continue;
+    }
+    flowAt(p.x, p.y, tmpF); slopeAt(p.x, p.y, tmpS);
+    const k = 1 - Math.exp(-dt * 2);
+    p.vx += (tmpF.x * 0.7 - tmpS.x * 80 - p.vx) * k;
+    p.vy += (tmpF.y * 0.7 - tmpS.y * 80 - p.vy) * k;
+    p.x = clamp(p.x + p.vx * dt, 4, W - 4); p.y = clamp(p.y + p.vy * dt, 4, H - 4);
+    p.life -= dt;
+  }
+  for (let i = pellets.length - 1; i >= 0; i--) if (pellets[i].eaten || pellets[i].life <= 0) pellets.splice(i, 1);
+}
+function drawPellets() {
+  for (const p of pellets) {
+    if (now < p.born) continue;
+    const k = clamp((now - p.born) / 0.32, 0, 1);
+    const e = 1 - Math.pow(1 - k, 3);
+    const fade = Math.min(1, p.life / 3);
+    const s = 1 + (1 - e) * 1.6, r = 2.6 * s;
+    const lift = (1 - e) * 10;
+    fx.globalAlpha = e * fade;
+    fx.fillStyle = 'rgba(4,10,12,0.32)';
+    fx.beginPath(); fx.arc(p.x + 1.6 + lift * 0.6, p.y + 2.4 + lift, r * 1.05, 0, TAU); fx.fill();
+    fx.fillStyle = '#a8724a';
+    fx.beginPath(); fx.arc(p.x, p.y, r, 0, TAU); fx.fill();
+    fx.fillStyle = 'rgba(236,196,150,0.75)';
+    fx.beginPath(); fx.arc(p.x - r * 0.3, p.y - r * 0.35, r * 0.42, 0, TAU); fx.fill();
+  }
+  fx.globalAlpha = 1;
+}
+function nearestPellet(x, y) {
+  let best = null, bd = Infinity;
+  for (const p of pellets) {
+    if (!p.landed || p.eaten) continue;
+    const d = (p.x - x) * (p.x - x) + (p.y - y) * (p.y - y);
+    if (d < bd) { bd = d; best = p; }
+  }
+  return best;
+}
+function startGulp(f, food) {
+  if (f.gulp >= 0) return;
+  f.gulp = 0; f.gulpFood = food; f.ate = false;
+}
+
+function updateFish(dt) {
+  const n = fish.length;
+  let gx = 0, gy = 0;
+  for (const f of fish) { gx += f.x; gy += f.y; }
+  gx /= n; gy /= n;
+  const holding = now - hold.t < 0.15;
+
+  for (const f of fish) {
+    const L = f.L;
+    const cruise = L * 0.46 * (0.85 + 0.25 * Math.sin(now * 0.13 + f.seed));
+    let tSpeed = cruise, focus = false, tDepth = null, fdx = 0, fdy = 0;
+
+    // 먹이 > 호기심
+    const mx = f.x + Math.cos(f.ang) * L * 0.06, my = f.y + Math.sin(f.ang) * L * 0.06;
+    const food = f.fear < 0.3 ? nearestPellet(mx, my) : null;
+    if (food) {
+      const ex = food.x - mx, ey = food.y - my, d = Math.hypot(ex, ey) || 1;
+      fdx = (ex / d) * 2.8; fdy = (ey / d) * 2.8; focus = true; tDepth = 0.04;
+      tSpeed = cruise * clamp(d / (L * 1.2), 0.35, 1.5);
+      if (d < L * 0.22) startGulp(f, food);
+    } else if (holding && f.fear < 0.05 && f.wary <= 0) {
+      const hx = hold.x - f.x, hy = hold.y - f.y, d = Math.hypot(hx, hy) || 1;
+      const reach = 150 + hold.still * 170;
+      if (d < reach && f.curious < 0.35 + hold.still * 0.22) {
+        focus = true; tDepth = 0.08;
+        const stand = L * 0.62;
+        const tx = hold.x - (hx / d) * stand - f.x, ty = hold.y - (hy / d) * stand - f.y;
+        const td = Math.hypot(tx, ty) || 1, pull = Math.min(1, td / L);
+        fdx = (tx / td) * 2.4 * pull + (hx / d) * 1.2 * (1 - pull);
+        fdy = (ty / td) * 2.4 * pull + (hy / d) * 1.2 * (1 - pull);
+        tSpeed = cruise * clamp(td / (L * 2.2), 0.1, 0.9);
+        if (d < L * 1.05 && f.gulp < 0 && Math.random() < dt * 0.45) startGulp(f, null); // 손가락에 뻐끔
+      }
+    }
+
+    // 방황
+    f.wanderA += (Math.random() - 0.5) * dt * 2.6 - f.wanderA * dt * 0.2;
+    f.wanderA = clamp(f.wanderA, -0.9, 0.9);
+    const ww = focus ? 0.2 : 0.9;
+    let dx = Math.cos(f.ang + f.wanderA) * ww, dy = Math.sin(f.ang + f.wanderA) * ww;
+
+    // 군집: 분리 · 정렬 · 응집 (느긋하게)
+    let sx = 0, sy = 0, ax = 0, ay = 0, cx = 0, cy = 0, cnt = 0;
+    for (const o of fish) {
+      if (o === f) continue;
+      const ox = o.x - f.x, oy = o.y - f.y, d = Math.hypot(ox, oy);
+      const sepR = (f.L + o.L) * 0.6;
+      if (d < sepR && d > 0.001) { const s = 1 - d / sepR; sx -= (ox / d) * s; sy -= (oy / d) * s; }
+      if (d < L * 4) { ax += Math.cos(o.ang); ay += Math.sin(o.ang); cx += o.x; cy += o.y; cnt++; }
+    }
+    const social = (1 - f.fear) * (focus ? 0.25 : 1);
+    if (cnt) {
+      dx += (ax / cnt) * 0.45 * social; dy += (ay / cnt) * 0.45 * social;
+      const ox = cx / cnt - f.x, oy = cy / cnt - f.y, d = Math.hypot(ox, oy) || 1;
+      const c = smoothstep(L * 1.1, L * 3, d) * 0.6 * social;
+      dx += (ox / d) * c; dy += (oy / d) * c;
+    } else {
+      const ox = gx - f.x, oy = gy - f.y, d = Math.hypot(ox, oy) || 1;
+      dx += (ox / d) * 0.4 * social; dy += (oy / d) * 0.4 * social;
+    }
+    const sw = focus ? 1.1 : 2.0;
+    dx += sx * sw + fdx; dy += sy * sw + fdy;
+
+    // 가장자리 피하기
+    const m = L * 1.1;
+    if (f.x < m) dx += ((m - f.x) / m) * 3; else if (f.x > W - m) dx -= ((f.x - (W - m)) / m) * 3;
+    if (f.y < m) dy += ((m - f.y) / m) * 3; else if (f.y > H - m) dy -= ((f.y - (H - m)) / m) * 3;
+
+    // 놀라서 도망
+    if (f.fear > 0.01) { dx += Math.cos(f.fleeA) * f.fear * 4.5; dy += Math.sin(f.fleeA) * f.fear * 4.5; tDepth = 0.8; }
+
+    // 방향과 속도는 천천히 따라감
+    const want = Math.atan2(dy, dx);
+    let da = want - f.ang; da -= Math.round(da / TAU) * TAU;
+    const maxTurn = (0.8 + f.fear * 4.5 + (focus ? 0.9 : 0)) * dt;
+    f.ang += clamp(da * Math.min(1, dt * 2.5), -maxTurn, maxTurn);
+    tSpeed *= (1 + f.fear * 3.4) * (1 - 0.45 * Math.min(1, Math.abs(da) / Math.PI));
+    f.speed += (tSpeed - f.speed) * (1 - Math.exp(-dt * (1.1 + f.fear * 6)));
+    flowAt(f.x, f.y, tmpF);
+    f.x += Math.cos(f.ang) * f.speed * dt + tmpF.x * 0.3 * dt;
+    f.y += Math.sin(f.ang) * f.speed * dt + tmpF.y * 0.3 * dt;
+    f.fear = Math.max(0, f.fear - dt * 0.36);
+    f.wary = Math.max(0, f.wary - dt);
+
+    // 깊이: 평소엔 오르내리고, 먹이·호기심이면 수면 가까이, 놀라면 깊이
+    f.depthT -= dt;
+    if (f.depthT <= 0) { f.depthT = 6 + Math.random() * 9; f.restDepth = 0.18 + Math.random() * 0.55; }
+    f.depth += ((tDepth !== null ? tDepth : f.restDepth) - f.depth) * (1 - Math.exp(-dt * 0.6));
+
+    // 뻐끔
+    if (f.gulp >= 0) {
+      f.gulp += dt;
+      if (!f.ate && f.gulp > 0.18) {
+        f.ate = true;
+        const tx = f.rx[0] + f.fwdX * f.w[0], ty = f.ry[0] + f.fwdY * f.w[0];
+        const p = f.gulpFood;
+        if (p && !p.eaten && Math.hypot(p.x - tx, p.y - ty) < L * 0.45) p.eaten = true;
+        disturb(tx, ty, 6, p ? 0.42 : 0.22);
+        for (const g of listeners.gulp) g(tx, ty);
+      }
+      if (f.gulp > 0.62) f.gulp = -1;
+    } else if (now > f.nextGulp && f.depth < 0.3 && f.fear < 0.05) {
+      f.nextGulp = now + 14 + Math.random() * 26;
+      startGulp(f, null);
+    }
+
+    // 빠르게 헤엄치면 수면에 옅은 물결 자국
+    if (f.speed > L * 1.5) {
+      f.wake -= dt;
+      if (f.wake < 0) { f.wake = 0.08; disturb(f.x, f.y, 6, 0.05 * Math.min(2.5, f.speed / (L * 1.5))); }
+    }
+
+    // 몸통 마디: 머리를 따라가되 너무 꺾이지 않게
+    f.phase += dt * (2.0 + (f.speed / L) * 4.0);
+    f.px[0] = f.x; f.py[0] = f.y;
+    let prevA = f.ang + Math.PI;
+    for (let k = 1; k < SEG; k++) {
+      let a = Math.atan2(f.py[k] - f.py[k - 1], f.px[k] - f.px[k - 1]);
+      let d = a - prevA; d -= Math.round(d / TAU) * TAU;
+      a = prevA + clamp(d, -0.3, 0.3);
+      f.px[k] = f.px[k - 1] + Math.cos(a) * f.seg;
+      f.py[k] = f.py[k - 1] + Math.sin(a) * f.seg;
+      prevA = a;
+    }
+  }
+}
+
+// 헤엄 물결(S자)을 얹어 그릴 모양 계산
+function buildFish(f) {
+  const L = f.L;
+  const amp = L * 0.05 * (0.4 + Math.min(1.1, f.speed / (L * 0.8)));
+  for (let k = 0; k < SEG; k++) {
+    const t = k / (SEG - 1);
+    const k0 = Math.max(0, k - 1), k1 = Math.min(SEG - 1, k + 1);
+    let tx = f.px[k0] - f.px[k1], ty = f.py[k0] - f.py[k1];
+    const tl = Math.hypot(tx, ty) || 1; tx /= tl; ty /= tl;
+    const o = amp * Math.sin(f.phase - t * 5.2) * (0.07 + Math.pow(t, 1.5) * 0.95);
+    f.rx[k] = f.px[k] - ty * o; f.ry[k] = f.py[k] + tx * o;
+    f.w[k] = L * 0.168 * PROF[k];
+  }
+  for (let k = 0; k < SEG; k++) {
+    const k0 = Math.max(0, k - 1), k1 = Math.min(SEG - 1, k + 1);
+    let tx = f.rx[k0] - f.rx[k1], ty = f.ry[k0] - f.ry[k1];
+    const tl = Math.hypot(tx, ty) || 1; tx /= tl; ty /= tl;
+    f.nx[k] = -ty; f.ny[k] = tx;
+    if (k === 0) { f.fwdX = tx; f.fwdY = ty; }
+  }
+}
+const P = { x: 0, y: 0, a: 0 };
+function at(f, t, s) {
+  const fk = clamp(t, 0, 1) * (SEG - 1), k = Math.min(SEG - 2, fk | 0), u = fk - k;
+  const nx = lerp(f.nx[k], f.nx[k + 1], u), ny = lerp(f.ny[k], f.ny[k + 1], u), w = lerp(f.w[k], f.w[k + 1], u);
+  P.x = lerp(f.rx[k], f.rx[k + 1], u) + nx * w * s;
+  P.y = lerp(f.ry[k], f.ry[k + 1], u) + ny * w * s;
+  P.a = Math.atan2(-nx, ny);
+  return P;
+}
+function bodyPath(ctx, f, ox, oy) {
+  const { rx, ry, nx, ny, w } = f;
+  const E = SEG - 1;
+  const lx = (k) => rx[k] + nx[k] * w[k] + ox, ly = (k) => ry[k] + ny[k] * w[k] + oy;
+  const qx = (k) => rx[k] - nx[k] * w[k] + ox, qy = (k) => ry[k] - ny[k] * w[k] + oy;
+  ctx.beginPath();
+  ctx.moveTo(lx(0), ly(0));
+  for (let k = 1; k < E; k++) ctx.quadraticCurveTo(lx(k), ly(k), (lx(k) + lx(k + 1)) / 2, (ly(k) + ly(k + 1)) / 2);
+  ctx.lineTo(lx(E), ly(E));
+  ctx.lineTo(qx(E), qy(E));
+  for (let k = E - 1; k > 0; k--) ctx.quadraticCurveTo(qx(k), qy(k), (qx(k) + qx(k - 1)) / 2, (qy(k) + qy(k - 1)) / 2);
+  ctx.lineTo(qx(0), qy(0));
+  const c = w[0] * 1.35;
+  ctx.bezierCurveTo(qx(0) + f.fwdX * c, qy(0) + f.fwdY * c, lx(0) + f.fwdX * c, ly(0) + f.fwdY * c, lx(0), ly(0));
+  ctx.closePath();
+}
+function finPath(ctx, f, t, side, len, wid, spread) {
+  const k = Math.round(t * (SEG - 1));
+  at(f, t, side * 0.78);
+  const bx = -Math.cos(P.a), by = -Math.sin(P.a);
+  const sx = f.nx[k] * side, sy = f.ny[k] * side;
+  const dx = bx * Math.cos(spread) + sx * Math.sin(spread), dy = by * Math.cos(spread) + sy * Math.sin(spread);
+  const cx = P.x + dx * len * 0.42, cy = P.y + dy * len * 0.42;
+  const c = Math.cos(Math.atan2(dy, dx)), s = Math.sin(Math.atan2(dy, dx));
+  const T = (u, v) => [cx + c * u - s * v, cy + s * u + c * v];
+  const p0 = T(-len * 0.5, 0), a1 = T(-len * 0.1, -wid * 0.75), p1 = T(len * 0.32, -wid * 0.5);
+  const a2 = T(len * 0.62, 0), p2 = T(len * 0.32, wid * 0.5), a3 = T(-len * 0.1, wid * 0.75);
+  ctx.moveTo(p0[0], p0[1]);
+  ctx.quadraticCurveTo(a1[0], a1[1], p1[0], p1[1]);
+  ctx.quadraticCurveTo(a2[0], a2[1], p2[0], p2[1]);
+  ctx.quadraticCurveTo(a3[0], a3[1], p0[0], p0[1]);
+}
+function tailPath(ctx, f, ox, oy) {
+  const E = SEG - 1;
+  let bx = f.rx[E] - f.rx[E - 2], by = f.ry[E] - f.ry[E - 2];
+  const bl = Math.hypot(bx, by) || 1; bx /= bl; by /= bl;
+  const sw = Math.sin(f.phase - 6.2) * 0.32 * (0.5 + Math.min(1, f.speed / (f.L * 0.8)));
+  const cs = Math.cos(sw), sn = Math.sin(sw);
+  const tx = bx * cs - by * sn, ty = bx * sn + by * cs;
+  const mx = -ty, my = tx, TL = f.L * 0.42, we = f.w[E];
+  const ex = f.rx[E] + ox, ey = f.ry[E] + oy;
+  const fl = Math.sin(now * 2.1 + f.seed) * 0.05;
+  const X = (u, v) => ex + tx * TL * u + mx * TL * v, Y = (u, v) => ey + ty * TL * u + my * TL * v;
+  ctx.beginPath();
+  ctx.moveTo(ex + mx * we, ey + my * we);
+  ctx.quadraticCurveTo(X(0.5, 0.5 + fl), Y(0.5, 0.5 + fl), X(1.0, 0.46 + fl), Y(1.0, 0.5 + fl));
+  ctx.quadraticCurveTo(X(0.78, 0.16), Y(0.78, 0.16), X(0.64, fl * 0.5), Y(0.64, fl * 0.5));
+  ctx.quadraticCurveTo(X(0.78, -0.16), Y(0.78, -0.16), X(1.0, -0.46 + fl), Y(1.0, -0.46 + fl));
+  ctx.quadraticCurveTo(X(0.5, -0.5 + fl), Y(0.5, -0.5 + fl), ex - mx * we, ey - my * we);
+  ctx.closePath();
+}
+
+function drawOneFish(f) {
+  const ctx = fc, L = f.L, pat = f.pat;
+  const a = 0.08 + f.depth * 0.5;
+  const hov = 1 - Math.min(1, f.speed / (L * 0.5));
+  const finCol = tint(pat.fin, a * 0.8, 0.58);
+
+  // 지느러미 (몸통 아래)
+  ctx.fillStyle = finCol;
+  ctx.beginPath();
+  for (const side of [1, -1]) {
+    const flap = 0.28 * Math.sin(f.phase * 0.55 + side * 0.6) + hov * 0.32 * Math.sin(now * 2.6 + (side > 0 ? 0 : Math.PI));
+    finPath(ctx, f, 0.2, side, L * 0.22, L * 0.12, 1.05 + flap);
+    finPath(ctx, f, 0.52, side, L * 0.13, L * 0.065, 0.75 + 0.12 * Math.sin(f.phase * 0.5 + side));
+  }
+  ctx.fill();
+  tailPath(ctx, f, 0, 0);
+  ctx.fill();
+  ctx.strokeStyle = tint(pat.fin, a, 0.16);
+  ctx.lineWidth = Math.max(0.6, L * 0.008);
+  ctx.stroke();
+
+  // 몸통
+  bodyPath(ctx, f, 0, 0);
+  ctx.fillStyle = tint(pat.base, a);
+  ctx.fill();
+  ctx.save();
+  ctx.clip();
+  for (const sp of pat.spots) {
+    at(f, sp.t, sp.s);
+    ctx.fillStyle = tint(sp.c, a, sp.al);
+    ctx.beginPath();
+    ctx.ellipse(P.x, P.y, sp.r * L * sp.st, sp.r * L, P.a, 0, TAU);
+    ctx.fill();
+  }
+  // 등 쪽 은은한 빛, 옆구리 그늘
+  ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+  ctx.strokeStyle = 'rgba(255,250,238,0.14)';
+  ctx.lineWidth = L * 0.07;
+  ctx.beginPath(); ctx.moveTo(f.rx[1], f.ry[1]);
+  for (let k = 2; k < 8; k++) ctx.lineTo(f.rx[k], f.ry[k]);
+  ctx.stroke();
+  bodyPath(ctx, f, 0, 0);
+  ctx.strokeStyle = `rgba(8,18,20,${0.2 + a * 0.2})`;
+  ctx.lineWidth = L * 0.075;
+  ctx.stroke();
+  ctx.restore();
+
+  // 등지느러미 선
+  ctx.strokeStyle = `rgba(20,24,24,${0.12 + a * 0.1})`;
+  ctx.lineWidth = L * 0.018;
+  ctx.beginPath(); ctx.moveTo(f.rx[3], f.ry[3]);
+  for (let k = 4; k < 8; k++) ctx.lineTo(f.rx[k], f.ry[k]);
+  ctx.stroke();
+
+  // 눈
+  const er = L * 0.024;
+  for (const side of [1, -1]) {
+    at(f, 0.075, side * 0.72);
+    ctx.fillStyle = '#151312';
+    ctx.beginPath(); ctx.arc(P.x, P.y, er, 0, TAU); ctx.fill();
+    ctx.fillStyle = 'rgba(255,250,240,0.7)';
+    ctx.beginPath(); ctx.arc(P.x - er * 0.3, P.y - er * 0.3, er * 0.36, 0, TAU); ctx.fill();
+  }
+
+  // 입 (뻐끔)
+  if (f.gulp >= 0) {
+    const g = Math.sin(Math.PI * Math.min(1, f.gulp / 0.55));
+    if (g > 0.02) {
+      const tx = f.rx[0] + f.fwdX * f.w[0] * 0.8, ty = f.ry[0] + f.fwdY * f.w[0] * 0.8;
+      ctx.fillStyle = 'rgba(52,26,26,0.9)';
+      ctx.beginPath();
+      ctx.ellipse(tx, ty, L * 0.03 * g, L * 0.042 * g, Math.atan2(f.fwdY, f.fwdX), 0, TAU);
+      ctx.fill();
+    }
+  }
+}
+
+function drawFishShadow(f) {
+  const so = 6 + (1 - f.depth) * 20;
+  const ox = so * 0.7, oy = so;
+  sc.fillStyle = `rgba(0,0,0,${0.32 + f.depth * 0.3})`;
+  bodyPath(sc, f, ox, oy); sc.fill();
+  tailPath(sc, f, ox, oy); sc.fill();
+}
+
+let fishOrder = [];
+function drawFish() {
+  fc.setTransform(FS, 0, 0, FS, 0, 0);
+  fc.clearRect(0, 0, W, H);
+  sc.setTransform(SS, 0, 0, SS, 0, 0);
+  sc.clearRect(0, 0, W, H);
+  fishOrder = fish.slice().sort((p, q) => q.depth - p.depth);
+  for (const f of fishOrder) { buildFish(f); drawFishShadow(f); drawOneFish(f); }
+}
+
+/* ============================================================
    크기 / 성능
    ============================================================ */
 function sizeCanvases() {
+  FS = Math.min(DPR, 1.5, RS);
+  fishCanvas.width = Math.max(1, Math.round(W * FS));
+  fishCanvas.height = Math.max(1, Math.round(H * FS));
+  shadowCanvas.width = Math.max(1, Math.round(W * SS));
+  shadowCanvas.height = Math.max(1, Math.round(H * SS));
   glCanvas.width = Math.max(1, Math.round(W * RS));
   glCanvas.height = Math.max(1, Math.round(H * RS));
   fxCanvas.width = Math.max(1, Math.round(W * FXS));
@@ -673,6 +1169,7 @@ function layout() {
   initSim();
   initFlow();
   initMotes();
+  if (!fish.length) initFish(); else clampFish();
   bottomCanvas = makeBottom();
   uploadBottom();
   allocWaveTex();
@@ -726,8 +1223,12 @@ function frame(ts) {
   updatePointers(dt);
   stepFlow(dt);
   updateMotes(dt);
+  updateFish(dt);
+  updatePellets(dt);
+  drawFish();
   if (glOK && !gl.isContextLost()) {
     if (steps) { encodeSim(); uploadWave(); }
+    uploadLayers();
     renderGL();
   }
   drawSurface();
@@ -742,6 +1243,8 @@ function start() {
   layout();
   if (!glOK) { // WebGL이 없으면 바닥만이라도
     glCanvas.style.display = 'none';
+    fishCanvas.style.cssText = 'position:absolute;inset:0;width:100%;height:100%';
+    stage.insertBefore(fishCanvas, fxCanvas);
     stage.style.background = `center / cover url(${bottomCanvas.toDataURL()})`;
   }
   setTimeout(() => { if (!touched) hint.classList.add('on'); }, 700);
@@ -749,7 +1252,7 @@ function start() {
 }
 
 // 다음 단계(물고기, 연잎, 소리)가 쓸 연결점
-window.__pond = { disturb, flowAt, slopeAt, listeners, get size() { return { W, H }; } };
+window.__pond = { disturb, flowAt, slopeAt, listeners, fish, pellets, shadowCanvas, sc, get size() { return { W, H }; } };
 
 start();
 })();
