@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CoverFX 예제</title>
+<style>
+  :root { --bg:#14112b; --panel:#1f1a40; --line:#3a3270; --text:#f2efff; --muted:#a9a2d6; --acc:#ffd54f; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--text); font-family: "Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif; }
+  .wrap { display:grid; grid-template-columns: minmax(0,1fr) 380px; gap:24px; padding:24px; min-height:100vh; }
+  @media (max-width: 900px) { .wrap { grid-template-columns: 1fr; } #box { height: 70vh !important; } }
+  /* ↓ 효과가 들어갈 div. 크기만 정해 주면 된다 */
+  #box { height: calc(100vh - 48px); background: radial-gradient(circle at 50% 40%, #2a2160, #120f26 70%); border-radius: 16px; overflow: hidden; }
+  aside { background:var(--panel); border:1px solid var(--line); border-radius:16px; padding:20px; display:flex; flex-direction:column; gap:16px; }
+  h1 { font-size:20px; margin:0; }
+  h2 { font-size:13px; margin:0 0 8px; color:var(--muted); font-weight:600; letter-spacing:.04em; }
+  .fx-list { display:grid; grid-template-columns: 1fr 1fr; gap:8px; }
+  button { font:inherit; color:var(--text); background:#2c2560; border:1px solid var(--line); border-radius:10px; padding:9px 12px; cursor:pointer; }
+  button:hover { background:#3a3180; }
+  button.on { background:var(--acc); color:#241a00; border-color:var(--acc); font-weight:700; }
+  .row { display:flex; gap:8px; flex-wrap:wrap; }
+  .row > button { flex:1; }
+  .stage { font-size:28px; font-weight:800; }
+  .stage small { font-size:14px; color:var(--muted); font-weight:500; margin-left:6px; }
+  .desc { color:var(--muted); font-size:14px; line-height:1.5; min-height:42px; }
+  input[type=text] { width:100%; font:inherit; padding:8px 10px; border-radius:8px; border:1px solid var(--line); background:#151230; color:var(--text); }
+  label.file { display:block; text-align:center; padding:9px; border:1px dashed var(--line); border-radius:10px; cursor:pointer; color:var(--muted); }
+  label.file input { display:none; }
+  pre { margin:0; background:#100d24; border:1px solid var(--line); border-radius:10px; padding:12px; font-size:12px; overflow:auto; color:#d7d1ff; }
+  .hint { font-size:12px; color:var(--muted); line-height:1.5; }
+  .drawing #box { cursor: crosshair; outline: 3px dashed var(--acc); }
+  #sel { position:absolute; border:2px solid var(--acc); background:rgba(255,213,79,.2); pointer-events:none; display:none; z-index:5; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div id="box"></div>
+
+  <aside>
+    <h1>CoverFX 효과 시험장</h1>
+    <div>
+      <h2>효과</h2>
+      <div class="fx-list" id="fxList"></div>
+    </div>
+    <div>
+      <div class="stage" id="stage">-</div>
+      <div class="desc" id="desc"></div>
+    </div>
+    <div class="row">
+      <button id="prev">← 이전</button>
+      <button id="next">다음 →</button>
+    </div>
+    <div class="row">
+      <button id="reveal">정답 공개</button>
+      <button id="reset">처음으로</button>
+    </div>
+    <div>
+      <h2>표지 이미지</h2>
+      <label class="file">내 이미지 파일 선택<input type="file" id="file" accept="image/*"></label>
+      <div class="row" style="margin-top:8px">
+        <input type="text" id="url" placeholder="또는 이미지 경로 / URL 입력 후 Enter">
+      </div>
+    </div>
+    <div>
+      <h2>제목 영역 (제목 가리기 · 제목 보호에 사용)</h2>
+      <div class="row">
+        <button id="draw">표지 위에 드래그해서 지정</button>
+        <button id="clearReg">지우기</button>
+      </div>
+      <p class="hint" id="regInfo">지정된 영역 없음</p>
+    </div>
+    <div>
+      <h2>키보드</h2>
+      <p class="hint">→ / Space 다음 · ← 이전 · Enter 공개 · R 처음 · 1~7 효과 선택</p>
+    </div>
+    <div>
+      <h2>최소 사용 코드</h2>
+<pre>&lt;div id="box" style="height:600px"&gt;&lt;/div&gt;
+&lt;script src="cover-fx.js"&gt;&lt;/script&gt;
+&lt;script&gt;
+  const fx = CoverFX.create('#box', {
+    src: 'cover.jpg',
+    effect: 'shuffle'
+  });
+  document.onclick = () =&gt; fx.next();
+&lt;/script&gt;</pre>
+    </div>
+  </aside>
+</div>
+<div id="sel"></div>
+
+<script src="cover-fx.js"></script>
+<script>
+  // 시험용 기본 표지 (파일이 없어도 바로 시험할 수 있게 자동 생성)
+  const sample = CoverFX.placeholder({ title: '표지 보고 책 제목 맞히기', sub: '예시 표지', hue: 265 });
+  let regions = [CoverFX.placeholder.titleRegion];
+
+  const fx = CoverFX.create('#box', {
+    src: sample,
+    effect: 'shuffle',
+    regions,
+    onChange: update,
+  });
+
+  const $ = (s) => document.querySelector(s);
+  const list = $('#fxList');
+  CoverFX.effects().forEach((e, i) => {
+    const b = document.createElement('button');
+    b.textContent = (i + 1) + '. ' + e.label;
+    b.dataset.name = e.name;
+    b.onclick = () => pick(e.name);
+    list.appendChild(b);
+  });
+  function pick(name) { fx.setEffect(name); update(); }
+  function update() {
+    $('#stage').innerHTML = fx.revealed ? '공개! <small>원본 표지</small>'
+      : '힌트 ' + (fx.stage + 1) + ' / ' + fx.stages + '<small>' + fx.label + '</small>';
+    $('#desc').textContent = fx.desc;
+    list.querySelectorAll('button').forEach((b) => b.classList.toggle('on', b.dataset.name === fx.effect));
+    $('#regInfo').textContent = regions.length
+      ? regions.map((r) => `{x:${r.x.toFixed(3)}, y:${r.y.toFixed(3)}, w:${r.w.toFixed(3)}, h:${r.h.toFixed(3)}}`).join('\n')
+      : '지정된 영역 없음';
+  }
+  update();
+
+  $('#next').onclick = () => fx.next();
+  $('#prev').onclick = () => fx.prev();
+  $('#reveal').onclick = () => fx.reveal();
+  $('#reset').onclick = () => fx.reset();
+  $('#file').onchange = (e) => {
+    const f = e.target.files[0];
+    if (!f) return;
+    regions = []; fx.setRegions(regions);
+    fx.setImage(f).then(() => { fx.reset({ instant: true }); update(); });
+  };
+  $('#url').onkeydown = (e) => {
+    if (e.key !== 'Enter' || !e.target.value.trim()) return;
+    regions = []; fx.setRegions(regions);
+    fx.setImage(e.target.value.trim()).then(() => { fx.reset({ instant: true }); update(); });
+  };
+  $('#clearReg').onclick = () => { regions = []; fx.setRegions(regions); update(); };
+
+  document.addEventListener('keydown', (e) => {
+    if (e.target.tagName === 'INPUT') return;
+    if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') { e.preventDefault(); fx.next(); }
+    else if (e.key === 'ArrowLeft' || e.key === 'PageUp') fx.prev();
+    else if (e.key === 'Enter') fx.reveal();
+    else if (e.key === 'r' || e.key === 'R') fx.reset();
+    else if (/^[1-9]$/.test(e.key)) { const ef = CoverFX.effects()[+e.key - 1]; if (ef) pick(ef.name); }
+  });
+
+  // ── 제목 영역 드래그 지정 (표지 좌표 비율로 저장) ──
+  let drawing = false, start = null;
+  const sel = $('#sel');
+  $('#draw').onclick = () => {
+    drawing = !drawing;
+    document.body.classList.toggle('drawing', drawing);
+    $('#draw').textContent = drawing ? '그리기 끝내기' : '표지 위에 드래그해서 지정';
+    if (drawing) fx.reveal({ instant: true });
+  };
+  function coverRect() { // 화면상의 표지 위치
+    const r = fx.coverRect(), c = box.getBoundingClientRect();
+    return { left: c.left + r.x, top: c.top + r.y, width: r.w, height: r.h };
+  }
+  const box = $('#box');
+  box.addEventListener('pointerdown', (e) => {
+    if (!drawing || !fx.coverRect()) return;
+    start = { x: e.clientX, y: e.clientY };
+    box.setPointerCapture(e.pointerId);
+  });
+  box.addEventListener('pointermove', (e) => {
+    if (!start) return;
+    Object.assign(sel.style, {
+      display: 'block',
+      left: Math.min(start.x, e.clientX) + scrollX + 'px', top: Math.min(start.y, e.clientY) + scrollY + 'px',
+      width: Math.abs(e.clientX - start.x) + 'px', height: Math.abs(e.clientY - start.y) + 'px',
+    });
+  });
+  box.addEventListener('pointerup', (e) => {
+    if (!start) return;
+    const cr = coverRect();
+    const x0 = Math.max(0, (Math.min(start.x, e.clientX) - cr.left) / cr.width);
+    const y0 = Math.max(0, (Math.min(start.y, e.clientY) - cr.top) / cr.height);
+    const x1 = Math.min(1, (Math.max(start.x, e.clientX) - cr.left) / cr.width);
+    const y1 = Math.min(1, (Math.max(start.y, e.clientY) - cr.top) / cr.height);
+    start = null;
+    sel.style.display = 'none';
+    if (x1 - x0 > 0.02 && y1 - y0 > 0.02) {
+      regions = regions.concat([{ x: x0, y: y0, w: x1 - x0, h: y1 - y0 }]);
+      fx.setRegions(regions);
+      update();
+    }
+  });
+</script>
+</body>
+</html>
