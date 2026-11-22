@@ -779,7 +779,7 @@ const KC = {
   peach: hexRGB('#f1dcc6'), paleApricot: hexRGB('#ebc6a5'),
 };
 // 머리 → 꼬리 몸통 너비 (통통하게)
-const PROF = [0.52, 0.78, 0.92, 0.99, 1.0, 0.95, 0.85, 0.71, 0.55, 0.40, 0.27, 0.18];
+const PROF = [0.66, 0.88, 0.98, 1.0, 0.97, 0.9, 0.79, 0.65, 0.5, 0.36, 0.25, 0.17];
 
 function makePattern(kind, rnd) {
   const spots = [];
@@ -830,7 +830,7 @@ function initFish() {
   const rnd = mulberry32(5);
   const kinds = ['tancho', 'chagoi', 'tancho', 'kohaku', 'tanchoApricot', 'tancho', 'chagoiPale', 'tancho', 'chagoi'];
   const n = clamp(Math.round((W * H) / 48000), 6, 9);
-  const baseL = clamp(Math.min(W, H) * 0.2, 54, 120);
+  const baseL = clamp(Math.min(W, H) * 0.145, 42, 90);
   for (let i = 0; i < n; i++) {
     const L = baseL * (0.8 + rnd() * 0.38);
     const a = rnd() * TAU, r = Math.min(W, H) * (0.08 + rnd() * 0.25);
@@ -1067,7 +1067,7 @@ function buildFish(f) {
     const tl = Math.hypot(tx, ty) || 1; tx /= tl; ty /= tl;
     const o = amp * Math.sin(f.phase - t * 5.2) * (0.07 + Math.pow(t, 1.5) * 0.95);
     f.rx[k] = f.px[k] - ty * o; f.ry[k] = f.py[k] + tx * o;
-    f.w[k] = L * 0.168 * PROF[k];
+    f.w[k] = L * 0.19 * PROF[k];
   }
   for (let k = 0; k < SEG; k++) {
     const k0 = Math.max(0, k - 1), k1 = Math.min(SEG - 1, k + 1);
@@ -1193,13 +1193,13 @@ function drawOneFish(f) {
   ctx.stroke();
 
   // 눈
-  const er = L * 0.024;
+  const er = L * 0.036;
   for (const side of [1, -1]) {
-    at(f, 0.075, side * 0.72);
+    at(f, 0.07, side * 0.66);
     ctx.fillStyle = '#151312';
     ctx.beginPath(); ctx.arc(P.x, P.y, er, 0, TAU); ctx.fill();
     ctx.fillStyle = 'rgba(255,250,240,0.7)';
-    ctx.beginPath(); ctx.arc(P.x - er * 0.3, P.y - er * 0.3, er * 0.36, 0, TAU); ctx.fill();
+    ctx.beginPath(); ctx.arc(P.x - er * 0.28, P.y - er * 0.3, er * 0.4, 0, TAU); ctx.fill();
   }
 
   // 입 (뻐끔)
