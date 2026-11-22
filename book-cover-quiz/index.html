@@ -369,8 +369,7 @@ label.sbtn input { display:none; }
       <section>
         <h3>라운드</h3>
         <div class="rlist" id="rlist"></div>
-        <div style="margin-top:12px"><button class="sbtn" id="addRound">+ 라운드 추가</button></div>
-        <p class="note">표지는 <b>파일 업로드</b>(브라우저에 저장, 새로고침해도 유지) 또는 <b>경로</b>(예: covers/1.jpg)로 넣습니다. 둘 다 있으면 업로드가 우선입니다. 이미지가 없으면 임시 표지가 자동으로 만들어집니다.<br>
+        <p class="note">라운드는 <b>표지 4개, 앞에서부터 순서대로 고정</b>입니다(추가·삭제·순서 변경 없음). 표지는 <b>파일 업로드</b>(브라우저에 저장, 새로고침해도 유지) 또는 <b>경로</b>(예: covers/1.jpg)로 넣습니다. 둘 다 있으면 업로드가 우선입니다. 이미지가 없으면 임시 표지가 자동으로 만들어집니다.<br>
         <b>제목 영역</b>은 "제목 가리기" 효과의 가림막 위치이자, 다른 효과에서 <b>제목 보호</b>(힌트 동안 제목 글자를 모자이크로 숨김)에 쓰입니다.</p>
       </section>
       <section>
@@ -434,13 +433,23 @@ const DEFAULTS = {
   ],
 };
 const clone = (o) => JSON.parse(JSON.stringify(o));
+// 라운드는 표지 4개, 순서와 개수 고정. 저장된 값에서는 라운드별로 고칠 수 있는 항목만 가져온다.
+const ROUND_KEYS = ['answer', 'sub', 'effect', 'protect', 'img', 'regions', 'mix'];
+function normalizeCfg(data) {
+  const c = Object.assign(clone(DEFAULTS), data || {});
+  const saved = Array.isArray(data && data.rounds) ? data.rounds : [];
+  c.rounds = DEFAULTS.rounds.map((def, i) => {
+    const r = clone(def);
+    const from = saved.find((x) => x && x.id === def.id) || saved[i];
+    if (from) ROUND_KEYS.forEach((k) => { if (from[k] !== undefined) r[k] = clone(from[k]); });
+    return r;
+  });
+  return c;
+}
 function loadCfg() {
   try {
     const raw = localStorage.getItem(STORE_KEY);
-    if (raw) {
-      const c = Object.assign(clone(DEFAULTS), JSON.parse(raw));
-      if (Array.isArray(c.rounds) && c.rounds.length) return c;
-    }
+    if (raw) return normalizeCfg(JSON.parse(raw));
   } catch (e) { /* 저장소 사용 불가 */ }
   return clone(DEFAULTS);
 }
@@ -450,7 +459,6 @@ function saveCfg() {
   try { localStorage.setItem(STORE_KEY, JSON.stringify(cfg)); } catch (e) { /* noop */ }
   const s = $('#saved'); s.classList.add('on'); clearTimeout(saveT); saveT = setTimeout(() => s.classList.remove('on'), 1200);
 }
-const newId = () => 'r' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
 
 // ═════════════════════ IndexedDB (업로드 이미지) ═════════════════════
 const IDB = (() => {
@@ -1088,11 +1096,7 @@ function renderSettings() {
     <div class="rrow" data-i="${i}">
       <div class="rthumb" data-thumb></div>
       <div class="rf">
-        <div class="rtop"><b>Round ${roman(i + 1)}</b>
-          <button class="sbtn" data-act="up" ${i === 0 ? 'disabled' : ''}>↑</button>
-          <button class="sbtn" data-act="down" ${i === cfg.rounds.length - 1 ? 'disabled' : ''}>↓</button>
-          <button class="sbtn danger" data-act="del" ${cfg.rounds.length <= 1 ? 'disabled' : ''}>삭제</button>
-        </div>
+        <div class="rtop"><b>Round ${roman(i + 1)}</b><span class="note">표지 ${i + 1}</span></div>
         <div class="wide"><span class="lbl">정답</span><input type="text" data-k="answer" value="${esc(r.answer)}"></div>
         <div><span class="lbl">효과</span><select data-k="effect">${fxs.filter((f) => f.name !== 'mix').map((f) => `<option value="${f.name}" ${f.name === r.effect ? 'selected' : ''}>${esc(f.label)} · ${f.stages}단계${f.fit.length ? ' · ' + f.fit.map((p) => POS_SHORT[p]).join('/') + ' 단계 추천' : ''}</option>`).join('')}
           <option value="mix" ${r.effect === 'mix' ? 'selected' : ''}>✦ 단계별 조합 (힌트마다 다른 효과)</option></select></div>
@@ -1166,20 +1170,11 @@ $('#rlist').addEventListener('click', (e) => {
   const b = e.target.closest('[data-act]'); if (!b || b.tagName === 'INPUT') return;
   const i = +rowOf(b).dataset.i, r = cfg.rounds[i];
   const act = b.dataset.act;
-  if (act === 'up' && i > 0) { [cfg.rounds[i - 1], cfg.rounds[i]] = [cfg.rounds[i], cfg.rounds[i - 1]]; }
-  else if (act === 'down' && i < cfg.rounds.length - 1) { [cfg.rounds[i + 1], cfg.rounds[i]] = [cfg.rounds[i], cfg.rounds[i + 1]]; }
-  else if (act === 'del') { if (!confirm(`ROUND ${i + 1} (${r.answer})를 삭제할까요?`)) return; if (r.img && r.img.key) IDB.del(r.img.key).catch(() => {}); cfg.rounds.splice(i, 1); }
-  else if (act === 'unfile') { if (r.img && r.img.key) IDB.del(r.img.key).catch(() => {}); r.img = { path: (r.img && r.img.path) || '' }; }
+  if (act === 'unfile') { if (r.img && r.img.key) IDB.del(r.img.key).catch(() => {}); r.img = { path: (r.img && r.img.path) || '' }; }
   else if (act === 'regions') { openRegionEd(i); return; }
   else return;
   changed(); renderSettings();
 });
-$('#addRound').onclick = () => {
-  const n = cfg.rounds.length + 1;
-  cfg.rounds.push({ id: newId(), answer: '새 문제 ' + n, sub: '', effect: 'mosaic', protect: true, img: { path: 'covers/' + n + '.jpg' }, regions: [] });
-  changed(); renderSettings();
-  const box = $('#settings .mbox'); box.scrollTop = box.scrollHeight;
-};
 $('#resetScores').onclick = () => { S.awards = {}; S.revealPts = {}; toast('팀 점수를 초기화했습니다'); renderTeams(); };
 $('#resetAll').onclick = () => {
   if (!confirm('모든 설정을 기본값으로 되돌릴까요? (업로드한 이미지 연결도 해제됩니다)')) return;
@@ -1201,7 +1196,7 @@ $('#importFile').onchange = async (e) => {
     const data = JSON.parse(await f.text());
     const imgs = data.__images || {}; delete data.__images;
     for (const k in imgs) { const b = await (await fetch(imgs[k])).blob(); await IDB.put(k, b); }
-    cfg = Object.assign(clone(DEFAULTS), data);
+    cfg = normalizeCfg(data);
     imgCache.clear(); changed(); renderSettings(); toast('설정을 가져왔습니다');
   } catch (err) { toast('설정 파일을 읽지 못했습니다'); }
   e.target.value = '';
