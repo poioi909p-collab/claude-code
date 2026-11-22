@@ -16,6 +16,10 @@ function el<K extends keyof HTMLElementTagNameMap>(tag: K, cls?: string, html?: 
   return e;
 }
 
+interface HostDownloads {
+  save(r: { filename: string; data: Blob }): Promise<unknown>;
+}
+
 const SIG_KEY = 'bloom.signature';
 
 function storageGet(k: string): string {
@@ -160,6 +164,21 @@ export class UI {
     try {
       const blob = await exportPNG(this.app, sig);
       const name = `bloom-${stamp()}.png`;
+      // Inside a hosted viewer (e.g. a claude.ai artifact) plain download
+      // links are blocked; hand the file to the host's save prompt instead.
+      const host = (window as unknown as { claude?: { use(n: string): Promise<HostDownloads | null> } }).claude;
+      const saver = host?.use ? await host.use('downloads').catch(() => null) : null;
+      if (saver) {
+        try {
+          await saver.save({ filename: name, data: blob });
+          this.toggleSheet(false);
+          this.showToast('저장했어요');
+        } catch (e) {
+          const code = (e as { code?: string }).code;
+          this.showToast(code === 'declined' ? '저장을 취소했어요' : '저장하지 못했어요');
+        }
+        return;
+      }
       const file = new File([blob], name, { type: 'image/png' });
       const nav = navigator as Navigator & { canShare?: (d: ShareData) => boolean };
       const coarse = window.matchMedia('(pointer: coarse)').matches;
