@@ -240,6 +240,18 @@ label.sbtn input { display:none; }
 .imgrow { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
 .imgrow input { flex:1; min-width:160px; }
 .note { font-size:12px; color:var(--muted); line-height:1.7; }
+.mixbox { border:1px solid var(--line); border-radius:4px; padding:12px; background:rgba(214,178,110,.05); }
+.mhead2 { display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:10px; }
+.mhead2 select { width:auto; margin-left:6px; }
+.msteps { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+.mstep { flex:1; min-width:170px; display:flex; flex-direction:column; gap:6px; }
+.mstep .mk { font-size:12px; color:var(--muted); }
+.mstep .mk b { font-family:var(--latin); font-style:italic; color:var(--gold); font-size:15px; margin-right:4px; }
+.mrec { font-size:11.5px; }
+.mrec .ok { color:var(--gold); }
+.mrec .warn { color:var(--wine-hi); }
+.marrow { color:var(--gold); font-size:18px; }
+.fx-name.swap { animation:fadeUp .7s cubic-bezier(.2,.8,.2,1) both; }
 .note b { color:var(--text); }
 .mfoot { display:flex; gap:8px; flex-wrap:wrap; }
 .re-box { width:min(900px,95vw); }
@@ -398,6 +410,8 @@ const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&':
 
 // ═════════════════════ 기본 설정 ═════════════════════
 const STORE_KEY = 'bookCoverQuiz.config.v1';
+const DEFAULT_MIX = ['zoom', 'tiles', 'chosung'];
+const POS_SHORT = { early: '첫', mid: '중간', late: '마지막' };
 const SPINES = ['#7a2b3a', '#24493d', '#22345a', '#8c6a27', '#4a2c4c', '#5a3a24'];
 function roman(n) {
   const t = [[1000, 'M'], [900, 'CM'], [500, 'D'], [400, 'CD'], [100, 'C'], [90, 'XC'], [50, 'L'], [40, 'XL'], [10, 'X'], [9, 'IX'], [5, 'V'], [4, 'IV'], [1, 'I']];
@@ -660,7 +674,7 @@ function renderStart() {
     const w = (4.6 + ((i * 37) % 5) * 0.35) * sc, h = 17.5 + ((i * 53) % 4) * 1.1;
     return `<div class="spine" style="--c:${SPINES[i % SPINES.length]};--w:${w}vw;--h:${h}vw;animation-delay:${0.25 + i * 0.09}s">
       <span class="num">${roman(i + 1)}</span>
-      <span class="ttl">${esc((fxs[r.effect] || {}).label || r.effect)}</span>
+      <span class="ttl">${esc(effectTitle(r))}</span>
       <span class="lab">ROUND</span>
     </div>`;
   }).join('');
@@ -673,8 +687,8 @@ async function setupRound(i, opt) {
   S.ri = i;
   const r = curRound();
   if (!CoverFX.has(r.effect)) r.effect = 'mosaic';
-  fx.setOptions({ protect: r.protect !== false, regions: r.regions || [] });
-  fx.setEffect(r.effect);
+  fx.setOptions({ protect: r.protect !== false, regions: r.regions || [], text: r.answer });
+  fx.setEffect(r.effect, effectOpts(r));
   if (opt.revealed) fx.reveal({ instant: true });
   hideAnswer(true);
   renderPanel();
@@ -687,13 +701,22 @@ async function setupRound(i, opt) {
   if (cfg.rounds[i + 1]) roundImage(cfg.rounds[i + 1]);
 }
 
+function effectOpts(r) { return r.effect === 'mix' ? { steps: (r.mix && r.mix.length ? r.mix : DEFAULT_MIX) } : undefined; }
+function effectTitle(r) {
+  if (r.effect === 'mix') return '단계별 조합';
+  return (CoverFX.get(r.effect) || {}).label || r.effect;
+}
 function renderPanel() {
   const r = curRound();
   const n = cfg.rounds.length;
   $('#roundNo').textContent = 'Round ' + roman(S.ri + 1);
   $('#roundOf').textContent = 'of ' + roman(n);
-  $('#fxName').textContent = fx.label;
-  $('#fxDesc').textContent = fx.desc;
+  const nm = $('#fxName');
+  if (nm.textContent !== fx.stageLabel) {
+    nm.textContent = fx.stageLabel;
+    nm.classList.remove('swap'); void nm.offsetWidth; nm.classList.add('swap');
+  }
+  $('#fxDesc').textContent = fx.stageDesc;
   // 힌트 점
   const st = fx.stages, cur = fx.stage;
   let h = `<span class="fill" style="width:calc(${(Math.min(cur, st) / st) * 100}% - ${(Math.min(cur, st) / st) * 1.6}vw)"></span>`;
@@ -782,8 +805,10 @@ function gotoRound(i, opt) {
   const r = curRound();
   const def = CoverFX.get(r.effect) || {};
   $('#spR').textContent = roman(i + 1);
-  $('#spF').textContent = def.label || r.effect;
-  $('#spD').textContent = def.desc || '';
+  $('#spF').textContent = effectTitle(r);
+  $('#spD').textContent = r.effect === 'mix'
+    ? (r.mix && r.mix.length ? r.mix : DEFAULT_MIX).map((n) => (CoverFX.get(n) || {}).label || n).join('  →  ')
+    : def.desc || '';
   const sp = $('#splash');
   sp.classList.remove('on', 'out'); void sp.offsetWidth; sp.classList.add('on');
   sp.querySelectorAll('.eyebrow,.num,.rule,.f,.d').forEach((e) => { e.style.animation = 'none'; void e.offsetWidth; e.style.animation = ''; });
@@ -1019,6 +1044,37 @@ $$('[data-g]').forEach((el) => {
   });
 });
 
+function mixBuilder(r) {
+  const steps = r.mix && r.mix.length ? r.mix : DEFAULT_MIX.slice();
+  const n = steps.length;
+  const all = CoverFX.effects().filter((f) => f.name !== 'mix');
+  const cells = steps.map((cur, k) => {
+    const pos = CoverFX.positionOf(k, n), rec = CoverFX.recommend(k, n);
+    const opt = (f) => `<option value="${f.name}" ${f.name === cur ? 'selected' : ''}>${esc(f.label)}</option>`;
+    return `<div class="mstep">
+      <div class="mk"><b>${roman(k + 1)}</b> ${CoverFX.positions[pos]}${k === 0 ? ' · 가장 어렵게' : k === n - 1 ? ' · 가장 쉽게' : ''}</div>
+      <select data-k="mixstep" data-s="${k}">
+        <optgroup label="★ 이 단계 추천">${all.filter((f) => rec.includes(f.name)).map(opt).join('')}</optgroup>
+        <optgroup label="그 밖의 효과">${all.filter((f) => !rec.includes(f.name)).map(opt).join('')}</optgroup>
+      </select>
+      <div class="mrec">${rec.includes(cur) ? '<span class="ok">★ 추천 효과</span>' : '<span class="warn">이 단계 추천은 아님</span>'}</div>
+    </div>`;
+  }).join('<span class="marrow">→</span>');
+  return `<div class="all mixbox">
+    <div class="mhead2"><span class="lbl">단계별 조합: 힌트마다 다른 효과로 바뀝니다. 목록 맨 위 ★가 그 단계 추천입니다.</span>
+      <label class="lbl">단계 수 <select data-k="mixn">${[2, 3, 4].map((v) => `<option ${v === n ? 'selected' : ''}>${v}</option>`).join('')}</select></label></div>
+    <div class="msteps">${cells}</div>
+  </div>`;
+}
+function resizeMix(steps, n) {
+  const out = [];
+  for (let k = 0; k < n; k++) {
+    const rec = CoverFX.recommend(k, n);
+    const keep = steps[k] && rec.includes(steps[k]) ? steps[k] : null;
+    out.push(keep || rec.find((x) => !out.includes(x)) || rec[0] || 'mosaic');
+  }
+  return out;
+}
 function renderSettings() {
   $$('[data-g]').forEach((el) => {
     const k = el.dataset.g;
@@ -1038,9 +1094,13 @@ function renderSettings() {
           <button class="sbtn danger" data-act="del" ${cfg.rounds.length <= 1 ? 'disabled' : ''}>삭제</button>
         </div>
         <div class="wide"><span class="lbl">정답</span><input type="text" data-k="answer" value="${esc(r.answer)}"></div>
-        <div><span class="lbl">효과</span><select data-k="effect">${fxs.map((f) => `<option value="${f.name}" ${f.name === r.effect ? 'selected' : ''}>${esc(f.label)} (${f.stages}단계)</option>`).join('')}</select></div>
+        <div><span class="lbl">효과</span><select data-k="effect">${fxs.filter((f) => f.name !== 'mix').map((f) => `<option value="${f.name}" ${f.name === r.effect ? 'selected' : ''}>${esc(f.label)} · ${f.stages}단계${f.fit.length ? ' · ' + f.fit.map((p) => POS_SHORT[p]).join('/') + ' 단계 추천' : ''}</option>`).join('')}
+          <option value="mix" ${r.effect === 'mix' ? 'selected' : ''}>✦ 단계별 조합 (힌트마다 다른 효과)</option></select></div>
         <div class="wide"><span class="lbl">보조 문구 (저자 · 출판사 등, 정답 카드에 표시)</span><input type="text" data-k="sub" value="${esc(r.sub || '')}"></div>
-        <div><label class="chk"><input type="checkbox" data-k="protect" ${r.protect !== false ? 'checked' : ''}> 제목 보호</label></div>
+        <div>${(CoverFX.get(r.effect) || {}).protect === false
+          ? '<span class="note">이 효과는 제목을 직접 가립니다</span>'
+          : `<label class="chk"><input type="checkbox" data-k="protect" ${r.protect !== false ? 'checked' : ''}> 제목 보호</label>`}</div>
+        ${r.effect === 'mix' ? mixBuilder(r) : ''}
         <div class="all"><span class="lbl">표지 이미지 ${r.img && r.img.key ? '— <b style="color:#7ee2a8">업로드한 이미지 사용 중</b>' : ''}</span>
           <div class="imgrow">
             <input type="text" data-k="path" placeholder="경로 예: covers/${i + 1}.jpg" value="${esc((r.img && r.img.path) || '')}">
@@ -1081,7 +1141,13 @@ $('#rlist').addEventListener('input', (e) => {
 });
 $('#rlist').addEventListener('change', async (e) => {
   const t = e.target, r = rOf(t);
-  if (t.dataset.k === 'effect') { r.effect = t.value; changed(); return; }
+  if (t.dataset.k === 'effect') {
+    r.effect = t.value;
+    if (r.effect === 'mix' && !(r.mix && r.mix.length)) r.mix = DEFAULT_MIX.slice();
+    changed(); renderSettings(); return;
+  }
+  if (t.dataset.k === 'mixn') { r.mix = resizeMix(r.mix && r.mix.length ? r.mix : DEFAULT_MIX, +t.value); changed(); renderSettings(); return; }
+  if (t.dataset.k === 'mixstep') { r.mix = (r.mix && r.mix.length ? r.mix : DEFAULT_MIX).slice(); r.mix[+t.dataset.s] = t.value; changed(); renderSettings(); return; }
   if (t.dataset.k === 'protect') { r.protect = t.checked; changed(); return; }
   if (t.dataset.k === 'answer') { renderThumb(rowOf(t)); return; }
   if (t.dataset.act === 'file' && t.files[0]) {

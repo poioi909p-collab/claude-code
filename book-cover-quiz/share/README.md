@@ -27,6 +27,7 @@ const fx = CoverFX.create(container, {
   opts,           // 효과별 옵션 (선택)
   regions,        // 제목 영역 [{x,y,w,h}] (0~1 비율 좌표, 선택)
   protect: true,  // 힌트 단계 동안 regions 안의 글자를 모자이크로 숨김
+  text: '',       // 정답 문구 (초성 힌트 효과가 사용)
   duration: 1000, // 단계 전환 시간(ms)
   padding: 0.03,  // 가장자리 여백 비율
   onChange(info) {}, // {stage, stages, revealed, effect}
@@ -38,29 +39,44 @@ fx.goTo(n, { instant: true });          // 애니메이션 없이 이동
 fx.setEffect(name, opts); fx.setImage(src);   // setImage 는 Promise 반환
 fx.setRegions([...]); fx.setOptions({ protect: false });
 fx.stage; fx.stages; fx.revealed; fx.label; fx.desc;
+fx.stageLabel; fx.stageDesc;  // 지금 단계의 효과 이름 (단계별 조합이면 그 단계 효과)
 fx.coverRect();   // 컨테이너 안에서 표지가 그려진 위치 (CSS px)
 fx.destroy();
 
-CoverFX.effects();    // [{name, label, desc, stages}]
+CoverFX.effects();    // [{name, label, desc, stages, fit}]  fit: 어울리는 힌트 단계
+CoverFX.recommend(k, n);   // n단계 중 k번째(0부터) 단계에 추천하는 효과 이름들
+CoverFX.positionOf(k, n);  // 'early' | 'mid' | 'late'
 CoverFX.placeholder({ title, sub });  // 임시 표지 canvas 생성
 ```
 - 단계는 `0 ~ stages-1`이 힌트이고, `stages`가 공개(원본)입니다. 공개 상태에서는 원본 이미지를 그대로 그립니다.
 - 상태가 바뀌면 컨테이너에서 `coverfx:change` 이벤트도 발생합니다.
 
 ## 효과
-| 이름 | 표시 이름 | 단계 | 내용 | 주요 옵션 |
-|---|---|---|---|---|
-| `titlemask` | 제목 가리기 | 2 | 가림막 → 제목 모자이크 → 공개 (`regions` 필요) | `block` |
-| `shuffle` | 조각 재배치 | 3 | 섞임·회전·반전 → 회전 풀림 → 절반 제자리 → 공개 | `grid:5`, `invert:0.3` |
-| `invert` | 색상 반전 | 2 | 반전+좌우반전+무지개 → 카드 뒤집기 → 원형으로 색 복원 | `rainbow`, `mosaic` |
-| `strips` | 흔들리는 띠 | 2 | 띠 섞임+잔잔한 일렁임 → 제자리 → 공개 | `count:12`, `amp` |
-| `mosaic` | 모자이크 | 3 | 블록이 점점 작아짐 | `blocks:[10,20,40]` |
-| `spotlight` | 손전등 | 3 | 어둠 속 움직이는 빛이 점점 커짐 | `radius`, `count` |
-| `zoom` | 초근접 줌 | 3 | 아주 가까이에서 점점 멀어짐 | `zoom:[6,3,1.7]`, `focus:{x,y}` |
-| `tiles` | 타일 뒤집기 | 3 | 번호판이 뒤집히며 드러남, 제목 칸은 마지막 | `cols:5`, `open:[0.22,0.42,0.65]` |
-| `scratch` | 복권 긁기 | 3 | 은박을 동전으로 긁어낸 자리가 보임 | `strokes:[3,4,5]`, `width` |
-| `blinds` | 블라인드 | 3 | 블라인드 틈새가 점점 넓어짐 | `count:10`, `open` |
-| `fog` | 뿌연 안개 | 3 | 흐리고 색 빠진 표지가 점점 선명해짐 | `blur`, `sat`, `haze` |
+"추천 단계"는 그 효과가 잘 어울리는 힌트 위치입니다. 첫 단계는 가장 어렵게, 마지막 단계는 서점에서 본 적 있으면 알아볼 정도로 쉽게 잡습니다.
+
+| 이름 | 표시 이름 | 단계 | 추천 단계 | 내용 | 주요 옵션 |
+|---|---|---|---|---|---|
+| `titlemask` | 제목 가리기 | 2 | 마지막 | 가림막 → 제목 모자이크 → 공개 (`regions` 필요) | `block` |
+| `shuffle` | 조각 재배치 | 3 | 첫 · 중간 | 섞임·회전·반전 → 회전 풀림 → 절반 제자리 → 공개 | `grid:5`, `invert:0.3` |
+| `invert` | 색상 반전 | 2 | 첫 | 제목 쪽 절반 가림 + 색·좌우 반전 + 무지개 → 카드 뒤집기 → 가림막 치우며 공개 | `cover:'auto'\|'top'\|'bottom'` |
+| `strips` | 흔들리는 띠 | 2 | 중간 | 띠 섞임+잔잔한 일렁임 → 제자리 → 공개 | `count:12`, `amp` |
+| `mosaic` | 모자이크 | 3 | 중간 · 마지막 | 블록이 점점 작아짐 | `blocks:[10,20,40]` |
+| `spotlight` | 손전등 | 3 | 첫 · 중간 | 어둠 속 움직이는 빛이 점점 커짐 | `radius`, `count` |
+| `zoom` | 초근접 줌 | 3 | 첫 | 아주 가까이에서 점점 멀어짐 | `zoom:[6,3,1.7]`, `focus:{x,y}` |
+| `tiles` | 타일 뒤집기 | 3 | 중간 | 번호판이 뒤집히며 드러남, 제목 칸은 마지막 | `cols:5`, `open` |
+| `scratch` | 복권 긁기 | 3 | 첫 · 중간 | 은박을 동전으로 긁어낸 자리가 보임 | `strokes:[3,4,5]`, `width` |
+| `blinds` | 블라인드 | 3 | 중간 · 마지막 | 블라인드 틈새가 점점 넓어짐 | `count:10`, `open` |
+| `fog` | 뿌연 안개 | 3 | 마지막 | 흐리고 색 바랜 표지가 점점 선명해짐 | `blur`, `sat`, `haze` |
+| `palette` | 색감 팔레트 | 2 | 첫 | 표지 색만 물감 칩으로 보여줌 | `grids:[[3,4],[5,7]]` |
+| `silhouette` | 흑백 실루엣 | 2 | 중간 | 색을 지우고 형태만 | `contrast:[8,2.2]` |
+| `chosung` | 초성 힌트 | 2 | 마지막 | 정답 초성 카드 → 첫 글자 공개 (`text` 필요) | `text` |
+| `mix` | 단계별 조합 | 단계 수만큼 | - | 힌트마다 다른 효과, 책장 넘기듯 전환 | `steps:['zoom','tiles','chosung']` |
+
+```js
+// 단계별 조합: 첫 힌트는 초근접 줌, 다음은 타일, 마지막은 초성
+fx.setOptions({ text: '지구 끝의 온실' });
+fx.setEffect('mix', { steps: ['zoom', 'tiles', 'chosung'] });
+```
 
 ## 효과 추가하기
 ```js

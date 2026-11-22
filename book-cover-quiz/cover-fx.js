@@ -310,8 +310,16 @@
   function effects() {
     return ORDER.map((n) => {
       const d = EFFECTS[n];
-      return { name: n, label: d.label || n, desc: d.desc || '', stages: stagesOf(d, Object.assign({}, d.defaults)) };
+      return { name: n, label: d.label || n, desc: d.desc || '', stages: stagesOf(d, Object.assign({}, d.defaults)), fit: (d.fit || []).slice() };
     });
+  }
+  // 힌트 단계 위치: 첫 단계(가장 어려움) · 중간 · 마지막(가장 쉬움)
+  const POSITIONS = { early: '첫 단계', mid: '중간 단계', late: '마지막 단계' };
+  function positionOf(k, n) { return n <= 1 ? 'late' : k <= 0 ? 'early' : k >= n - 1 ? 'late' : 'mid'; }
+  /** k번째(0부터) 힌트 단계에 어울리는 효과 이름들 (전체 n단계 기준) */
+  function recommend(k, n) {
+    const pos = positionOf(k, n);
+    return ORDER.filter((nm) => nm !== 'mix' && (EFFECTS[nm].fit || []).indexOf(pos) >= 0);
   }
 
   // ───────────────────────── 엔진 ─────────────────────────
@@ -352,6 +360,13 @@
     get effect() { return this.name; }
     get label() { return this.def.label || this.name; }
     get desc() { return this.def.desc || ''; }
+    /** 지금 단계의 효과 이름/설명 (단계별 조합이면 그 단계의 효과) */
+    get stageLabel() { return this._stageInfo().label; }
+    get stageDesc() { return this._stageInfo().desc; }
+    _stageInfo() {
+      const f = this.def.stageInfo;
+      return f ? f(this.opts, Math.min(this.target, this._stages - 1)) : { label: this.label, desc: this.desc };
+    }
 
     // ── 단계 이동 ──
     goTo(n, opt) {
@@ -559,6 +574,7 @@
         time: ((now || performance.now()) - this.t0) / 1000,
         state: this.state, opts: this.opts, regions: this._regionsPx(),
         bounds: { x: -r.x, y: -r.y, w: W, h: H }, dpr: this.dpr, p: p == null ? 1 : p, H: Helpers,
+        text: this.o.text || '',
       };
       ctx.save();
       ctx.translate(r.x, r.y);
@@ -629,6 +645,7 @@
   register('titlemask', {
     label: '제목 가리기',
     desc: '제목은 가림막 뒤에 숨었어요. 그림만 보고 맞혀 보세요!',
+    fit: ['late'],
     stages: 2,
     protect: false, // 자체적으로 제목 영역을 다룬다
     defaults: { block: 0.035, defaultRegion: { x: 0.06, y: 0.05, w: 0.88, h: 0.24 } },
@@ -688,6 +705,7 @@
   register('shuffle', {
     label: '조각 재배치',
     desc: '표지가 조각조각 흩어졌어요. 조각들이 제자리를 찾아갑니다!',
+    fit: ['early', 'mid'],
     stages: 3,
     defaults: { grid: 5, invert: 0.3, rotate: true },
     init({ opts, rand }) {
@@ -766,26 +784,34 @@
     },
   });
 
-  // 3) 색상 반전 ── ① 반전+좌우반전+무지개+약한 모자이크 ② 카드 뒤집기로 방향 복귀 → 공개(원형으로 색 복원)
+  // 3) 색상 반전 ── ① 반전+좌우반전+무지개, 제목 쪽 절반 가림 ② 카드 뒤집기로 방향 복귀(반전·가림 유지) → 공개(가림막 치우며 원형으로 색 복원)
+  function halfSide(s) {
+    const o = s.opts.cover;
+    if (o === 'top' || o === 'bottom') return o;
+    if (!s.regions.length) return 'top';
+    let best = s.regions[0];
+    for (const g of s.regions) if (g.w * g.h > best.w * best.h) best = g;
+    return best.y + best.h / 2 < s.h / 2 ? 'top' : 'bottom';
+  }
   register('invert', {
     label: '색상 반전',
-    desc: '색도 방향도 뒤집혔어요. 무지개빛 너머의 진짜 표지는?',
+    desc: '색과 방향이 뒤집히고 절반은 가려졌어요. 보이는 절반으로 맞혀 보세요!',
     stages: 2,
-    defaults: { mosaic: 0.014, rainbow: 0.38, speed: 0.12 },
+    protect: false, // 제목이 있는 절반을 가림막으로 덮는다
+    fit: ['early'],
+    defaults: { rainbow: 0.38, speed: 0.12, cover: 'auto' },
     animated: (t) => t < 1,
     render(ctx, s) {
-      const { w, h, t, src } = s;
+      const { w, h, t } = s;
+      const src = s.clear;
       const a = seg(t, 0, 1), b = seg(t, 1, 2);
       const sx = -Math.cos(Math.PI * a);
       const lift = 1 + 0.12 * Math.sin(Math.PI * a);
       const R = (Math.hypot(w, h) / 2) * b * 1.02;
+      const card = (flip) => { ctx.translate(w / 2, h / 2); ctx.scale((flip ? sx : Math.abs(sx)) * lift, lift); ctx.translate(-w / 2, -h / 2); };
       ctx.save();
-      ctx.translate(w / 2, h / 2);
-      ctx.scale(sx * lift, lift);
-      ctx.translate(-w / 2, -h / 2);
-      const blk = w * s.opts.mosaic * (1 - a);
-      if (blk > 1.5) pixelate(ctx, src, 0, 0, w, h, 0, 0, w, h, blk);
-      else ctx.drawImage(src, 0, 0);
+      card(true);
+      ctx.drawImage(src, 0, 0);
       if (b < 1) {
         ctx.save();
         if (b > 0) {
@@ -798,12 +824,38 @@
         ctx.restore();
       }
       rainbow(ctx, 0, 0, w, h, s.time * s.opts.speed, s.opts.rainbow * (1 - a));
+      ctx.restore();
+      // 절반 가림막 (글자가 뒤집혀 보이지 않게 카드 크기만 따라감)
+      const side = halfSide(s), ph = Math.ceil(h / 2);
+      if (b < 1) {
+        if (!s.state.panel || s.state.panel.width !== w || s.state.panel.height !== ph) s.state.panel = makePanel(w, ph);
+        const off = Ease.in(b) * ph * 1.15 * (side === 'top' ? -1 : 1);
+        ctx.save();
+        ctx.globalAlpha = 1 - seg(b, 0.55, 1);
+        card(false);
+        if (b > 0) { ctx.shadowColor = 'rgba(0,0,0,0.5)'; ctx.shadowBlur = w * 0.05 * b; }
+        ctx.drawImage(s.state.panel, 0, (side === 'top' ? 0 : h - ph) + off);
+        // 가림막 밖에 있는 제목·저자 영역은 작은 천 조각으로 덮는다
+        if (!s.state.patches) s.state.patches = {};
+        const pad = Math.round(w * 0.01);
+        for (const g of s.regions) {
+          const inHalf = side === 'top' ? g.y + g.h <= ph : g.y >= h - ph;
+          if (inHalf) continue;
+          const pw = g.w + pad * 2, pp = g.h + pad * 2, key = pw + 'x' + pp;
+          const pc = s.state.patches[key] || (s.state.patches[key] = makePanel(pw, pp));
+          const px = sx < 0 ? w - g.x - g.w - pad : g.x - pad;
+          ctx.drawImage(pc, px, g.y - pad - off * 0.4);
+        }
+        ctx.restore();
+      }
       const shade = 1 - Math.abs(sx);
       if (shade > 0.01) {
+        ctx.save();
+        card(false);
         ctx.fillStyle = 'rgba(0,0,0,' + (0.55 * shade).toFixed(3) + ')';
         ctx.fillRect(0, 0, w, h);
+        ctx.restore();
       }
-      ctx.restore();
       if (b > 0 && b < 1) ring(ctx, w / 2, h / 2, R, b, w, h);
     },
   });
@@ -812,6 +864,7 @@
   register('strips', {
     label: '흔들리는 띠',
     desc: '표지가 세로 띠로 잘려 뒤섞이고 잔잔하게 일렁여요.',
+    fit: ['mid'],
     stages: 2,
     defaults: { count: 12, amp: 0.04, amp1: 0.012, speed: 0.22 },
     animated: (t, o, S) => t < S,
@@ -862,6 +915,7 @@
   register('mosaic', {
     label: '모자이크',
     desc: '커다란 픽셀 속에 숨은 표지. 점점 선명해집니다.',
+    fit: ['mid', 'late'],
     stages: (o) => (o.blocks || []).length || 3,
     defaults: { blocks: [10, 20, 40] },
     render(ctx, s) {
@@ -898,6 +952,7 @@
   register('spotlight', {
     label: '손전등',
     desc: '어둠 속을 헤매는 손전등. 빛이 비추는 곳을 잘 보세요!',
+    fit: ['early', 'mid'],
     stages: (o) => (o.radius || []).length || 3,
     defaults: { radius: [0.13, 0.2, 0.3], dim: 0.96, speed: 0.11, count: 1 },
     animated: (t, o, S) => t < S,
@@ -957,6 +1012,7 @@
   register('zoom', {
     label: '초근접 줌',
     desc: '표지의 아주 작은 부분부터! 점점 멀어지며 전체가 드러나요.',
+    fit: ['early'],
     stages: (o) => (o.zoom || []).length || 3,
     defaults: { zoom: [6, 3, 1.7], focus: null, rotate: 20, drift: 0.06 },
     animated: (t, o, S) => t < S,
@@ -1027,6 +1083,7 @@
   register('tiles', {
     label: '타일 뒤집기',
     desc: '번호판이 하나씩 뒤집히며 표지가 드러나요. 제목 칸은 맨 마지막에!',
+    fit: ['mid'],
     stages: (o) => (o.open || []).length || 3,
     defaults: { cols: 5, open: [0.22, 0.42, 0.65] },
     init({ rand }) { return { seed: (rand() * 1e9) | 0 }; },
@@ -1103,6 +1160,7 @@
   register('scratch', {
     label: '복권 긁기',
     desc: '은박을 긁어낼수록 표지가 보여요. 어디를 긁을지는 운!',
+    fit: ['early', 'mid'],
     stages: (o) => (o.strokes || []).length || 3,
     defaults: { strokes: [3, 4, 5], width: 0.075 },
     init({ opts, rand }) {
@@ -1190,6 +1248,7 @@
   register('blinds', {
     label: '블라인드',
     desc: '블라인드 틈새로 엿보기. 단계마다 조금씩 더 열려요.',
+    fit: ['mid', 'late'],
     stages: (o) => (o.open || []).length || 3,
     defaults: { count: 10, open: [0.14, 0.3, 0.52] },
     render(ctx, s) {
@@ -1230,6 +1289,7 @@
   register('fog', {
     label: '뿌연 안개',
     desc: '뿌연 안개 속의 표지. 안개가 걷히며 색과 모양이 살아나요.',
+    fit: ['late'],
     stages: (o) => (o.blur || []).length || 3,
     defaults: { blur: [0.04, 0.018, 0.007], sat: [0.4, 0.7, 0.95], haze: [0.22, 0.12, 0.05] },
     animated: (t, o, S) => t < S,
@@ -1285,12 +1345,265 @@
     },
   });
 
+  // 12) 색감 팔레트 (첫 단계용) ── 표지 색만 물감 칩처럼
+  register('palette', {
+    label: '색감 팔레트',
+    desc: '표지의 색만 물감 칩처럼 모았어요. 색감과 분위기로 맞혀 보세요!',
+    fit: ['early'],
+    stages: (o) => (o.grids || []).length || 2,
+    defaults: { grids: [[3, 4], [5, 7]] },
+    render(ctx, s) {
+      const { w, h, t, src, state: st } = s;
+      const S = s.stages, grids = s.opts.grids;
+      const i = Math.min(Math.floor(t), S - 1), u = t - i;
+      const fin = i === S - 1;
+      const key = w + 'x' + h;
+      if (st.key !== key) { st.key = key; st.smalls = {}; }
+      const chips = (gi, scaleOf) => {
+        const [cols, rows] = grids[gi];
+        const id = cols + 'x' + rows;
+        if (!st.smalls[id]) {
+          const tmp = shrink(src, 0, 0, w, h, cols, rows);
+          const c = makeCanvas(cols, rows);
+          c.getContext('2d').drawImage(tmp, 0, 0, cols, rows, 0, 0, cols, rows);
+          st.smalls[id] = c;
+        }
+        const sm = st.smalls[id];
+        const cw = w / cols, ch = h / rows, pad = Math.min(cw, ch) * 0.1;
+        const labelH = ch > 90 * s.dpr ? (ch - pad * 2) * 0.2 : 0;
+        for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) {
+          const k = scaleOf(r * cols + c, cols * rows);
+          if (k <= 0.01) continue;
+          const x = c * cw + pad, y = r * ch + pad, ww = cw - pad * 2, hh = ch - pad * 2;
+          ctx.save();
+          ctx.translate(x + ww / 2, y + hh / 2);
+          ctx.scale(k, k);
+          ctx.translate(-ww / 2, -hh / 2);
+          ctx.shadowColor = 'rgba(40,30,20,0.25)'; ctx.shadowBlur = pad * 0.8; ctx.shadowOffsetY = pad * 0.25;
+          ctx.fillStyle = '#fffaf0';
+          roundRect(ctx, 0, 0, ww, hh, pad * 0.4); ctx.fill();
+          ctx.shadowColor = 'transparent';
+          ctx.save();
+          roundRect(ctx, 0, 0, ww, hh - labelH, pad * 0.4); ctx.clip();
+          ctx.imageSmoothingEnabled = false;
+          ctx.drawImage(sm, c, r, 1, 1, 0, 0, ww, hh - labelH);
+          ctx.restore();
+          if (labelH) {
+            ctx.fillStyle = '#6b5a45';
+            ctx.font = 'italic 600 ' + labelH * 0.5 + 'px ' + LATIN;
+            ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+            ctx.fillText('No. ' + (r * cols + c + 1), labelH * 0.4, hh - labelH / 2);
+          }
+          ctx.restore();
+        }
+      };
+      if (fin && u > 0) ctx.drawImage(src, 0, 0);
+      ctx.save();
+      ctx.globalAlpha = fin ? 1 - Ease.in(u) : 1;
+      ctx.fillStyle = '#ece2cf';
+      ctx.fillRect(0, 0, w, h);
+      ctx.restore();
+      if (fin) chips(i, (n, N) => 1 - Ease.in(stagger(u, n / N, 0.6)));
+      else {
+        chips(i, (n, N) => 1 - Ease.in(stagger(u, n / N, 0.5)));
+        chips(i + 1, (n, N) => Ease.outBack(stagger(u, n / N, 0.5)));
+      }
+    },
+  });
+
+  // 13) 흑백 실루엣 (중간 단계용) ── 색을 지우고 형태만
+  register('silhouette', {
+    label: '흑백 실루엣',
+    desc: '색은 지우고 형태만 남겼어요. 실루엣으로 맞혀 보세요!',
+    fit: ['mid'],
+    stages: (o) => (o.contrast || []).length || 2,
+    defaults: { contrast: [8, 2.2], dark: '#0d1520', light: '#f3ead9' },
+    render(ctx, s) {
+      const { w, h, t, src, state: st } = s;
+      const S = s.stages, C = s.opts.contrast;
+      const i = Math.min(Math.floor(t), S - 1), u = t - i;
+      const c = i + 1 >= S ? C[i] : lerp(C[i], C[i + 1], u);
+      const b = seg(t, S - 1, S);
+      if (!st.l || st.l.width !== w || st.l.height !== h) st.l = makeCanvas(w, h);
+      const g = st.l.getContext('2d');
+      g.globalCompositeOperation = 'source-over';
+      g.clearRect(0, 0, w, h);
+      if (FILTER_OK) { g.filter = 'grayscale(1) contrast(' + c.toFixed(2) + ')'; g.drawImage(src, 0, 0); g.filter = 'none'; }
+      else {
+        g.drawImage(src, 0, 0);
+        g.globalCompositeOperation = 'saturation'; g.fillStyle = '#808080'; g.fillRect(0, 0, w, h);
+      }
+      g.globalCompositeOperation = 'lighten'; g.fillStyle = s.opts.dark; g.fillRect(0, 0, w, h);
+      g.globalCompositeOperation = 'darken'; g.fillStyle = s.opts.light; g.fillRect(0, 0, w, h);
+      g.globalCompositeOperation = 'source-over';
+      const R = (Math.hypot(w, h) / 2) * b * 1.02;
+      if (b > 0) ctx.drawImage(src, 0, 0);
+      ctx.save();
+      if (b > 0) { ctx.beginPath(); ctx.rect(0, 0, w, h); ctx.arc(w / 2, h / 2, R, 0, Math.PI * 2, true); ctx.clip('evenodd'); }
+      ctx.drawImage(st.l, 0, 0);
+      ctx.restore();
+      if (b > 0 && b < 1) ring(ctx, w / 2, h / 2, R, b, w, h);
+    },
+  });
+
+  // 14) 초성 힌트 (마지막 단계용) ── 정답의 초성을 장서표 카드로 보여줌
+  const CHO = 'ㄱㄲㄴㄷㄸㄹㅁㅂㅃㅅㅆㅇㅈㅉㅊㅋㅌㅍㅎ';
+  function initials(str, keep) {
+    let out = '', n = 0;
+    for (const ch of String(str)) {
+      const c = ch.charCodeAt(0);
+      if (c >= 0xac00 && c <= 0xd7a3) { out += n < keep ? ch : CHO[Math.floor((c - 0xac00) / 588)]; n++; }
+      else out += ch;
+    }
+    return out;
+  }
+  register('chosung', {
+    label: '초성 힌트',
+    desc: '정답의 초성이 공개됩니다. 마지막 결정적 힌트!',
+    fit: ['late'],
+    stages: 2,
+    defaults: { text: '', blur: 0.008 },
+    render(ctx, s) {
+      const { w, h, t, src } = s;
+      const text = s.opts.text || s.text || '정답을 입력하세요';
+      const a = seg(t, 0, 1), fin = seg(t, 1, 2);
+      const r = s.opts.blur * w * (1 - a);
+      if (FILTER_OK && r > 0.3) {
+        ctx.save(); ctx.beginPath(); ctx.rect(0, 0, w, h); ctx.clip();
+        ctx.filter = 'blur(' + r.toFixed(2) + 'px)';
+        ctx.drawImage(src, -r * 2, -r * 2, w + r * 4, h + r * 4);
+        ctx.filter = 'none'; ctx.restore();
+      } else ctx.drawImage(src, 0, 0);
+      if (fin >= 1) return;
+      const k = seg(a, 0.25, 0.75);
+      const lines = [initials(text, 0), initials(text, 1)];
+      let fs = w * 0.1;
+      ctx.font = '700 ' + fs + 'px ' + SERIF;
+      const tw = Math.max(ctx.measureText(lines[0]).width, ctx.measureText(lines[1]).width);
+      if (tw > w * 0.74) { fs *= (w * 0.74) / tw; ctx.font = '700 ' + fs + 'px ' + SERIF; }
+      const cw = Math.min(w * 0.9, Math.max(tw * (fs / (w * 0.1)), w * 0.4) + fs * 1.6), chh = fs * 2.6;
+      const cx = w / 2, cy = h * 0.56 - fin * h * 0.08;
+      ctx.save();
+      ctx.globalAlpha = 1 - fin;
+      ctx.translate(cx, cy);
+      ctx.shadowColor = 'rgba(0,0,0,0.45)'; ctx.shadowBlur = fs * 0.6; ctx.shadowOffsetY = fs * 0.15;
+      ctx.fillStyle = '#f3ead9';
+      ctx.fillRect(-cw / 2, -chh / 2, cw, chh);
+      ctx.shadowColor = 'transparent';
+      ctx.strokeStyle = '#9b7a3e'; ctx.lineWidth = Math.max(1, fs * 0.03);
+      ctx.strokeRect(-cw / 2 + fs * 0.18, -chh / 2 + fs * 0.18, cw - fs * 0.36, chh - fs * 0.36);
+      ctx.strokeRect(-cw / 2 + fs * 0.28, -chh / 2 + fs * 0.28, cw - fs * 0.56, chh - fs * 0.56);
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillStyle = '#9b7a3e';
+      ctx.font = 'italic 600 ' + fs * 0.3 + 'px ' + LATIN;
+      ctx.fillText('I N I T I A L S  ·  초성', 0, -chh * 0.27);
+      ctx.font = '700 ' + fs + 'px ' + SERIF;
+      ctx.fillStyle = '#2a2118';
+      ctx.globalAlpha = (1 - fin) * (1 - k);
+      ctx.fillText(lines[0], 0, chh * 0.1);
+      ctx.globalAlpha = (1 - fin) * k;
+      ctx.fillText(lines[1], 0, chh * 0.1);
+      ctx.restore();
+    },
+  });
+
+  // 15) 단계별 조합 ── 힌트 단계마다 다른 효과, 책장 넘기듯 전환
+  function mixPlan(opts) {
+    const steps = (opts.steps || []).filter((n) => EFFECTS[n] && n !== 'mix');
+    if (!steps.length) steps.push('mosaic');
+    const N = steps.length;
+    return steps.map((name, k) => {
+      const def = EFFECTS[name];
+      const o = Object.assign({}, def.defaults, (opts.stepOpts || [])[k] || {});
+      const S = stagesOf(def, o);
+      const level = N === 1 ? 1 : k / (N - 1);
+      return { name, def, opts: o, S, at: Math.round(level * (S - 1)) };
+    });
+  }
+  function mixSubT(plan, i, u, N) { return i === N - 1 ? lerp(plan[i].at, plan[i].S, u) : plan[i].at; }
+  function subAnimated(st, tt) {
+    const a = st.def.animated;
+    if (!a) return false;
+    return typeof a === 'function' ? !!a(tt, st.opts, st.S) : tt < st.S;
+  }
+  register('mix', {
+    label: '단계별 조합',
+    desc: '힌트 단계마다 다른 효과로 바뀌어요.',
+    fit: [],
+    stages: (o) => mixPlan(o).length,
+    defaults: { steps: ['zoom', 'tiles', 'chosung'] },
+    stageInfo(opts, stage) {
+      const plan = mixPlan(opts);
+      const st = plan[Math.min(stage, plan.length - 1)];
+      return { label: st.def.label || st.name, desc: st.def.desc || '' };
+    },
+    animated(t, o, N) {
+      const plan = mixPlan(o);
+      const i = Math.min(Math.floor(t), N - 1), u = t - i;
+      if (subAnimated(plan[i], mixSubT(plan, i, u, N))) return true;
+      return u > 0 && i + 1 < N && subAnimated(plan[i + 1], plan[i + 1].at);
+    },
+    init({ opts, rand }) {
+      const plan = mixPlan(opts);
+      const subs = [];
+      plan.forEach((st, k) => {
+        if (k > 0 && plan[k - 1].name === st.name) { subs.push(subs[k - 1]); return; }
+        subs.push(st.def.init ? st.def.init({ opts: st.opts, rand: rng((rand() * 1e9) | 0), stages: st.S }) || {} : {});
+      });
+      return { plan, subs, layers: [null, null] };
+    },
+    render(ctx, s) {
+      const st = s.state, plan = st.plan, N = plan.length, t = s.t;
+      const i = Math.min(Math.floor(t), N - 1), u = t - i;
+      const sub = (k, tt, c) => plan[k].def.render(c, Object.assign({}, s, { ctx: c, t: tt, stages: plan[k].S, state: st.subs[k], opts: plan[k].opts }));
+      if (i === N - 1 || u <= 0) { sub(i, mixSubT(plan, i, u, N), ctx); return; }
+      const A = plan[i], B = plan[i + 1];
+      if (A.name === B.name) { sub(i, lerp(A.at, B.at, u), ctx); return; }
+      // 서로 다른 효과: 책장을 넘기듯 오른쪽에서 왼쪽으로 새 효과가 드러남
+      const b = s.bounds;
+      const L = [0, 1].map((n) => {
+        let c = st.layers[n];
+        if (!c || c.width !== b.w || c.height !== b.h) c = st.layers[n] = makeCanvas(b.w, b.h);
+        const g = c.getContext('2d');
+        g.setTransform(1, 0, 0, 1, 0, 0);
+        g.globalAlpha = 1; g.globalCompositeOperation = 'source-over'; g.filter = 'none';
+        g.clearRect(0, 0, b.w, b.h);
+        g.setTransform(1, 0, 0, 1, -b.x, -b.y);
+        g.save();
+        sub(i + n, plan[i + n].at, g);
+        g.restore();
+        g.setTransform(1, 0, 0, 1, 0, 0);
+        return c;
+      });
+      const edge = lerp(1.08, -0.08, u) * s.w;
+      ctx.drawImage(L[0], b.x, b.y);
+      ctx.save();
+      ctx.beginPath(); ctx.rect(edge, b.y, b.x + b.w - edge, b.h); ctx.clip();
+      ctx.drawImage(L[1], b.x, b.y);
+      ctx.restore();
+      const bw = s.w * 0.14;
+      ctx.save();
+      ctx.beginPath(); ctx.rect(0, 0, s.w, s.h); ctx.clip();
+      const g = ctx.createLinearGradient(edge - bw, 0, edge + bw * 0.4, 0);
+      g.addColorStop(0, 'rgba(0,0,0,0)');
+      g.addColorStop(0.72, 'rgba(0,0,0,0.38)');
+      g.addColorStop(0.86, 'rgba(255,246,225,0.55)');
+      g.addColorStop(1, 'rgba(255,246,225,0)');
+      ctx.fillStyle = g;
+      ctx.fillRect(edge - bw, 0, bw * 1.4, s.h);
+      ctx.restore();
+    },
+  });
+
   // ───────────────────────── 공개 API ─────────────────────────
   const CoverFX = {
-    version: '1.0.0',
+    version: '1.1.0',
     create: (container, opts) => new Engine(container, opts),
     register,
     effects,
+    recommend,
+    positionOf,
+    positions: POSITIONS,
     get: (name) => EFFECTS[name] || null,
     has: (name) => !!EFFECTS[name],
     placeholder,
