@@ -31,8 +31,32 @@ try {
   (window as unknown as { bloom: App }).bloom = app;
 } catch (err) {
   console.error(err);
+  showFallback(err);
+}
+
+// When the browser drops the GPU context (e.g. after backgrounding a phone),
+// start over cleanly instead of leaving a blank sheet.
+canvas.addEventListener('webglcontextlost', (e) => e.preventDefault());
+canvas.addEventListener('webglcontextrestored', () => location.reload());
+
+function showFallback(err: unknown): void {
   const d = document.createElement('div');
   d.className = 'fallback';
-  d.innerHTML = '이 브라우저에서는 수채 물감이 번지지 않아요.<br/>WebGL2를 지원하는 브라우저에서 열어 주세요.';
+  const msg = document.createElement('p');
+  msg.innerHTML = '이 브라우저에서는 수채 물감이 번지지 않아요.<br/>Safari나 Chrome에서 직접 열어 보세요.';
+  const detail = document.createElement('p');
+  detail.className = 'detail';
+  let renderer = '';
+  try {
+    const g = document.createElement('canvas').getContext('webgl');
+    const ext = g?.getExtension('WEBGL_debug_renderer_info');
+    renderer = g ? String(g.getParameter(ext ? ext.UNMASKED_RENDERER_WEBGL : g.RENDERER)) : 'no webgl';
+  } catch {
+    renderer = '?';
+  }
+  detail.textContent = `${err instanceof Error ? err.message : String(err)} · ${renderer} · ${navigator.userAgent}`;
+  const wrap = document.createElement('div');
+  wrap.append(msg, detail);
+  d.appendChild(wrap);
   document.body.appendChild(d);
 }

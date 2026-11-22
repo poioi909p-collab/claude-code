@@ -280,6 +280,17 @@ canvas#c {
   transform: translate(-50%, 0);
 }
 
+.fallback .detail {
+  margin-top: 18px;
+  font-family: ui-monospace, Menlo, monospace;
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--ink-soft);
+  word-break: break-all;
+  max-width: 34em;
+  -webkit-user-select: text;
+  user-select: text;
+}
 .fallback {
   position: fixed;
   inset: 0;

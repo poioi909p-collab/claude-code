@@ -111,25 +111,23 @@ export class Watercolor {
   washDuration = 3.2;
 
   constructor(readonly canvas: HTMLCanvasElement) {
-    const gl = canvas.getContext('webgl2', {
-      antialias: false,
-      alpha: false,
-      depth: false,
-      stencil: false,
-      premultipliedAlpha: false,
-      preserveDrawingBuffer: false,
-      powerPreference: 'high-performance',
-    });
-    if (!gl) throw new Error('WebGL2 is not available');
+    // Some browsers refuse particular context options; retry with fewer.
+    const attempts: WebGLContextAttributes[] = [
+      { antialias: false, alpha: false, depth: false, stencil: false, premultipliedAlpha: false, powerPreference: 'high-performance' },
+      { antialias: false, alpha: false, depth: false, stencil: false },
+      {},
+    ];
+    let gl: WebGL2RenderingContext | null = null;
+    for (const opts of attempts) {
+      gl = canvas.getContext('webgl2', opts) as WebGL2RenderingContext | null;
+      if (gl) break;
+    }
+    if (!gl) {
+      const hasGL1 = !!document.createElement('canvas').getContext('webgl');
+      throw new EngineError('NO_WEBGL2', hasGL1 ? 'WebGL2 없음 (WebGL1만 지원)' : 'WebGL 없음');
+    }
     this.gl = gl;
-
-    const hasFloat = !!gl.getExtension('EXT_color_buffer_float');
-    const hasHalf = !!gl.getExtension('EXT_color_buffer_half_float');
-    gl.getExtension('OES_texture_float_linear');
-    this.fmtState =
-      hasFloat || hasHalf
-        ? { internal: gl.RGBA16F, format: gl.RGBA, type: gl.HALF_FLOAT }
-        : { internal: gl.RGBA8, format: gl.RGBA, type: gl.UNSIGNED_BYTE };
+    this.fmtState = pickStateFormat(gl);
 
     this.pSim = createProgram(gl, FULLSCREEN_VS, SIM_FS);
     this.pStamp = createProgram(gl, STAMP_VS, STAMP_FS);
@@ -490,6 +488,56 @@ export class Watercolor {
     for (let y = 0; y < h; y++) flipped.set(buf.subarray((h - 1 - y) * row, (h - y) * row), y * row);
     this.dirty = true;
     return { w, h, data: flipped };
+  }
+}
+
+export class EngineError extends Error {
+  constructor(
+    readonly code: string,
+    detail: string,
+  ) {
+    super(`${code}: ${detail}`);
+  }
+}
+
+/**
+ * The simulation needs three renderable, blendable float textures (MRT).
+ * Probe candidates for real instead of trusting extension strings.
+ */
+function pickStateFormat(gl: WebGL2RenderingContext): TexFormat {
+  const f32 = !!gl.getExtension('EXT_color_buffer_float');
+  const f16 = !!gl.getExtension('EXT_color_buffer_half_float');
+  const blend32 = !!gl.getExtension('EXT_float_blend');
+  const lin32 = !!gl.getExtension('OES_texture_float_linear');
+  const candidates: TexFormat[] = [];
+  if (f32 || f16) candidates.push({ internal: gl.RGBA16F, format: gl.RGBA, type: gl.HALF_FLOAT });
+  if (f32 && blend32 && lin32) candidates.push({ internal: gl.RGBA32F, format: gl.RGBA, type: gl.FLOAT });
+  // Some drivers render half floats without advertising an extension.
+  if (!f32 && !f16) candidates.push({ internal: gl.RGBA16F, format: gl.RGBA, type: gl.HALF_FLOAT });
+  for (const fmt of candidates) {
+    if (probeFormat(gl, fmt)) return fmt;
+  }
+  throw new EngineError('NO_FLOAT_TARGET', `float 렌더 타깃 없음 (ext: f32=${+f32} f16=${+f16} blend32=${+blend32})`);
+}
+
+function probeFormat(gl: WebGL2RenderingContext, fmt: TexFormat): boolean {
+  while (gl.getError() !== gl.NO_ERROR) {
+    /* drain */
+  }
+  let t: Target | null = null;
+  try {
+    t = new Target(gl, 4, 4, [fmt, fmt, fmt]);
+    t.clear();
+    gl.enable(gl.BLEND);
+    gl.blendFunc(gl.ONE, gl.ONE);
+    gl.clear(gl.COLOR_BUFFER_BIT);
+    gl.disable(gl.BLEND);
+    return gl.getError() === gl.NO_ERROR;
+  } catch {
+    return false;
+  } finally {
+    t?.dispose();
+    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
   }
 }
 

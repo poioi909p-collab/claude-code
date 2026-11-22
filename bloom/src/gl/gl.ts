@@ -16,7 +16,7 @@ function compile(gl: WebGL2RenderingContext, type: number, src: string): WebGLSh
       .map((l, i) => `${String(i + 1).padStart(4)}: ${l}`)
       .join('\n');
     console.error(numbered);
-    throw new Error('Shader compile error: ' + log);
+    throw new Error('SHADER: ' + String(log).split('\n').slice(0, 2).join(' '));
   }
   return sh;
 }
