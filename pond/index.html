@@ -47,6 +47,12 @@ html, body {
   display: block;
   touch-action: none;
 }
+#veil {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(ellipse 80% 70% at 50% 50%, transparent 58%, rgba(6, 11, 12, 0.42) 100%);
+}
 #hint {
   position: fixed;
   left: 0;
@@ -75,6 +81,34 @@ html, body {
 #hint.gone { opacity: 0; filter: blur(5px); letter-spacing: 0.62em; transform: translateY(-4px); }
 #hint span { display: inline-block; animation: breathe 6s ease-in-out infinite; }
 @keyframes breathe { 0%, 100% { opacity: 1; } 50% { opacity: 0.62; } }
+#sound {
+  position: fixed;
+  top: calc(env(safe-area-inset-top, 0px) + 14px);
+  right: calc(env(safe-area-inset-right, 0px) + 14px);
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  border: 1px solid rgba(239, 230, 212, 0.16);
+  background: rgba(10, 18, 19, 0.3);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+  color: var(--cream);
+  opacity: 0.5;
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  transition: opacity 0.9s cubic-bezier(0.25, 0.1, 0.25, 1), border-color 0.9s ease;
+}
+#sound:hover { opacity: 0.75; }
+#sound[aria-pressed="true"] { opacity: 0.85; border-color: rgba(233, 188, 192, 0.35); }
+#sound:focus-visible { outline: 1px solid rgba(239, 230, 212, 0.6); outline-offset: 3px; }
+#sound path { transition: opacity 0.8s ease; }
+#sound .on { opacity: 0; }
+#sound[aria-pressed="true"] .on { opacity: 1; }
+#sound[aria-pressed="true"] .off { opacity: 0; }
 @media (prefers-reduced-motion: reduce) {
   #hint span { animation: none; }
 }
@@ -85,7 +119,15 @@ html, body {
   <canvas id="water"></canvas>
   <canvas id="surface"></canvas>
 </div>
+<div id="veil" aria-hidden="true"></div>
 <p id="hint"><span>물을 만져보세요</span></p>
+<button id="sound" type="button" aria-label="소리 켜기" aria-pressed="false">
+  <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <path d="M4 9.5h3l4.5-3.5v12L7 14.5H4z"/>
+    <path class="on" d="M15 9.2a4 4 0 0 1 0 5.6M17.6 6.8a7.4 7.4 0 0 1 0 10.4"/>
+    <path class="off" d="M15.5 9.5l5 5M20.5 9.5l-5 5"/>
+  </svg>
+</button>
 
 <script>
 (() => {
@@ -413,6 +455,7 @@ uniform float uRefract;
 uniform float uNormal;
 uniform sampler2D uFish;
 uniform sampler2D uShadow;
+uniform sampler2D uCaustic;
 
 vec3 wave(vec2 suv) {
   vec3 e = texture2D(uWave, suv).rgb * (255.0 / 127.0) - (128.0 / 127.0);
@@ -436,6 +479,13 @@ void main() {
 
   // 물고기 그림자: 바닥에 떨어지고, 굴절로 더 크게 일렁임
   float sh = texture2D(uShadow, vUv - off * 1.5).a;
+  // 커스틱: 같은 무늬를 두 겹, 서로 다른 방향으로 천천히 흘려서 겹친 곳만 빛나게
+  vec2 cp = (vUv * uView - off * uView * 1.2) / 240.0;
+  float c1 = texture2D(uCaustic, cp + vec2(uTime * 0.011, uTime * 0.006)).r;
+  float c2 = texture2D(uCaustic, mat2(0.8, -0.6, 0.6, 0.8) * cp * 1.31 + vec2(-uTime * 0.008, uTime * 0.012)).r;
+  float caus = min(c1, c2);
+  float shallow = 1.0 - smoothstep(0.0, 1.25, dot(vUv, vec2(0.55, 0.8)));
+  col += vec3(0.80, 0.92, 0.78) * caus * (0.05 + 0.16 * shallow) * (1.0 - sh * 0.9);
   col *= 1.0 - sh * 0.62;
   // 물고기: 수면 가까이 있어서 굴절은 조금만
   vec4 fsh = texture2D(uFish, vUv - off * 0.55);
@@ -465,7 +515,7 @@ void main() {
   gl_FragColor = vec4(col, 1.0);
 }`;
 
-let gl = null, prog = null, U = {}, texWave = null, texBottom = null, texFish = null, texShadow = null, bottomCanvas = null, glOK = false;
+let gl = null, prog = null, U = {}, texCaustic = null, texWave = null, texBottom = null, texFish = null, texShadow = null, bottomCanvas = null, glOK = false;
 
 function compile(type, src) {
   const s = gl.createShader(type);
@@ -482,6 +532,28 @@ function makeTex() {
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
   return t;
+}
+// 물속 빛 무늬 타일 (반복 가능한 커스틱, 한 번만 계산)
+let causticCache = null;
+function causticData() {
+  if (causticCache) return causticCache;
+  const N = 256, out = new Uint8Array(N * N), t = 23.7;
+  for (let y = 0; y < N; y++) {
+    for (let x = 0; x < N; x++) {
+      const px = (x / N) * TAU - 250, py = (y / N) * TAU - 250;
+      let ix = px, iy = py, c = 1;
+      for (let n = 0; n < 5; n++) {
+        const tt = t * (1 - 3.5 / (n + 1));
+        const nx = px + Math.cos(tt - ix) + Math.sin(tt + iy);
+        const ny = py + Math.sin(tt - iy) + Math.cos(tt + ix);
+        ix = nx; iy = ny;
+        c += 1 / Math.hypot(px / (Math.sin(ix + tt) / 0.005), py / (Math.cos(iy + tt) / 0.005));
+      }
+      c = 1.17 - Math.pow(c / 5, 1.4);
+      out[y * N + x] = Math.min(255, Math.pow(Math.abs(c), 8) * 255) | 0;
+    }
+  }
+  return (causticCache = out);
 }
 function initGL() {
   const opts = { alpha: false, antialias: false, depth: false, stencil: false, premultipliedAlpha: false, preserveDrawingBuffer: false, powerPreference: 'high-performance' };
@@ -500,7 +572,7 @@ function initGL() {
   const loc = gl.getAttribLocation(prog, 'aPos');
   gl.enableVertexAttribArray(loc);
   gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
-  for (const n of ['uBottom', 'uWave', 'uView', 'uSim', 'uTime', 'uRefract', 'uNormal', 'uFish', 'uShadow']) U[n] = gl.getUniformLocation(prog, n);
+  for (const n of ['uBottom', 'uWave', 'uView', 'uSim', 'uTime', 'uRefract', 'uNormal', 'uFish', 'uShadow', 'uCaustic']) U[n] = gl.getUniformLocation(prog, n);
   gl.pixelStorei(gl.UNPACK_ALIGNMENT, 1);
   texBottom = makeTex();
   texWave = makeTex();
@@ -508,6 +580,12 @@ function initGL() {
   texShadow = makeTex();
   gl.uniform1i(U.uFish, 2);
   gl.uniform1i(U.uShadow, 3);
+  gl.activeTexture(gl.TEXTURE4);
+  texCaustic = makeTex();
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT);
+  gl.texImage2D(gl.TEXTURE_2D, 0, gl.LUMINANCE, 256, 256, 0, gl.LUMINANCE, gl.UNSIGNED_BYTE, causticData());
+  gl.uniform1i(U.uCaustic, 4);
   gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, true);
   gl.uniform1i(U.uBottom, 0);
   gl.uniform1i(U.uWave, 1);
@@ -580,11 +658,13 @@ function updateMotes(dt) {
 function drawSurface() {
   fx.setTransform(FXS, 0, 0, FXS, 0, 0);
   fx.clearRect(0, 0, W, H);
+  drawPads();
   for (const m of motes) {
     const tw = 0.75 + 0.25 * Math.sin(now * 0.8 + m.ph * 3);
     fx.fillStyle = `rgba(239,230,212,${(m.a * tw).toFixed(3)})`;
     fx.beginPath(); fx.arc(m.x, m.y, m.r, 0, TAU); fx.fill();
   }
+  drawPetals();
   drawPellets();
 }
 
@@ -797,7 +877,7 @@ function updatePellets(dt) {
   for (const p of pellets) {
     if (now < p.born) continue;
     if (!p.landed) {
-      if (now - p.born > 0.32) { p.landed = true; disturb(p.x, p.y, 5, 0.3); }
+      if (now - p.born > 0.32) { p.landed = true; disturb(p.x, p.y, 5, 0.3); plip(0.35, 1.5); }
       continue;
     }
     flowAt(p.x, p.y, tmpF); slopeAt(p.x, p.y, tmpS);
@@ -805,6 +885,7 @@ function updatePellets(dt) {
     p.vx += (tmpF.x * 0.7 - tmpS.x * 80 - p.vx) * k;
     p.vy += (tmpF.y * 0.7 - tmpS.y * 80 - p.vy) * k;
     p.x = clamp(p.x + p.vx * dt, 4, W - 4); p.y = clamp(p.y + p.vy * dt, 4, H - 4);
+    avoidPads(p, 3);
     p.life -= dt;
   }
   for (let i = pellets.length - 1; i >= 0; i--) if (pellets[i].eaten || pellets[i].life <= 0) pellets.splice(i, 1);
@@ -1143,7 +1224,313 @@ function drawFish() {
   sc.clearRect(0, 0, W, H);
   fishOrder = fish.slice().sort((p, q) => q.depth - p.depth);
   for (const f of fishOrder) { buildFish(f); drawFishShadow(f); drawOneFish(f); }
+  drawPadShadows();
 }
+
+/* ============================================================
+   연잎 · 연꽃 — 가장자리에 떠서 물결에 살짝 흔들림
+   ============================================================ */
+const PAD_LAYOUT = [
+  { u: 0.06, v: 0.1, s: 0.21, lotus: true },
+  { u: 1.0, v: 0.5, s: 0.17 },
+  { u: 0.12, v: 0.86, s: 0.23 },
+  { u: 0.4, v: 0.985, s: 0.12 },
+];
+const pads = [];
+
+function petalShape(g, len, wid) {
+  g.beginPath();
+  g.moveTo(0, 0);
+  g.bezierCurveTo(len * 0.25, -wid * 0.9, len * 0.8, -wid * 0.75, len, 0);
+  g.bezierCurveTo(len * 0.8, wid * 0.75, len * 0.25, wid * 0.9, 0, 0);
+  g.closePath();
+}
+function paintLotus(g, R, rnd) {
+  // 꽃 그림자 (연잎 위)
+  g.fillStyle = 'rgba(20,36,22,0.35)';
+  g.beginPath(); g.ellipse(R * 0.18, R * 0.24, R * 0.95, R * 0.9, 0, 0, TAU); g.fill();
+  const rings = [
+    { n: 9, len: 1.0, wid: 0.36, base: '#f3e2dd', tip: '#e2a7ae', off: 0 },
+    { n: 7, len: 0.78, wid: 0.34, base: '#f6e7e3', tip: '#dd9aa4', off: 0.35 },
+    { n: 5, len: 0.52, wid: 0.3, base: '#f8ece8', tip: '#d98f9b', off: 0.1 },
+  ];
+  for (const ring of rings) {
+    for (let i = 0; i < ring.n; i++) {
+      const a = (i / ring.n) * TAU + ring.off + (rnd() - 0.5) * 0.18;
+      const len = R * ring.len * (0.92 + rnd() * 0.14), wid = R * ring.wid;
+      g.save(); g.rotate(a);
+      const gr = g.createLinearGradient(0, 0, len, 0);
+      gr.addColorStop(0, ring.base); gr.addColorStop(0.55, ring.base); gr.addColorStop(1, ring.tip);
+      g.fillStyle = gr;
+      petalShape(g, len, wid); g.fill();
+      g.strokeStyle = 'rgba(150,80,92,0.22)'; g.lineWidth = Math.max(0.5, R * 0.015); g.stroke();
+      g.strokeStyle = 'rgba(180,110,120,0.16)';
+      g.beginPath(); g.moveTo(len * 0.15, 0); g.lineTo(len * 0.85, 0); g.stroke();
+      g.restore();
+    }
+  }
+  // 연밥
+  g.fillStyle = '#d6c47c';
+  g.beginPath(); g.arc(0, 0, R * 0.17, 0, TAU); g.fill();
+  g.fillStyle = 'rgba(120,110,50,0.55)';
+  for (let i = 0; i < 6; i++) { const a = (i / 6) * TAU; g.beginPath(); g.arc(Math.cos(a) * R * 0.09, Math.sin(a) * R * 0.09, R * 0.022, 0, TAU); g.fill(); }
+  g.beginPath(); g.arc(0, 0, R * 0.022, 0, TAU); g.fill();
+}
+function paintPad(pad) {
+  const r = pad.r, S = FXS, size = Math.ceil(r * 2.3 * S);
+  const c = document.createElement('canvas');
+  c.width = c.height = size;
+  const g = c.getContext('2d');
+  g.setTransform(S, 0, 0, S, size / 2, size / 2);
+  const rnd = mulberry32(pad.seed);
+  const na = pad.notch, nw = 0.12;
+  const cx = Math.cos(na) * r * 0.05, cy = Math.sin(na) * r * 0.05;
+  const outline = () => {
+    g.beginPath();
+    g.moveTo(cx, cy);
+    for (let k = 0; k <= 80; k++) {
+      const a = na + nw + ((TAU - 2 * nw) * k) / 80;
+      const rr = r * (1 + 0.016 * Math.sin(a * 5 + pad.seed) + 0.008 * Math.sin(a * 11 + pad.seed * 2));
+      g.lineTo(Math.cos(a) * rr, Math.sin(a) * rr);
+    }
+    g.closePath();
+  };
+  outline();
+  const gr = g.createRadialGradient(cx, cy, 0, 0, 0, r);
+  gr.addColorStop(0, '#5e784a'); gr.addColorStop(0.55, '#4d683f'); gr.addColorStop(1, '#3b5233');
+  g.fillStyle = gr; g.fill();
+  g.save(); g.clip();
+  // 잎맥
+  g.strokeStyle = 'rgba(190,206,156,0.12)';
+  g.lineWidth = 0.9;
+  for (let i = 0; i < 17; i++) {
+    const a = na + nw * 1.4 + ((TAU - 2.8 * nw) * i) / 16, bend = (rnd() - 0.5) * 0.12;
+    g.beginPath(); g.moveTo(cx, cy);
+    g.quadraticCurveTo(Math.cos(a + bend) * r * 0.55, Math.sin(a + bend) * r * 0.55, Math.cos(a) * r, Math.sin(a) * r);
+    g.stroke();
+  }
+  // 세월의 얼룩
+  for (let i = 0; i < 5; i++) {
+    const a = rnd() * TAU, d = r * (0.55 + rnd() * 0.4), sr = r * (0.05 + rnd() * 0.09);
+    g.fillStyle = rnd() < 0.5 ? 'rgba(160,150,80,0.12)' : 'rgba(40,52,30,0.18)';
+    g.beginPath(); g.arc(Math.cos(a) * d, Math.sin(a) * d, sr, 0, TAU); g.fill();
+  }
+  // 왁스 같은 윤기
+  const sh = g.createRadialGradient(-r * 0.35, -r * 0.4, 0, -r * 0.35, -r * 0.4, r * 0.9);
+  sh.addColorStop(0, 'rgba(240,245,220,0.13)'); sh.addColorStop(1, 'rgba(240,245,220,0)');
+  g.fillStyle = sh; g.fillRect(-r, -r, r * 2, r * 2);
+  // 가장자리 말림
+  outline();
+  g.strokeStyle = 'rgba(26,42,24,0.55)'; g.lineWidth = r * 0.06; g.stroke();
+  g.restore();
+  outline();
+  g.strokeStyle = 'rgba(180,198,142,0.22)'; g.lineWidth = 0.8; g.stroke();
+  // 물방울
+  for (let i = 0; i < 3; i++) {
+    const a = rnd() * TAU, d = r * (0.2 + rnd() * 0.5), dr = 1.2 + rnd() * 1.6;
+    const x = Math.cos(a) * d, y = Math.sin(a) * d;
+    g.fillStyle = 'rgba(20,34,20,0.25)'; g.beginPath(); g.arc(x + dr * 0.3, y + dr * 0.4, dr, 0, TAU); g.fill();
+    g.fillStyle = 'rgba(215,228,200,0.22)'; g.beginPath(); g.arc(x, y, dr, 0, TAU); g.fill();
+    g.fillStyle = 'rgba(255,255,250,0.7)'; g.beginPath(); g.arc(x - dr * 0.35, y - dr * 0.35, dr * 0.32, 0, TAU); g.fill();
+  }
+  if (pad.lotus) {
+    g.save();
+    g.translate(-Math.cos(na) * r * 0.22, -Math.sin(na) * r * 0.22);
+    paintLotus(g, r * 0.46, rnd);
+    g.restore();
+  }
+  pad.img = c; pad.size = size;
+}
+function initPads() {
+  pads.length = 0;
+  const rnd = mulberry32(31);
+  for (const l of PAD_LAYOUT) {
+    const x = l.u * W, y = l.v * H;
+    const r = clamp(Math.min(W, H) * l.s, 30, 160);
+    const pad = {
+      x, y, r, lotus: !!l.lotus, seed: (rnd() * 1e6) | 0,
+      notch: Math.atan2(H * 0.5 - y, W * 0.5 - x) + (rnd() - 0.5) * 1.4,
+      ox: 0, oy: 0, vx: 0, vy: 0, rot: 0, vr: 0, bob: 0,
+    };
+    paintPad(pad);
+    pads.push(pad);
+    // 연잎 아래로는 물결이 조금 잦아듦
+    const c = sim.cell;
+    for (let yy = 0; yy < sim.rows; yy++) for (let xx = 0; xx < sim.cols; xx++) {
+      const d = Math.hypot((xx - 1) * c - x, (yy - 1) * c - y);
+      if (d < r * 0.92) sim.damp[yy * sim.cols + xx] *= 0.993;
+    }
+  }
+}
+function updatePads(dt) {
+  for (const p of pads) {
+    let gx = 0, gy = 0, tq = 0;
+    for (let k = 0; k < 6; k++) {
+      const a = (k / 6) * TAU;
+      slopeAt(p.x + Math.cos(a) * p.r * 0.6, p.y + Math.sin(a) * p.r * 0.6, tmpS);
+      gx += tmpS.x; gy += tmpS.y;
+      tq += -Math.sin(a) * tmpS.x + Math.cos(a) * tmpS.y;
+    }
+    slopeAt(p.x, p.y, tmpS);
+    flowAt(p.x, p.y, tmpF);
+    const ax = -gx * 110 - p.ox * 3.2 - p.vx * 2.4 + (tmpF.x - (-(p.y - H * 0.52) * 0.011)) * 0.4;
+    const ay = -gy * 110 - p.oy * 3.2 - p.vy * 2.4 + (tmpF.y - ((p.x - W * 0.5) * 0.011)) * 0.4;
+    p.vx += ax * dt; p.vy += ay * dt;
+    p.ox += p.vx * dt; p.oy += p.vy * dt;
+    p.vr += (tq * 1.6 - p.rot * 2.2 - p.vr * 1.8) * dt;
+    p.rot += p.vr * dt;
+    p.bob += (tmpS.h - p.bob) * Math.min(1, dt * 6);
+  }
+}
+function drawPads() {
+  for (const p of pads) {
+    const x = p.x + p.ox, y = p.y + p.oy;
+    const s = 1 - clamp(p.bob, -1.5, 1.5) * 0.01;
+    fx.fillStyle = 'rgba(4,10,12,0.3)';
+    fx.beginPath(); fx.arc(x + 2.5, y + 4, p.r * s * 1.01, 0, TAU); fx.fill();
+    fx.save();
+    fx.translate(x, y); fx.rotate(p.rot); fx.scale(s / FXS, s / FXS);
+    fx.drawImage(p.img, -p.size / 2, -p.size / 2);
+    fx.restore();
+  }
+}
+function drawPadShadows() {
+  sc.fillStyle = 'rgba(0,0,0,0.5)';
+  for (const p of pads) {
+    sc.beginPath(); sc.arc(p.x + p.ox + 18, p.y + p.oy + 26, p.r * 1.02, 0, TAU); sc.fill();
+  }
+}
+function avoidPads(o, pad) {
+  for (const p of pads) {
+    const dx = o.x - (p.x + p.ox), dy = o.y - (p.y + p.oy), d = Math.hypot(dx, dy) || 1, R = p.r * 0.97 + pad;
+    if (d < R) { o.x += (dx / d) * (R - d); o.y += (dy / d) * (R - d); }
+  }
+}
+
+/* ============================================================
+   꽃잎 — 가끔 하늘에서 떨어져 물 위를 떠다님
+   ============================================================ */
+const petals = [];
+let nextPetal = 4;
+function spawnPetal() {
+  if (petals.length >= 12) return;
+  const rnd = Math.random;
+  petals.push({
+    x: W * (0.12 + rnd() * 0.76), y: H * (0.06 + rnd() * 0.8), z: 1,
+    rot: rnd() * TAU, spin: (rnd() - 0.5) * 2.2, flip: rnd() * TAU, vr: (rnd() - 0.5) * 0.3,
+    vx: 0, vy: 0, wind: (rnd() - 0.5) * 30, size: 6.5 + rnd() * 3.5,
+    life: 70 + rnd() * 50, landed: false, deep: rnd() < 0.5,
+  });
+}
+function updatePetals(dt) {
+  if (now > nextPetal) { nextPetal = now + 7 + Math.random() * 10; spawnPetal(); }
+  for (const p of petals) {
+    if (!p.landed) {
+      p.z -= dt / 3.4;
+      p.x += (p.wind + Math.sin(now * 1.3 + p.flip) * 14) * dt * p.z;
+      p.y += Math.cos(now * 0.9 + p.flip) * 6 * dt * p.z;
+      p.rot += p.spin * dt; p.flip += dt * 2.4;
+      if (p.z <= 0) {
+        p.z = 0; p.landed = true;
+        disturb(p.x, p.y, 6, 0.22);
+        plip(0.22, 1.9);
+      }
+      continue;
+    }
+    flowAt(p.x, p.y, tmpF); slopeAt(p.x, p.y, tmpS);
+    const k = 1 - Math.exp(-dt * 1.4);
+    p.vx += (tmpF.x * 0.8 - tmpS.x * 70 - p.vx) * k;
+    p.vy += (tmpF.y * 0.8 - tmpS.y * 70 - p.vy) * k;
+    p.x += p.vx * dt; p.y += p.vy * dt;
+    p.rot += p.vr * dt + (tmpF.x * tmpS.y - tmpF.y * tmpS.x) * dt * 0.4;
+    p.vr *= 1 - dt * 0.05;
+    avoidPads(p, p.size * 0.6);
+    p.life -= dt;
+  }
+  for (let i = petals.length - 1; i >= 0; i--) {
+    const p = petals[i];
+    if (p.life <= 0 || p.x < -40 || p.x > W + 40 || p.y < -40 || p.y > H + 40) petals.splice(i, 1);
+  }
+}
+function drawPetals() {
+  for (const p of petals) {
+    const e = 1 - p.z * p.z;              // 착지할수록 선명하게
+    const fade = Math.min(1, p.life / 6) * Math.min(1, e * 1.6 + 0.05);
+    const s = p.size * (1 + p.z * 0.7);
+    const sq = p.landed ? 1 : Math.max(0.25, Math.abs(Math.cos(p.flip)));
+    const so = 2 + p.z * 46;
+    fx.globalAlpha = fade * (0.6 - p.z * 0.4);
+    fx.fillStyle = 'rgba(4,10,12,0.55)';
+    fx.save(); fx.translate(p.x + so * 0.6, p.y + so); fx.rotate(p.rot); fx.scale(1, sq);
+    petalShape(fx, s * 2, s * 1.15); fx.translate(-s, 0); fx.fill();
+    fx.restore();
+    fx.globalAlpha = fade;
+    fx.save(); fx.translate(p.x, p.y); fx.rotate(p.rot); fx.scale(1, sq); fx.translate(-s, 0);
+    const gr = fx.createLinearGradient(0, 0, s * 2, 0);
+    gr.addColorStop(0, p.deep ? '#e2a6ae' : '#ecc2c6');
+    gr.addColorStop(1, '#f7e7e3');
+    fx.fillStyle = gr;
+    petalShape(fx, s * 2, s * 1.15); fx.fill();
+    fx.strokeStyle = 'rgba(190,120,130,0.22)'; fx.lineWidth = 0.6;
+    fx.beginPath(); fx.moveTo(s * 0.3, 0); fx.lineTo(s * 1.6, 0); fx.stroke();
+    fx.restore();
+  }
+  fx.globalAlpha = 1;
+}
+
+/* ============================================================
+   소리 — Web Audio로 만든 물방울, 기본은 꺼짐
+   ============================================================ */
+const audio = { ctx: null, on: false, input: null, last: 0 };
+function ensureAudio() {
+  if (audio.ctx) return true;
+  const AC = window.AudioContext || window.webkitAudioContext;
+  if (!AC) return false;
+  const c = new AC();
+  audio.ctx = c;
+  const master = c.createGain(); master.gain.value = 0.9;
+  const lp = c.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 3800;
+  const conv = c.createConvolver();
+  const len = (c.sampleRate * 1.8) | 0, ir = c.createBuffer(2, len, c.sampleRate);
+  for (let ch = 0; ch < 2; ch++) { const d = ir.getChannelData(ch); for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 3.4); }
+  conv.buffer = ir;
+  const wet = c.createGain(); wet.gain.value = 0.3;
+  audio.input = c.createGain();
+  audio.input.connect(lp); lp.connect(master); lp.connect(conv); conv.connect(wet); wet.connect(master);
+  master.connect(c.destination);
+  return true;
+}
+// 물방울: 사인파가 순간적으로 위로 미끄러지는 소리
+function plip(vol, pitch) {
+  if (!audio.on || !audio.ctx) return;
+  const c = audio.ctx, t = c.currentTime + 0.005;
+  if (t - audio.last < 0.045 && vol < 0.9) return;
+  audio.last = t;
+  const f0 = (380 + Math.random() * 360) * pitch;
+  const o = c.createOscillator(), g = c.createGain();
+  o.type = 'sine';
+  o.frequency.setValueAtTime(f0, t);
+  o.frequency.exponentialRampToValueAtTime(f0 * 2.5, t + 0.085);
+  g.gain.setValueAtTime(0.0001, t);
+  g.gain.exponentialRampToValueAtTime(0.05 * vol, t + 0.006);
+  g.gain.exponentialRampToValueAtTime(0.0001, t + 0.2);
+  o.connect(g); g.connect(audio.input);
+  o.start(t); o.stop(t + 0.24);
+}
+let nextStirSound = 0;
+listeners.tap.push(() => plip(1, 1));
+listeners.stir.push((x, y, speed) => { if (now > nextStirSound && speed > 120) { nextStirSound = now + 0.16 + Math.random() * 0.2; plip(0.28, 1.15); } });
+listeners.gulp.push(() => plip(0.45, 0.6));
+
+const soundBtn = document.getElementById('sound');
+soundBtn.addEventListener('click', () => {
+  if (!ensureAudio()) return;
+  audio.on = !audio.on;
+  if (audio.ctx.state !== 'running') audio.ctx.resume();
+  soundBtn.setAttribute('aria-pressed', String(audio.on));
+  soundBtn.setAttribute('aria-label', audio.on ? '소리 끄기' : '소리 켜기');
+  if (audio.on) setTimeout(() => plip(0.8, 1.1), 60);
+});
 
 /* ============================================================
    크기 / 성능
@@ -1170,6 +1557,7 @@ function layout() {
   initFlow();
   initMotes();
   if (!fish.length) initFish(); else clampFish();
+  initPads();
   bottomCanvas = makeBottom();
   uploadBottom();
   allocWaveTex();
@@ -1224,6 +1612,8 @@ function frame(ts) {
   stepFlow(dt);
   updateMotes(dt);
   updateFish(dt);
+  updatePads(dt);
+  updatePetals(dt);
   updatePellets(dt);
   drawFish();
   if (glOK && !gl.isContextLost()) {
@@ -1252,7 +1642,7 @@ function start() {
 }
 
 // 다음 단계(물고기, 연잎, 소리)가 쓸 연결점
-window.__pond = { disturb, flowAt, slopeAt, listeners, fish, pellets, shadowCanvas, sc, get size() { return { W, H }; } };
+window.__pond = { pads, petals, spawnPetal, audio, disturb, flowAt, slopeAt, listeners, fish, pellets, shadowCanvas, sc, get size() { return { W, H }; } };
 
 start();
 })();
