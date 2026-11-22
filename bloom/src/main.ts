@@ -40,6 +40,7 @@ canvas.addEventListener('webglcontextlost', (e) => e.preventDefault());
 canvas.addEventListener('webglcontextrestored', () => location.reload());
 
 function showFallback(err: unknown): void {
+  canvas.style.display = 'none';
   const d = document.createElement('div');
   d.className = 'fallback';
   const msg = document.createElement('p');

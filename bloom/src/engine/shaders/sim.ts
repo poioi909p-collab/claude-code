@@ -63,9 +63,10 @@ void main() {
   vec4 dp = vec4(0.0);
   float exposed = 0.0;
 
-  vec2 offs[4] = vec2[4](vec2(uTexel.x, 0.0), vec2(-uTexel.x, 0.0), vec2(0.0, uTexel.y), vec2(0.0, -uTexel.y));
+  // no array constructor here: some Mali drivers reject it (S0032)
   for (int k = 0; k < 4; k++) {
-    vec2 q = uv + offs[k];
+    vec2 o = k == 0 ? vec2(uTexel.x, 0.0) : k == 1 ? vec2(-uTexel.x, 0.0) : k == 2 ? vec2(0.0, uTexel.y) : vec2(0.0, -uTexel.y);
+    vec2 q = uv + o;
     float wn = texture(uWater, q).r;
     vec4 pn = texture(uWet, q);
     float pmN = texture(uPaper, q).g;
