@@ -1031,7 +1031,7 @@
     desc: '어둠 속을 헤매는 손전등. 빛이 비추는 곳을 잘 보세요!',
     fit: ['early', 'mid'],
     stages: (o) => (o.radius || []).length || 3,
-    defaults: { radius: [0.13, 0.2, 0.3], dim: 0.96, speed: 0.11, count: 1, area: null },
+    defaults: { radius: [0.13, 0.2, 0.3], dim: 0.96, speed: 0.11, count: 1, area: null, path: null },
     animated: (t, o, S) => t < S,
     init({ rand }) {
       const ph = [];
@@ -1057,9 +1057,18 @@
       const sp = s.opts.speed * Math.PI * 2;
       const A = s.opts.area || { x: 0.14, y: 0.12, w: 0.72, h: 0.76 }; // 빛이 돌아다니는 범위 (표지 비율)
       const pts = [];
+      if (st.born == null) st.born = time;
       for (let k = 0; k < Math.max(1, s.opts.count | 0); k++) {
-        let cx = w * (A.x + A.w * (0.5 + 0.5 * Math.sin(time * sp + st.ph[k * 2])));
-        let cy = h * (A.y + A.h * (0.5 + 0.5 * Math.sin(time * sp * 0.71 + st.ph[k * 2 + 1])));
+        let cx, cy;
+        if (s.opts.path === 'eight') {
+          // 고정 경로: 가운데에서 출발해 영역 위를 가로 8자로 돈다 (매번 같은 위치·같은 순서)
+          const th = (time - st.born) * sp + k * Math.PI;
+          cx = w * (A.x + A.w * (0.5 + 0.5 * Math.sin(th)));
+          cy = h * (A.y + A.h * (0.5 + 0.5 * Math.sin(2 * th)));
+        } else {
+          cx = w * (A.x + A.w * (0.5 + 0.5 * Math.sin(time * sp + st.ph[k * 2])));
+          cy = h * (A.y + A.h * (0.5 + 0.5 * Math.sin(time * sp * 0.71 + st.ph[k * 2 + 1])));
+        }
         cx = lerp(cx, w / 2, fade); cy = lerp(cy, h / 2, fade);
         const gr = g.createRadialGradient(cx, cy, 0, cx, cy, r);
         gr.addColorStop(0, 'rgba(0,0,0,1)');
@@ -1131,7 +1140,7 @@
     const cols = Math.max(2, s.opts.cols | 0);
     const rows = Math.max(2, Math.round((cols * s.h) / s.w));
     const keys = (s.opts.key ? [].concat(s.opts.key) : []).filter(Boolean);
-    const key = s.w + 'x' + s.h + ':' + s.regions.map((g) => [g.x, g.y, g.w, g.h].join(',')).join('|') + ':' + JSON.stringify(keys) + ':' + s.opts.open.join(',');
+    const key = s.w + 'x' + s.h + ':' + s.regions.map((g) => [g.x, g.y, g.w, g.h].join(',')).join('|') + ':' + JSON.stringify(keys) + ':' + s.opts.open.join(',') + ':' + s.opts.random;
     if (st.key === key) return st;
     const N = cols * rows, tw = s.w / cols, th = s.h / rows;
     const pr = [];
@@ -1149,7 +1158,10 @@
         const cx = (x + tw / 2) / s.w, cy = (y + th / 2) / s.h;
         for (const k of keys) near = Math.max(near, 1 - clamp(Math.hypot(cx - k.x, (cy - k.y) * (s.h / s.w)) / (k.r || 0.55), 0, 1));
       }
-      const jitter = rng(st.seed + i * 7919)() * (keys.length ? 0.35 : 1);
+      // random:false → 무작위 대신 체크무늬 리듬(고정). 거리 순서로 바깥부터 원을 좁혀 오며 열림
+      const fixed = s.opts.random === false;
+      const checker = ((Math.floor(i / cols) + (i % cols)) % 2) * 0.05;
+      const jitter = fixed ? checker + i * 1e-4 : rng(st.seed + i * 7919)() * (keys.length ? 0.35 : 1);
       pr.push({ i, p: jitter + near * 1.2 + title * 3 });
     }
     pr.sort((a, b) => a.p - b.p);
@@ -1160,7 +1172,7 @@
       let k = 0;
       while (k < S && !(f < open[Math.min(k, open.length - 1)])) k++;
       openAt[o.i] = k;
-      delay[o.i] = rng(st.seed + i2(o.i))();
+      delay[o.i] = s.opts.random === false ? ((Math.floor(o.i / cols) * 3 + (o.i % cols) * 5) % 7) / 7 : rng(st.seed + i2(o.i))();
     });
     function i2(v) { return v * 104729 + 17; }
     Object.assign(st, { key, cols, rows, N, tw, th, openAt, delay });
@@ -1171,7 +1183,7 @@
     desc: '번호판이 하나씩 뒤집히며 표지가 조금씩 드러나요. 결정적인 곳은 맨 마지막에!',
     fit: ['mid'],
     stages: (o) => (o.open || []).length || 3,
-    defaults: { cols: 5, open: [0.22, 0.42, 0.65], key: null },
+    defaults: { cols: 5, open: [0.22, 0.42, 0.65], key: null, random: true },
     init({ rand }) { return { seed: (rand() * 1e9) | 0 }; },
     render(ctx, s) {
       const st = tileLayout(s);
@@ -1669,10 +1681,11 @@
     label: '김 서린 유리',
     desc: '김이 잔뜩 서린 유리창. 손으로 닦은 자리로 표지가 보여요.',
     fit: ['mid', 'late'],
-    stages: (o) => (o.wipes || []).length || 3,
-    defaults: { wipes: [2, 3, 4], blur: 0.03, frost: 0.5 },
+    stages: (o) => (o.paths || o.wipes || []).length || 3,
+    defaults: { wipes: [2, 3, 4], blur: 0.03, frost: 0.5, paths: null },
     init({ opts, rand }) {
-      const groups = opts.wipes.map((n) => {
+      // paths: 단계별 [{cx, cy, rx, ry, a0?, turns?}] — 닦는 자리를 고정으로 설계
+      const groups = Array.isArray(opts.paths) ? opts.paths.map((list) => list.map((p) => ({ cx: p.cx, cy: p.cy, rx: p.rx, ry: p.ry, a0: p.a0 || 0, turns: p.turns || 1.6 }))) : opts.wipes.map((n) => {
         const list = [];
         for (let k = 0; k < n; k++) {
           const cx = 0.2 + rand() * 0.6, cy = 0.15 + rand() * 0.75, rx = 0.16 + rand() * 0.16, ry = 0.04 + rand() * 0.05;

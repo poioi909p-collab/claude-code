@@ -29,7 +29,12 @@ body::after { content: ""; position: fixed; inset: 0; pointer-events: none; z-in
 
 /* 상단: 번호 · 효과 · 진행 */
 .top { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
-.top .yr { font-size: 12px; color: var(--muted); letter-spacing: .04em; }
+.mode { display: inline-flex; align-items: center; gap: 7px; font: 500 12px var(--sans); color: var(--muted); background: transparent; border: 1px solid var(--line); border-radius: 999px; padding: 6px 11px; cursor: pointer; }
+.mode i { width: 7px; height: 7px; border-radius: 50%; background: var(--muted); transition: background .3s; }
+.mode.on { color: var(--text); border-color: var(--accent); }
+.mode.on i { background: var(--accent); }
+.mode:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.app.intro-mode > .top .no { visibility: hidden; }
 .no { font-family: var(--serif); font-size: 26px; line-height: 1; }
 .no i { font-style: italic; color: var(--accent); margin-right: 4px; }
 .no small { font-family: var(--sans); font-size: 12px; color: var(--muted); margin-left: 6px; letter-spacing: .02em; }
@@ -54,7 +59,6 @@ body::after { content: ""; position: fixed; inset: 0; pointer-events: none; z-in
 .dots span.cur { width: 22px; border-radius: 3px; background: var(--accent); }
 .dots.hide { opacity: 0; }
 
-/* 하단 정보: 점수 · 설명 */
 
 
 /* 정답: 전시 캡션 라벨 */
@@ -84,7 +88,9 @@ button.next .arr { font-family: var(--serif); font-style: italic; font-size: 20p
 /* 시작 화면: 잡지 표지 + 목차 */
 .intro { position: absolute; inset: 0 0 72px 0; z-index: 10; display: none; flex-direction: column; justify-content: space-between; gap: 18px; padding: 6px 2px 0; background: transparent; }
 .intro.on { display: flex; }
-.app.intro-mode > .top, .app.intro-mode > .prog, .app.intro-mode > .stage { visibility: hidden; }
+.app.intro-mode > .prog, .app.intro-mode > .stage { visibility: hidden; }
+.app.intro-mode > .top { position: relative; z-index: 11; justify-content: flex-end; }
+.app.intro-mode > .top .no { display: none; }
 .intro .eyebrow { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); letter-spacing: .04em; }
 .intro .mast { font-family: var(--serif); font-style: italic; font-size: clamp(44px, 14vw, 72px); line-height: .9; color: var(--accent); margin-top: 18px; }
 .intro h1 { margin: 6px 0 0; font-size: clamp(38px, 11.5vw, 60px); font-weight: 700; line-height: 1.04; letter-spacing: -0.05em; word-break: keep-all; }
@@ -131,7 +137,7 @@ button.next .arr { font-family: var(--serif); font-style: italic; font-size: 20p
 <div class="app intro-mode" id="app">
   <div class="top">
     <div class="no" id="no"><i>No.</i>01<small>/ 04</small></div>
-    <div class="yr">2026 송년회 Book Quiz</div>
+    <button class="mode" id="mode" type="button" aria-pressed="false"><i></i>고정 배치</button>
   </div>
   <div class="prog" id="prog"></div>
   <div class="stage">
@@ -150,10 +156,10 @@ button.next .arr { font-family: var(--serif); font-style: italic; font-size: 20p
 
   <section class="intro on" id="intro" aria-label="시작 화면">
     <div>
-      <div class="eyebrow"><span>2026 송년회</span><span>연습판</span></div>
+      <div class="eyebrow"><span>2026 송년회 · 연습판</span></div>
       <div class="mast">Book Quiz</div>
       <h1>표지 보고<br>책 제목 맞히기</h1>
-      <p class="lead">익숙한 책 표지가 낯설게 변신했어요. 힌트가 하나씩 열릴수록 점수는 줄어듭니다.</p>
+      <p class="lead">익숙한 책 표지가 낯설게 변신했어요. 힌트가 하나씩 열릴 때마다 정답을 외쳐 보세요.</p>
     </div>
     <ol class="toc" id="toc"></ol>
   </section>
@@ -173,21 +179,31 @@ button.next .arr { font-family: var(--serif); font-style: italic; font-size: 20p
   // 라운드 4개, 순서 고정, 라운드마다 ★ 지정 효과 하나. accent: 표지에서 뽑은 색
   const ROUNDS = [
     { src: 'covers/1.jpg', answer: '무서운 게 딱! 좋아!', author: '이구성', meta: 'ILB · 2002 · 딱이야 시리즈 1', accent: '#f2c500', ink: '#121110',
-      effect: 'shuffle', opts: { layout: 'frame', pos0: [21, 19, 17, 15, 23, 7, 10, 20, 4, 11, 16, 24, 2, 22, 8, 5, 14, 0, 12, 6, 9, 3, 18, 1, 13], invSlots: [6, 8, 16, 18] },
+      effect: 'shuffle', rnd: { layout: 'random' }, opts: { layout: 'frame', pos0: [21, 19, 17, 15, 23, 7, 10, 20, 4, 11, 16, 24, 2, 22, 8, 5, 14, 0, 12, 6, 9, 3, 18, 1, 13], invSlots: [6, 8, 16, 18] },
       regions: [{ x: 0.15, y: 0.245, w: 0.7, h: 0.37 }] },
     { src: 'covers/2.jpg', answer: '해리 포터와 마법사의 돌', author: 'J.K. 롤링', meta: '문학수첩 · 1999 · 1권 (구표지)', accent: '#e09a45', ink: '#121110',
-      effect: 'tiles', opts: { key: [{ x: 0.67, y: 0.5, r: 0.5 }], open: [0.14, 0.28, 0.44, 0.6] },
+      // 고정: 바깥에서 해리 얼굴 쪽으로 원을 좁혀 오며, 체크무늬 리듬으로 열림. 제목 칸은 맨 마지막
+      effect: 'tiles', rnd: { random: true }, opts: { key: [{ x: 0.67, y: 0.5, r: 0.5 }], open: [0.14, 0.28, 0.44, 0.6], random: false },
       regions: [{ x: 0.1, y: 0, w: 0.82, h: 0.25 }, { x: 0.27, y: 0.26, w: 0.52, h: 0.13 }, { x: 0.25, y: 0.845, w: 0.5, h: 0.045 }] },
     { src: 'covers/3.jpg', answer: '지구 끝의 온실', author: '김초엽', meta: '자이언트북스 · 2021', accent: '#f19bb8', ink: '#121110',
-      effect: 'steam',
+      // 고정: ① 양옆 화분 → ② 돔 꼭대기와 가장자리 → ③ 돔 한가운데 (제목·띠지 자리도 이때 닦이지만 글자는 가려짐)
+      effect: 'steam', rnd: { paths: null }, opts: { paths: [
+        [{ cx: 0.24, cy: 0.56, rx: 0.13, ry: 0.05 }, { cx: 0.78, cy: 0.63, rx: 0.13, ry: 0.05 }],
+        [{ cx: 0.5, cy: 0.36, rx: 0.15, ry: 0.04 }, { cx: 0.3, cy: 0.74, rx: 0.15, ry: 0.04 }, { cx: 0.72, cy: 0.44, rx: 0.12, ry: 0.04 }],
+        [{ cx: 0.5, cy: 0.56, rx: 0.2, ry: 0.06 }, { cx: 0.5, cy: 0.15, rx: 0.26, ry: 0.05 }, { cx: 0.5, cy: 0.86, rx: 0.26, ry: 0.04 }],
+      ] },
       regions: [{ x: 0.2, y: 0.07, w: 0.6, h: 0.165 }, { x: 0.3, y: 0.79, w: 0.4, h: 0.05 }] },
     { src: 'covers/4.jpg', answer: '물고기는 존재하지 않는다', author: '룰루 밀러', meta: '곰출판 · 2021 · 정지인 옮김', accent: '#48b07a', ink: '#121110',
-      effect: 'spotlight', opts: { area: { x: 0.12, y: 0.12, w: 0.76, h: 0.56 } },
+      // 고정: 물고기 떼 위를 가운데에서 출발해 가로 8자로 도는 정해진 길
+      effect: 'spotlight', rnd: { path: null }, opts: { area: { x: 0.12, y: 0.12, w: 0.76, h: 0.56 }, path: 'eight' },
       regions: [{ x: 0.17, y: 0.05, w: 0.66, h: 0.27 }, { x: 0.28, y: 0.64, w: 0.44, h: 0.075 }, { x: 0.9, y: 0.45, w: 0.08, h: 0.17 }] },
   ];
   ROUNDS.forEach((r) => { const i = new Image(); i.src = r.src; });
+  let randomMode = false;
+  try { randomMode = localStorage.getItem('bq.random') === '1'; } catch (e) { /* 저장소 없음 */ }
+  const optsOf = (r) => randomMode ? Object.assign({}, r.opts, r.rnd, { seed: (Math.random() * 1e9) | 0 }) : Object.assign({ seed: 2026 }, r.opts);
   const label = (r) => (CoverFX.get(r.effect) || {}).label || r.effect;
-  const hintsOf = (r) => { const d = CoverFX.get(r.effect); return typeof d.stages === 'function' ? d.stages(Object.assign({}, d.defaults, r.opts || {})) : d.stages; };
+  const hintsOf = (r) => { const d = CoverFX.get(r.effect); return typeof d.stages === 'function' ? d.stages(Object.assign({}, d.defaults, optsOf(r))) : d.stages; };
   const fx = CoverFX.create('#box', { padding: 0.02, duration: 1050, onChange: render });
   let ri = 0, ended = false, inIntro = true, cardT = 0;
 
@@ -212,7 +228,7 @@ button.next .arr { font-family: var(--serif); font-style: italic; font-size: 20p
     if (!c.classList.contains('on') || c.classList.contains('out')) return;
     clearTimeout(cardT);
     c.classList.add('out');
-    fx.setEffect(ROUNDS[ri].effect, ROUNDS[ri].opts); // 카드가 걷히는 순간 등장 연출 시작
+    fx.setEffect(ROUNDS[ri].effect, optsOf(ROUNDS[ri])); // 카드가 걷히는 순간 등장 연출 시작
     setTimeout(() => c.classList.remove('on', 'out'), 620);
   }
   function load(i) {
@@ -222,14 +238,10 @@ button.next .arr { font-family: var(--serif); font-style: italic; font-size: 20p
     hideLabel();
     $('#end').classList.remove('on');
     fx.setOptions({ regions: r.regions, text: r.answer, protect: true });
-    fx.setEffect(r.effect, r.opts);
+    fx.setEffect(r.effect, optsOf(r));
     fx.setImage(r.src);
     showCard();
     render();
-  }
-  function pts() {
-    const S = fx.stages, k = Math.min(fx.stage, S - 1);
-    return S <= 1 ? 30 : Math.round(30 - (20 * k) / (S - 1));
   }
   function showLabel(r) {
     $('#lk').innerHTML = '<i>No.</i> ' + two(ri + 1) + ' — 정답';
@@ -280,6 +292,20 @@ button.next .arr { font-family: var(--serif); font-style: italic; font-size: 20p
     render();
   }
   $('#next').onclick = next;
+  function renderMode() {
+    const b = $('#mode');
+    b.classList.toggle('on', randomMode);
+    b.innerHTML = '<i></i>' + (randomMode ? '랜덤 배치' : '고정 배치');
+    b.setAttribute('aria-pressed', randomMode ? 'true' : 'false');
+  }
+  $('#mode').onclick = (e) => {
+    e.stopPropagation();
+    randomMode = !randomMode;
+    try { localStorage.setItem('bq.random', randomMode ? '1' : '0'); } catch (err) { /* 저장소 없음 */ }
+    renderMode();
+    if (!inIntro && !ended) load(ri); // 지금 라운드를 새 배치로 다시 시작
+  };
+  renderMode();
   $('#card').addEventListener('click', hideCard);
   $('#box').addEventListener('click', next);
   $('#box').addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); next(); } });

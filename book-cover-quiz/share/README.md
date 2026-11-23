@@ -61,9 +61,9 @@ CoverFX.placeholder({ title, sub });  // 임시 표지 canvas 생성
 | `invert` | 색상 반전 | 2 | 첫 | 제목 쪽 절반 가림 + 색·좌우 반전 + 무지개 → 카드 뒤집기 → 가림막 치우며 공개 | `cover:'auto'\|'top'\|'bottom'` |
 | `strips` | 흔들리는 띠 | 2 | 중간 | 띠 섞임+잔잔한 일렁임 → 제자리 → 공개 | `count:12`, `amp` |
 | `mosaic` | 모자이크 | 3 | 중간 · 마지막 | 블록이 점점 작아짐 | `blocks:[10,20,40]` |
-| `spotlight` | 손전등 | 3 | 첫 · 중간 | 어둠 속 움직이는 빛이 점점 커짐 | `radius`, `count`, `area:{x,y,w,h}` |
+| `spotlight` | 손전등 | 3 | 첫 · 중간 | 어둠 속 움직이는 빛이 점점 커짐. `path:'eight'`이면 8자 고정 경로 | `radius`, `count`, `area:{x,y,w,h}`, `path` |
 | `zoom` | 초근접 줌 | 3 | 첫 | 아주 가까이에서 점점 멀어짐 | `zoom:[6,3,1.7]`, `focus:{x,y}` |
-| `tiles` | 타일 뒤집기 | 3 | 중간 | 번호판이 뒤집히며 드러남, 제목 칸과 `key` 지점 근처는 마지막 | `cols:5`, `open`, `key:[{x,y,r}]` |
+| `tiles` | 타일 뒤집기 | 3 | 중간 | 번호판이 뒤집히며 드러남, 제목 칸과 `key` 지점 근처는 마지막. `random:false`면 무작위 없이 고정 순서 | `cols:5`, `open`, `key:[{x,y,r}]`, `random` |
 | `scratch` | 복권 긁기 | 3 | 첫 · 중간 | 은박을 동전으로 긁어낸 자리가 보임 | `strokes:[3,4,5]`, `width` |
 | `blinds` | 블라인드 | 3 | 중간 · 마지막 | 블라인드 틈새가 점점 넓어짐 | `count:10`, `open` |
 | `fog` | 뿌연 안개 | 3 | 마지막 | 흐리고 색 바랜 표지가 점점 선명해짐 | `blur`, `sat`, `haze` |
@@ -71,7 +71,7 @@ CoverFX.placeholder({ title, sub });  // 임시 표지 canvas 생성
 | `silhouette` | 흑백 실루엣 | 2 | 중간 | 색을 지우고 형태만 | `contrast:[8,2.2]` |
 | `chosung` | 초성 힌트 | 2 | 마지막 | 정답 초성 카드 → 첫 글자 공개 (`text` 필요) | `text` |
 | `door` | 삐걱 문틈 | 3 | 첫 · 중간 | 어두운 나무 문이 조금씩 열리며 틈으로 엿보기 | `open:[0.08,0.22,0.42]`, `at` |
-| `steam` | 김 서린 유리 | 3 | 중간 · 마지막 | 김 서린 유리를 손으로 닦은 자리만 선명 | `wipes:[2,3,4]`, `blur`, `frost` |
+| `steam` | 김 서린 유리 | 3 | 중간 · 마지막 | 김 서린 유리를 손으로 닦은 자리만 선명. `paths`로 닦는 자리를 단계별로 지정 | `wipes:[2,3,4]`, `paths`, `blur`, `frost` |
 | `bubbles` | 물방울 | 3 | 중간 | 깊은 물속, 떠오르는 물방울 안만 또렷 | `count:[8,12,16]`, `radius`, `speed` |
 | `mix` | 단계별 조합 | 단계 수만큼 | - | 힌트마다 다른 효과, 책장 넘기듯 전환 | `steps:['zoom','tiles','chosung']` |
 

@@ -83,12 +83,12 @@ kbd { font-family:var(--sans); font-size:.8em; padding:.05em .45em; border-radiu
 .body { position:relative; margin-top:4vh; height:22vw; }
 .info { position:absolute; inset:0; display:grid; grid-template-columns:1fr auto; gap:2vw; align-items:end; transition:opacity .45s, transform .45s; }
 .info.hide { opacity:0; transform:translateY(-1vw); pointer-events:none; }
-.label { font-size:1.05vw; color:var(--muted); }
+.label { font-family:var(--serif); font-style:italic; font-size:1.8vw; color:var(--accent); }
 .points { display:flex; align-items:baseline; gap:.6vw; margin-top:.6vh; }
 .pts { font-family:var(--serif); font-size:11vw; line-height:.78; font-variant-numeric:lining-nums; display:inline-block; letter-spacing:-.03em; }
 .pts.bump { animation:ptsIn .7s cubic-bezier(.2,.8,.2,1); }
 @keyframes ptsIn { from { opacity:0; transform:translateY(1.5vw); filter:blur(6px); } }
-.pts-unit { font-size:1.4vw; color:var(--muted); }
+.pts-unit { font-family:var(--serif); font-size:3vw; color:var(--muted); }
 .timer { position:relative; width:10.5vw; height:10.5vw; margin-bottom:.6vw; }
 .timer svg { width:100%; height:100%; overflow:visible; }
 .timer .ring-track { fill:none; stroke:var(--line); stroke-width:2; }
@@ -240,7 +240,7 @@ label.sbtn input { display:none; }
       <div class="eyebrow"><span id="gameSub">2026 송년회</span><span>Year-end Book Quiz</span></div>
       <div class="mast">Book Quiz</div>
       <h1 id="gameTitle">표지 보고 책 제목 맞히기</h1>
-      <p class="lead">익숙한 책 표지가 낯설게 변신했어요. 힌트가 하나씩 열릴수록 점수는 줄어듭니다.</p>
+      <p class="lead">익숙한 책 표지가 낯설게 변신했어요. 힌트가 하나씩 열릴 때마다 정답을 외쳐 보세요.</p>
     </div>
     <div class="toc-wrap">
       <div class="toc-h">Contents</div>
@@ -250,7 +250,7 @@ label.sbtn input { display:none; }
         <button class="btn" id="setBtn">설정 <kbd>S</kbd></button>
         <button class="btn" id="fsBtn">전체화면 <kbd>F</kbd></button>
       </div>
-      <div class="keys"><kbd>→</kbd><kbd>Space</kbd> 다음 · <kbd>←</kbd> 되돌리기 · <kbd>Enter</kbd> 바로 정답 · <kbd>N</kbd><kbd>P</kbd> 라운드 이동 · <kbd>T</kbd> 타이머 · <kbd>M</kbd> 소리 · <kbd>Esc</kbd>×2 처음으로</div>
+      <div class="keys"><kbd>→</kbd><kbd>Space</kbd> 다음 · <kbd>←</kbd> 되돌리기 · <kbd>Enter</kbd> 바로 정답 · <kbd>N</kbd><kbd>P</kbd> 라운드 이동 · <kbd>T</kbd> 타이머 · <kbd>R</kbd> 고정/랜덤 · <kbd>M</kbd> 소리 · <kbd>Esc</kbd>×2 처음으로</div>
     </div>
   </div>
 </section>
@@ -267,8 +267,8 @@ label.sbtn input { display:none; }
       <div class="body">
         <div class="info" id="info">
           <div>
-            <div class="label" id="ptsLabel">지금 맞히면</div>
-            <div class="points"><span class="pts" id="pts">30</span><span class="pts-unit">점</span></div>
+            <div class="label">Hint</div>
+            <div class="points"><span class="pts" id="pts">01</span><span class="pts-unit" id="ptsOf">/ 03</span></div>
           </div>
           <div class="timer" id="timer">
             <svg viewBox="0 0 120 120" id="tsvg"><circle class="ring-track" cx="60" cy="60" r="50"/><circle class="bar" id="tbar" cx="60" cy="60" r="50"/></svg>
@@ -323,15 +323,14 @@ label.sbtn input { display:none; }
           <div class="f"><label>게임 제목</label><input type="text" data-g="title"></div>
           <div class="f"><label>상단 문구</label><input type="text" data-g="subtitle"></div>
           <div class="f"><label>타이머 (초, 0이면 끄기)</label><input type="number" min="0" max="600" data-g="timer"></div>
-          <div class="f"><label>첫 힌트 점수 → 마지막 힌트 점수</label>
-            <div style="display:flex;gap:8px;align-items:center"><input type="number" min="0" data-g="maxPts"> → <input type="number" min="0" data-g="minPts"></div></div>
-          <div class="f"><label>팀 이름 (쉼표로 구분 · 비우면 점수판 없음)</label><input type="text" data-g="teams" placeholder="예: 1팀, 2팀, 3팀"></div>
+          <div class="f"><label>팀 이름 (쉼표로 구분 · 비우면 팀 기록 없음)</label><input type="text" data-g="teams" placeholder="예: 1팀, 2팀, 3팀"></div>
           <div class="f" style="display:flex;flex-direction:column;gap:6px;justify-content:flex-end">
             <label class="chk"><input type="checkbox" data-g="timerAuto"> 힌트마다 타이머 자동 시작</label>
             <label class="chk"><input type="checkbox" data-g="sound"> 효과음</label>
+            <label class="chk"><input type="checkbox" data-g="randomLayout"> 랜덤 배치 (끄면 라운드마다 정해 둔 고정 구조, 키보드 <b>R</b>)</label>
           </div>
         </div>
-        <p class="note">팀을 넣으면 문제 화면에서 숫자키 <b>1~9</b>로 해당 팀에 "지금 점수"를 주고 바로 정답을 공개합니다. 공개 후 다시 누르면 취소됩니다.</p>
+        <p class="note">팀을 넣으면 문제 화면에서 숫자키 <b>1~9</b>로 그 팀이 맞혔다고 기록하고 바로 정답을 공개합니다. 다시 누르면 취소됩니다. 끝 화면에 팀별로 맞힌 개수가 나옵니다.</p>
       </section>
       <section>
         <h3>라운드</h3>
@@ -344,7 +343,7 @@ label.sbtn input { display:none; }
         <div class="mfoot">
           <button class="sbtn" id="exportBtn">설정 내보내기 (.json)</button>
           <label class="sbtn">설정 가져오기<input type="file" id="importFile" accept=".json,application/json"></label>
-          <button class="sbtn" id="resetScores">팀 점수 초기화</button>
+          <button class="sbtn" id="resetScores">팀 기록 초기화</button>
           <button class="sbtn danger" id="resetAll">기본값으로 되돌리기</button>
         </div>
       </section>
@@ -390,7 +389,8 @@ const COVER_REC = {
     pick: ['tiles', '바깥 배경부터 한 칸씩 열리고, 해리 얼굴과 제목은 맨 마지막에 열려요'],
     alts: [['shuffle', '그림이 상징적이라 조각 맞추기도 좋아요'], ['zoom', '아주 가까이에서 시작해 멀어져요']],
     opts: {
-      tiles: { key: [{ x: 0.67, y: 0.5, r: 0.5 }], open: [0.14, 0.28, 0.44, 0.6] },
+      // 고정: 바깥에서 해리 얼굴 쪽으로 원을 좁혀 오며, 체크무늬 리듬으로 열림. 제목 칸은 맨 마지막
+      tiles: { key: [{ x: 0.67, y: 0.5, r: 0.5 }], open: [0.14, 0.28, 0.44, 0.6], random: false },
       zoom: { focus: { x: 0.67, y: 0.5 }, drift: 0.012, rotate: 12 },
     },
   },
@@ -398,15 +398,25 @@ const COVER_REC = {
     accent: '#f19bb8',
     pick: ['steam', '온실 유리에 김이 서린 느낌. 손으로 닦은 자리만 조금씩 보여요'],
     alts: [['invert', '제목 쪽 절반을 가리고 색과 방향을 뒤집어요'], ['silhouette', '유리 돔 모양이 실루엣으로도 또렷해요']],
-    opts: { zoom: { focus: { x: 0.5, y: 0.45 }, drift: 0.02 } },
+    opts: {
+      zoom: { focus: { x: 0.5, y: 0.45 }, drift: 0.02 },
+      // 고정: ① 양옆 화분 → ② 돔 꼭대기와 가장자리 → ③ 돔 한가운데
+      steam: { paths: [
+        [{ cx: 0.24, cy: 0.56, rx: 0.13, ry: 0.05 }, { cx: 0.78, cy: 0.63, rx: 0.13, ry: 0.05 }],
+        [{ cx: 0.5, cy: 0.36, rx: 0.15, ry: 0.04 }, { cx: 0.3, cy: 0.74, rx: 0.15, ry: 0.04 }, { cx: 0.72, cy: 0.44, rx: 0.12, ry: 0.04 }],
+        [{ cx: 0.5, cy: 0.56, rx: 0.2, ry: 0.06 }, { cx: 0.5, cy: 0.15, rx: 0.26, ry: 0.05 }, { cx: 0.5, cy: 0.86, rx: 0.26, ry: 0.04 }],
+      ] },
+    },
   },
   r4: {
     accent: '#48b07a',
     pick: ['spotlight', '깊은 바닷속을 손전등으로 비추는 느낌. 빛이 점점 커져요'],
     alts: [['zoom', '물고기 떼 한 귀퉁이부터 시작해 점점 멀어지며 큰 물고기가 드러나요'], ['bubbles', '물고기 떼 사이로 물방울이 떠올라요']],
-    opts: { zoom: { focus: { x: 0.6, y: 0.45 }, drift: 0.02 }, spotlight: { area: { x: 0.12, y: 0.12, w: 0.76, h: 0.56 } } },
+    opts: { zoom: { focus: { x: 0.6, y: 0.45 }, drift: 0.02 }, spotlight: { area: { x: 0.12, y: 0.12, w: 0.76, h: 0.56 }, path: 'eight' } },
   },
 };
+// 랜덤 배치를 켜면 고정 구조 대신 매번 무작위로 섞는다
+const RANDOM_OVERRIDE = { shuffle: { layout: 'random' }, tiles: { random: true }, steam: { paths: null }, spotlight: { path: null } };
 const SPINES = ['#7a2b3a', '#24493d', '#22345a', '#8c6a27', '#4a2c4c', '#5a3a24'];
 const two = (n) => String(n).padStart(2, '0');
 function setAccent(r) { document.documentElement.style.setProperty('--accent', (COVER_REC[r && r.id] || {}).accent || '#f2c500'); }
@@ -418,7 +428,7 @@ const DEFAULTS = {
   title: '표지 보고 책 제목 맞히기',
   subtitle: '2026 송년회',
   schema: 4,
-  timer: 30, timerAuto: true, maxPts: 30, minPts: 10, sound: true,
+  timer: 30, timerAuto: true, sound: true, randomLayout: false,
   teams: [],
   rounds: [
     { id: 'r1', answer: '무서운 게 딱! 좋아!', sub: '이구성 · ILB · 2002 · 딱이야 시리즈 1', effect: 'shuffle', protect: true,
@@ -661,14 +671,8 @@ const dust = (() => {
 const fx = CoverFX.create($('#cover'), { effect: 'titlemask', duration: 1050, padding: 0.02 });
 
 // ═════════════════════ 게임 상태 ═════════════════════
-const S = { screen: 'start', ri: 0, splashT: 0, escT: 0, revealPts: {}, awards: {}, finished: false, roundTok: 0 };
+const S = { screen: 'start', ri: 0, splashT: 0, escT: 0, awards: {}, finished: false, roundTok: 0 };
 const curRound = () => cfg.rounds[S.ri];
-function ptsAt(stage, stages) {
-  const mx = +cfg.maxPts || 0, mn = +cfg.minPts || 0;
-  if (stages <= 1) return mx;
-  return Math.round(mx - ((mx - mn) * stage) / (stages - 1));
-}
-const curPts = () => ptsAt(Math.min(fx.stage, fx.stages - 1), fx.stages);
 
 function show(id) {
   $$('.screen').forEach((s) => s.classList.toggle('active', s.id === id));
@@ -721,8 +725,11 @@ async function setupRound(i, opt) {
 function mixOf(r) { return r.mix && r.mix.length ? r.mix : DEFAULT_MIX; }
 function effectOpts(r) {
   const per = (COVER_REC[r.id] || {}).opts || {};
-  if (r.effect === 'mix') { const steps = mixOf(r); return { steps, stepOpts: steps.map((n) => per[n] || {}) }; }
-  return per[r.effect];
+  const one = (name) => cfg.randomLayout
+    ? Object.assign({}, per[name], RANDOM_OVERRIDE[name], { seed: (Math.random() * 1e9) | 0 })
+    : Object.assign({ seed: 2026 }, per[name]);
+  if (r.effect === 'mix') { const steps = mixOf(r); return { steps, stepOpts: steps.map(one) }; }
+  return one(r.effect);
 }
 function effectTitle(r) {
   if (r.effect === 'mix') return '단계별 조합';
@@ -744,16 +751,16 @@ function renderPanel() {
   let h = '';
   for (let k = 0; k < st; k++) h += `<span class="${k <= cur ? 'on' : ''}"></span>`;
   $('#dots').innerHTML = h;
-  $('#ptsLabel').textContent = fx.revealed ? '' : `힌트 ${Math.min(cur, st - 1) + 1} / ${st} · 지금 맞히면`;
   const p = $('#pts');
-  const val = String(curPts());
+  const val = two(Math.min(cur, st - 1) + 1);
   if (p.textContent !== val) { p.textContent = val; p.classList.remove('bump'); void p.offsetWidth; p.classList.add('bump'); }
+  $('#ptsOf').textContent = '/ ' + two(st);
   $('#info').classList.toggle('hide', fx.revealed);
   $('#fxDesc').style.opacity = fx.revealed ? 0.35 : 1;
   renderTeams();
 }
 
-// ── 팀 점수 ──
+// ── 팀 기록 (맞힌 개수) ──
 function teamScores() {
   const sc = cfg.teams.map(() => 0);
   for (const rid in S.awards) for (const ti in S.awards[rid]) if (sc[ti] != null) sc[ti] += S.awards[rid][ti];
@@ -770,16 +777,15 @@ function award(ti) {
   if (S.screen !== 'play' || ti >= cfg.teams.length) return;
   const r = curRound();
   if (!fx.revealed) { reveal(); }
-  const pts = S.revealPts[r.id] != null ? S.revealPts[r.id] : curPts();
   const aw = S.awards[r.id] || (S.awards[r.id] = {});
-  if (aw[ti] != null) { delete aw[ti]; toast(cfg.teams[ti] + ' 점수 취소'); }
-  else { aw[ti] = pts; sfx.award(); }
+  if (aw[ti] != null) { delete aw[ti]; toast(cfg.teams[ti] + ' 정답 취소'); }
+  else { aw[ti] = 1; sfx.award(); }
   renderTeams(ti);
   renderAwardLine();
 }
 function renderAwardLine() {
   const r = curRound(), aw = S.awards[r.id] || {};
-  $('#ansAward').textContent = Object.keys(aw).map((i) => `${cfg.teams[i]} +${aw[i]}점`).join('  ·  ');
+  $('#ansAward').textContent = Object.keys(aw).length ? '맞힌 팀 · ' + Object.keys(aw).map((i) => cfg.teams[i]).join(', ') : '';
 }
 
 // ── 정답 공개 ──
@@ -802,7 +808,6 @@ function hideAnswer() { $('#answer').classList.remove('show', 'instant'); }
 function reveal() {
   if (fx.revealed) return;
   const r = curRound();
-  S.revealPts[r.id] = curPts();
   fx.reveal();
   timer.stop(); $('#ddaeng').classList.remove('on');
   sfx.chime();
@@ -872,7 +877,7 @@ async function showEnd() {
     const order = cfg.teams.map((t, i) => i).sort((a, b) => sc[b] - sc[a]);
     const top = sc[order[0]];
     $('#rank').innerHTML = order.map((i, k) => `<div class="team ${sc[i] === top && top > 0 ? 'first' : ''}">
-      <span class="k">${k + 1}위</span><span class="nm">${esc(cfg.teams[i])}</span><span class="sc">${sc[i]}</span></div>`).join('');
+      <span class="k">${k + 1}위</span><span class="nm">${esc(cfg.teams[i])}</span><span class="sc">${sc[i]}</span><span class="k">권</span></div>`).join('');
   } else $('#rank').innerHTML = '';
   document.documentElement.style.setProperty('--accent', '#f3efe7');
   sfx.chime(); dust.burst($('#endList'));
@@ -884,7 +889,7 @@ function goHome() {
   S.screen = 'start'; renderStart(); show('start');
 }
 function startGame() {
-  if (S.finished) { S.awards = {}; S.revealPts = {}; S.finished = false; }
+  if (S.finished) { S.awards = {}; S.finished = false; }
   sfx.unlock();
   gotoRound(0);
 }
@@ -1010,6 +1015,11 @@ addEventListener('keydown', (e) => {
     case 't': case 'T': timer.toggle(); break;
     case 'f': case 'F': toggleFS(); break;
     case 's': case 'S': openSettings(); break;
+    case 'r': case 'R':
+      cfg.randomLayout = !cfg.randomLayout; saveCfg();
+      toast(cfg.randomLayout ? '랜덤 배치: 매번 무작위로 섞어요' : '고정 배치: 라운드마다 정해 둔 구조');
+      if (S.screen === 'play' && !fx.revealed) { fx.setEffect(curRound().effect, effectOpts(curRound())); renderPanel(); if (cfg.timerAuto) timer.start(); }
+      break;
     case 'm': case 'M': cfg.sound = !cfg.sound; saveCfg(); toast(cfg.sound ? '🔊 효과음 켬' : '🔇 효과음 끔'); break;
     case 'Escape': {
       if (S.screen === 'start') break;
@@ -1077,7 +1087,7 @@ function effectOptions(r) {
   const pick = rec ? rec.pick[0] : null;
   const all = CoverFX.effects().filter((f) => f.name !== 'mix');
   const stagesOf = (f) => {
-    const def = CoverFX.get(f.name), o = rec && rec.opts[f.name];
+    const def = CoverFX.get(f.name), o = rec && Object.assign({}, rec.opts[f.name], cfg.randomLayout ? RANDOM_OVERRIDE[f.name] : {});
     return o && typeof def.stages === 'function' ? def.stages(Object.assign({}, def.defaults, o)) : f.stages;
   };
   const opt = (f, star) => `<option value="${f.name}" ${f.name === r.effect ? 'selected' : ''}>${star ? '★ ' : ''}${esc(f.label)} · ${stagesOf(f)}단계${star ? ' (이 라운드 지정)' : ''}</option>`;
@@ -1177,7 +1187,7 @@ $('#rlist').addEventListener('click', (e) => {
   else return;
   changed(); renderSettings();
 });
-$('#resetScores').onclick = () => { S.awards = {}; S.revealPts = {}; toast('팀 점수를 초기화했습니다'); renderTeams(); };
+$('#resetScores').onclick = () => { S.awards = {}; toast('팀 기록을 초기화했습니다'); renderTeams(); };
 $('#resetAll').onclick = () => {
   if (!confirm('모든 설정을 기본값으로 되돌릴까요? (업로드한 이미지 연결도 해제됩니다)')) return;
   cfg = clone(DEFAULTS); changed(); renderSettings();
