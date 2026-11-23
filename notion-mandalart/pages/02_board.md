@@ -35,7 +35,7 @@
 		[[VIEW:board.r3c3]]
 	</column>
 </columns>
-<span color="gray">🟩 충분 · 🟨 조금 · ⬜ 아직 · 💤 14일+ 멈춤 · ✅ 미션 완료 · 🔴 기한 지남 · ⏸ 쉬는 칸 · 🏅 세부 100% · 🔥 80%+</span>
+<span color="gray">🟩 충분 · 🟨 조금 · ⬜ 아직 · 💤 오래 멈춤 · ✅ 미션 완료 · 🔴 기한 지남 · ⏸️ 쉬는 칸 · 🏅 세부 100% · 🔥 80%+</span>
 ---
 ## ✏️ 입력 표 {color="purple"}
 <callout icon="✍️" color="gray_bg">

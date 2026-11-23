@@ -11,13 +11,13 @@
 </callout>
 [[BUTTON:restart.redesign]]
 ## 🚨 재설계 신호 {color="pink"}
-<span color="gray">💤 14일 넘게 기록 없음 · 📉 지금까지 해야 했던 횟수의 40% 미만</span>
+<span color="gray">💤 오래 멈춤(주 1회 이상 습관 14일, 월 1회 습관 46일) · 📉 지금까지 해야 했던 횟수의 40% 미만</span>
 [[VIEW:restart.signal]]
 ## 🚀 페이스 점검 {color="pink"}
 [[VIEW:restart.pace]]
 <columns>
 	<column>
-		### ⏸ 쉬는 칸 (교체 후보)
+		### ⏸️ 쉬는 칸 (교체 후보)
 		[[VIEW:restart.paused]]
 	</column>
 	<column>

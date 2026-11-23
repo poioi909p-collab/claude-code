@@ -1,0 +1,285 @@
+<title>굴러가는 만다라트 미리보기</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap">
+<style>
+/* Layout: 노션 페이지를 그대로 흉내 낸 미리보기. 위쪽 탭 = 사이드바 대신, 본문 폭 900px(전체 너비 1200px). */
+:root{
+  --bg:#ffffff; --fg:#37352f; --muted:#787774; --line:#e9e9e7; --hover:#f1f1ef; --card:#ffffff; --shadow:rgba(15,15,15,.06);
+  --gray:#787774; --brown:#9f6b53; --orange:#d9730d; --yellow:#cb912f; --green:#448361; --blue:#337ea9; --purple:#9065b0; --pink:#c14c8a; --red:#d44c47;
+  --gray_bg:#f1f1ef; --brown_bg:#f4eeee; --orange_bg:#fbecdd; --yellow_bg:#fbf3db; --green_bg:#edf3ec; --blue_bg:#e7f3f8; --purple_bg:#f4f0f7; --pink_bg:#f9eef3; --red_bg:#fdebec;
+  --font: ui-sans-serif, -apple-system, "Segoe UI", "Noto Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+  --mono: "SFMono-Regular", Menlo, Consolas, "Noto Sans KR", monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#191919; --fg:rgba(255,255,255,.81); --muted:#9b9b9b; --line:#2f2f2f; --hover:#252525; --card:#202020; --shadow:rgba(0,0,0,.3);
+  --gray:#9b9b9b; --brown:#ba856f; --orange:#c77d48; --yellow:#ca9849; --green:#529e72; --blue:#379ad3; --purple:#9d68d3; --pink:#d15796; --red:#df5452;
+  --gray_bg:#2f2f2f; --brown_bg:#4a3228; --orange_bg:#5c3b23; --yellow_bg:#564328; --green_bg:#243d30; --blue_bg:#143a4e; --purple_bg:#3c2d49; --pink_bg:#4e2c3c; --red_bg:#522e2a;
+  color-scheme:dark }}
+:root[data-theme="dark"]{
+  --bg:#191919; --fg:rgba(255,255,255,.81); --muted:#9b9b9b; --line:#2f2f2f; --hover:#252525; --card:#202020; --shadow:rgba(0,0,0,.3);
+  --gray:#9b9b9b; --brown:#ba856f; --orange:#c77d48; --yellow:#ca9849; --green:#529e72; --blue:#379ad3; --purple:#9d68d3; --pink:#d15796; --red:#df5452;
+  --gray_bg:#2f2f2f; --brown_bg:#4a3228; --orange_bg:#5c3b23; --yellow_bg:#564328; --green_bg:#243d30; --blue_bg:#143a4e; --purple_bg:#3c2d49; --pink_bg:#4e2c3c; --red_bg:#522e2a;
+  color-scheme:dark }
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--font);font-size:15px;line-height:1.55;margin:0}
+.c-gray{color:var(--gray)}.c-brown{color:var(--brown)}.c-orange{color:var(--orange)}.c-yellow{color:var(--yellow)}.c-green{color:var(--green)}.c-blue{color:var(--blue)}.c-purple{color:var(--purple)}.c-pink{color:var(--pink)}.c-red{color:var(--red)}
+.bg-gray{background:var(--gray_bg)}.bg-brown{background:var(--brown_bg)}.bg-orange{background:var(--orange_bg)}.bg-yellow{background:var(--yellow_bg)}.bg-green{background:var(--green_bg)}.bg-blue{background:var(--blue_bg)}.bg-purple{background:var(--purple_bg)}.bg-pink{background:var(--pink_bg)}.bg-red{background:var(--red_bg)}
+b{font-weight:600}
+
+.topbar{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);border-bottom:1px solid var(--line);
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+.topbar-in{max-width:1200px;margin:0 auto;display:flex;align-items:center;gap:12px;min-height:46px;overflow-x:auto;scrollbar-width:none}
+.crumb{font-size:14px;white-space:nowrap;color:var(--fg);display:flex;gap:6px;align-items:center}
+.tabs{display:flex;gap:2px;margin-left:auto}
+.tab{appearance:none;border:0;background:none;color:var(--muted);font:inherit;font-size:14px;padding:5px 9px;border-radius:6px;cursor:pointer;white-space:nowrap}
+.tab:hover{background:var(--hover)}
+.tab[aria-selected="true"]{color:var(--fg);background:var(--hover);font-weight:500}
+.tab:focus-visible,.nbtn:focus-visible{outline:2px solid var(--blue);outline-offset:1px}
+.note{max-width:1200px;margin:0 auto;font-size:12.5px;color:var(--muted);padding:6px 0 8px}
+
+.cover{height:120px;background:var(--cv,linear-gradient(120deg,#8ec5fc,#e0c3fc))}
+.page{max-width:1080px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 64px}
+.icon{font-size:56px;line-height:1;margin-top:-34px}
+h1{font-size:34px;font-weight:700;margin:8px 0 2px;letter-spacing:-.01em;text-wrap:balance}
+h2{font-size:21px;font-weight:600;margin:28px 0 6px;text-wrap:balance}
+h3{font-size:17px;font-weight:600;margin:18px 0 4px}
+.links{font-size:13.5px;color:var(--muted);margin:2px 0 14px}
+.links span{text-decoration:underline;text-decoration-color:var(--line);text-underline-offset:3px}
+.callout{display:flex;gap:10px;padding:14px 16px;border-radius:6px;margin:6px 0}
+.callout .ci{font-size:19px;line-height:1.3}
+.callout p{margin:0}
+.muted{color:var(--muted);font-size:13.5px}
+.btnrow{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0}
+.nbtn{appearance:none;border:1px solid var(--line);background:var(--card);color:var(--fg);font:inherit;font-size:14px;padding:4px 10px;border-radius:6px;cursor:pointer;box-shadow:0 1px 2px var(--shadow)}
+.nbtn:hover{background:var(--hover)}
+.viewname{font-size:14px;font-weight:600;display:flex;align-items:center;gap:6px;margin:14px 0 4px;padding-bottom:6px;border-bottom:1px solid var(--line)}
+.viewname small{font-weight:400;color:var(--muted)}
+
+.gallery{display:grid;gap:12px}
+.card{background:var(--card);border-radius:6px;box-shadow:0 0 0 1px var(--line),0 2px 4px var(--shadow);padding:12px 14px;min-width:0}
+.card .t{font-weight:600;font-size:15px;margin-bottom:6px}
+.card .p{font-size:13.5px;margin-top:4px;white-space:pre-wrap;overflow-wrap:anywhere}
+.bar{font-family:var(--mono);letter-spacing:-.02em;white-space:nowrap}
+.bar .on{color:var(--c)}.bar .off{color:var(--muted);opacity:.55}
+
+.tbl-wrap{overflow-x:auto;border-top:1px solid var(--line)}
+table.nt{border-collapse:collapse;width:100%;font-size:13.5px;min-width:640px}
+table.nt th{font-weight:500;color:var(--muted);text-align:left;padding:6px 8px;border-bottom:1px solid var(--line);white-space:nowrap}
+table.nt td{padding:7px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+table.nt td.num{font-variant-numeric:tabular-nums;text-align:right}
+table.nt tr:hover td{background:var(--hover)}
+.chk{display:inline-flex;width:15px;height:15px;border:1.5px solid var(--muted);border-radius:3px;vertical-align:-2px;margin-right:6px}
+.chk.on{background:var(--blue);border-color:var(--blue);position:relative}
+.chk.on::after{content:"";position:absolute;left:4px;top:1px;width:4px;height:8px;border:solid #fff;border-width:0 2px 2px 0;transform:rotate(45deg)}
+.done{text-decoration:line-through;color:var(--muted)}
+.tag{display:inline-block;padding:0 6px;border-radius:4px;font-size:12.5px;line-height:20px;white-space:nowrap}
+.pbtn{appearance:none;border:1px solid var(--line);background:var(--card);color:var(--fg);font:inherit;font-size:12.5px;padding:1px 7px;border-radius:5px;cursor:pointer;white-space:nowrap}
+.pbtn:hover{background:var(--hover)}
+.pbtn[aria-pressed="true"]{background:var(--green_bg);border-color:transparent}
+
+.board{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.board .card{display:flex;flex-direction:column;gap:6px}
+.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:3px 6px;font-size:12.5px;line-height:1.35}
+.grid3 span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.grid3 .mid{font-weight:700}
+.center-card{box-shadow:0 0 0 1.5px var(--blue),0 2px 6px var(--shadow)}
+.badges{display:flex;flex-wrap:wrap;gap:4px;min-height:20px}
+.legend{font-size:12.5px;color:var(--muted);margin-top:8px}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.cols>*{min-width:0}
+.home-goals{grid-template-columns:repeat(4,minmax(0,1fr))}
+.compare-cards{grid-template-columns:repeat(2,minmax(0,1fr))}
+.lesson-cards{grid-template-columns:repeat(3,minmax(0,1fr))}
+.dist{font-family:var(--mono);font-size:12.5px;white-space:nowrap}
+@media (max-width:760px){
+  .board{grid-template-columns:1fr}
+  .home-goals,.lesson-cards{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .compare-cards,.cols{grid-template-columns:1fr}
+  h1{font-size:28px}
+}
+@media (max-width:440px){.home-goals,.lesson-cards{grid-template-columns:1fr}}
+@media (prefers-reduced-motion:no-preference){.panel{animation:fade .18s ease-out}@keyframes fade{from{opacity:.6}to{opacity:1}}}
+</style>
+
+<header class="topbar">
+  <div class="topbar-in">
+    <div class="crumb"><span>🎯</span><span>굴러가는 만다라트</span></div>
+    <nav class="tabs" role="tablist" aria-label="페이지">
+      <button class="tab" role="tab" id="t-home" data-p="home">🏠 홈</button>
+      <button class="tab" role="tab" id="t-board" data-p="board">🗺️ 만다라트 보드</button>
+      <button class="tab" role="tab" id="t-compare" data-p="compare">📊 비교 대시보드</button>
+      <button class="tab" role="tab" id="t-lastyear" data-p="lastyear">🔍 작년 목표 해부</button>
+      <button class="tab" role="tab" id="t-restart" data-p="restart">🔄 재시작 센터</button>
+    </nav>
+  </div>
+  <div class="note">디자인 미리보기 · 샘플 데이터 "6개월 갓생 만들기" · 기준일 <span id="base"></span> · 값은 템플릿 수식과 같은 규칙으로 계산한 결과예요 (노션 화면이 아닌 재현)</div>
+</header>
+<main id="app"></main>
+
+<script>
+const D = __DATA__;
+const $ = (h) => { const t = document.createElement('template'); t.innerHTML = h.trim(); return t.content; };
+const esc = (s) => String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const COLOR = {레드:'red',오렌지:'orange',옐로:'yellow',그린:'green',블루:'blue',퍼플:'purple',핑크:'pink',브라운:'brown'};
+const bar = (p, c) => { const n = Math.floor(Math.min(Math.max(p,0),100)/10);
+  return `<span class="bar" style="--c:var(--${c})"><span class="on">${'■'.repeat(n)}</span><span class="off">${'□'.repeat(10-n)}</span></span> <b>${p}%</b>`; };
+const now = D.mandalarts.find(m => m.key === 'M_NOW');
+const prev = D.mandalarts.find(m => m.key === 'M_PREV');
+const goals = D.goals.filter(g => g.만다라트[0] === 'M_NOW').sort((a,b) => a.위치 - b.위치);
+const A = Object.fromEntries(D.actions.map(a => [a.key, a]));
+const gOf = (a) => D.goals.find(g => g.key === a.세부목표[0]);
+const colorOf = (g) => COLOR[g.색상 라벨] || 'blue';
+const short = (x) => x.짧은 이름 || x.세부목표 || x.실천항목;
+const paceCls = (s) => s.startsWith('🚀') ? 'c-green' : s.startsWith('👍') ? 'c-blue' : s.startsWith('⚠️') ? 'c-red' : 'c-brown';
+const dotName = (g) => `<b class="c-${colorOf(g)}">● ${esc(g.세부목표)}</b>`;
+const stamp = (g) => g.달성률 >= 100 ? '<span class="tag bg-yellow"><b>🏅 달성!</b></span>' : g.달성률 >= 80 ? '<b class="c-orange">🔥 거의 다 왔어요</b>' : '';
+const nap = (g) => g.방치 칸 수 > 0 ? `<span class="tag bg-gray"><b>💤 방치 ${g.방치 칸 수}칸</b></span>` : '';
+const gemo = (p) => p >= 100 ? '🏅' : p >= 80 ? '🔥' : p >= 40 ? '🟩' : p > 0 ? '🟨' : '⬜';
+
+function page({icon, title, cover, links, children}) {
+  return `<div class="cover" style="--cv:${cover}"></div><div class="page"><div class="icon">${icon}</div><h1>${title}</h1>
+    <div class="links">${links.map(l => `<span>${l}</span>`).join(' · ')}</div>${children}</div>`;
+}
+const callout = (icon, color, html) => `<div class="callout bg-${color}"><div class="ci">${icon}</div><p>${html}</p></div>`;
+const view = (name, sub='') => `<div class="viewname">${name}${sub ? ` <small>${sub}</small>` : ''}</div>`;
+
+function miniGrid(g) {
+  let cells, mid;
+  if (g.구분 === '중심') {
+    const sib = goals.filter(x => x.구분 !== '중심');
+    cells = [1,2,3,4,6,7,8,9].map(i => { const s = sib.find(x => x.위치 === i);
+      return s ? `${gemo(s.달성률)} <b class="c-${colorOf(s)}">${esc(short(s))}</b>` : '⬚ ─'; });
+    mid = `<span class="tag bg-blue mid">🎯 ${esc(short(g))}</span>`;
+  } else {
+    cells = [1,2,3,4,5,6,7,8].map(i => { const a = g.actions.map(k => A[k]).find(x => x.위치 === i);
+      return a ? `${a.최근 상태} ${esc(short(a))}` : '⬚ ─'; });
+    mid = `<b class="c-${colorOf(g)}">◆ ${esc(short(g))}</b>`;
+  }
+  const c = [cells[0],cells[1],cells[2],cells[3],mid,cells[4],cells[5],cells[6],cells[7]];
+  return `<div class="grid3">${c.map((x,i) => `<span class="${i===4?'mid':''}" title="${esc(x.replace(/<[^>]+>/g,''))}">${x}</span>`).join('')}</div>`;
+}
+
+function home() {
+  const acts = D.actions.filter(a => a.활성 && a.오늘 할 차례 && !a.오늘 할 차례.startsWith('😌'));
+  const ord = (t) => /🔴|📌|🔥/.test(t) ? 1 : t.startsWith('🙂') ? 2 : t.startsWith('🧘') ? 3 : t.startsWith('✅') ? 4 : 5;
+  acts.sort((a,b) => ord(a.오늘 할 차례) - ord(b.오늘 할 차례) || gOf(a).위치 - gOf(b).위치 || a.위치 - b.위치);
+  const top3 = D.todos.filter(t => t.오늘의 3가지), rest = D.todos.filter(t => !t.오늘의 3가지);
+  const todoRow = (t) => `<div style="padding:5px 0;border-bottom:1px solid var(--line)"><span class="chk ${t.완료?'on':''}"></span><span class="${t.완료?'done':''}">${esc(t.할 일)}</span> <span class="tag bg-gray">${t.예상 시간}</span></div>`;
+  return page({icon:'🏠', title:'홈', cover:'linear-gradient(120deg,#a1c4fd,#c2e9fb)',
+    links:['🗺️ 만다라트 보드','📅 기간 계획','✅ 할 일','🔁 습관 체크','📝 회고','📊 비교 대시보드','🔄 재시작 센터'],
+    children: callout('☀️','blue','<b>매일 1분 루틴</b> — ① ⭐ 오늘의 3가지 고르기 → ② 한 일에 ✅ 누르기 → 끝. 안 되는 날엔 🌱 최소만 했음도 기록이에요.')
+    + view('지금 만다라트','갤러리 · 현재 = true')
+    + `<div class="gallery"><div class="card"><div class="t">🎯 ${esc(now.핵심목표)} <span class="tag bg-purple">${now.기간 모드}</span></div>
+        <div class="p">${bar(now.전체 달성률,'blue')}</div>
+        <div class="p"><b class="${paceCls(now.페이스)}">${esc(now.페이스)}</b> · 시간 경과 ${now.시간 경과율}% · <b>${now.D-day}</b></div>
+        <div class="p">${esc(now.작년 이맘때 비교).replace(/▲ (\d+)%p/, '<b class="c-green">▲ $1%p</b>')}</div></div></div>`
+    + `<div class="btnrow"><button class="nbtn">➕ 할 일</button><button class="nbtn">➕ 이번 주 목표</button><button class="nbtn">📝 주간 회고 시작</button><button class="nbtn">🗺️ 만다라트 보기</button></div>`
+    + `<h2 class="c-blue">⭐ 오늘의 3가지</h2>${top3.map(todoRow).join('')}`
+    + `<h2 class="c-blue">🔥 오늘의 행동</h2><div class="muted">기간 목표 횟수를 이번 주 남은 날로 나눠서 자동으로 골라 줘요.</div>`
+    + view('🔥 오늘의 행동','표 · 오늘 순서 오름차순')
+    + `<div class="tbl-wrap"><table class="nt"><thead><tr><th>실천항목</th><th></th><th></th><th>오늘 할 차례</th><th>최소 행동</th><th>연속 기록</th><th>세부목표</th></tr></thead><tbody>${
+      acts.slice(0,12).map(a => `<tr><td>${esc(a.실천항목)}</td><td><button class="pbtn" aria-pressed="${a.오늘 할 차례.startsWith('✅')}">✅ 오늘 했음</button></td><td><button class="pbtn">🌱 최소만</button></td>
+        <td style="white-space:nowrap">${/🔥|🔴/.test(a.오늘 할 차례)?'<b>'+esc(a.오늘 할 차례)+'</b>':esc(a.오늘 할 차례)}</td><td class="muted">${esc(a.최소 행동)}</td>
+        <td>${a.연속>=2?'🔥 '+a.연속+'일 연속':''}</td><td style="white-space:nowrap">${dotName(gOf(a))}</td></tr>`).join('')}</tbody></table></div>
+      <div class="muted" style="margin-top:4px">+ ${Math.max(acts.length-12,0)}개 더 · 표의 버튼은 미리보기에서 눌러 볼 수 있어요</div>`
+    + `<h2 class="c-blue">📋 오늘 할 일</h2>${rest.map(todoRow).join('')}`
+    + view('🔴 지연') + D.overdue.map(t => `<div style="padding:4px 0">${esc(t.할 일)} <b class="c-red">🔴 지연 ${Math.round((new Date(D.base_date)-new Date(t.날짜))/864e5)}일</b></div>`).join('')
+    + `<h3>🧩 세부목표 8</h3><div class="gallery home-goals">${goals.filter(g=>g.구분!=='중심').map(g => `<div class="card"><div class="t"><span class="c-${colorOf(g)}">●</span> ${esc(g.세부목표)}</div>
+        <div class="p">${bar(g.달성률, colorOf(g))}</div><div class="p muted">${g.이번 주}</div><div class="badges">${nap(g)}${stamp(g)}</div></div>`).join('')}</div>`
+  });
+}
+
+function board() {
+  const order = [1,2,3,4,5,6,7,8,9].map(i => goals.find(g => g.위치 === i));
+  return page({icon:'🗺️', title:'만다라트 보드', cover:'linear-gradient(120deg,#e0c3fc,#8ec5fc)', links:['🏠 홈','📱 모바일 보드','💡 추천 라이브러리'],
+    children: callout('🗺️','purple','<b>9칸 × 9칸이 한 화면에.</b> 가운데 카드 = 핵심목표와 세부목표 8개, 바깥 카드 8장 = 각 세부목표의 실천항목 8개. 아래 입력 표에 쓰면 보드가 자동으로 바뀌어요.')
+    + `<div class="board" style="margin-top:12px">${order.map(g => { const center = g.구분 === '중심';
+        const p = center ? now.전체 달성률 : g.달성률, c = center ? 'blue' : colorOf(g);
+        return `<div class="card ${center?'center-card':''}">${miniGrid(g)}<div class="p" style="margin-top:6px">${bar(p, c)}</div>
+          <div class="badges">${center ? '' : stamp(g) + nap(g)}</div></div>`; }).join('')}</div>`
+    + `<div class="legend">🟩 충분 · 🟨 조금 · ⬜ 아직 · 💤 오래 멈춤 · ✅ 미션 완료 · 🔴 기한 지남 · ⏸️ 쉬는 칸 · 🏅 세부 100% · 🔥 80%+</div>`
+    + `<h2 class="c-purple">✏️ 입력 표</h2>` + view('✏️ 실천항목 입력','표 · 세부목표별 그룹 · 위치 오름차순')
+    + `<div class="tbl-wrap"><table class="nt"><thead><tr><th>실천항목</th><th>위치</th><th>유형</th><th>빈도</th><th>최소 행동</th><th>활성 상태</th><th>칸</th><th>자동 분해</th></tr></thead><tbody>
+      <tr><td colspan="8">${dotName(goals.find(g=>g.위치===4))}</td></tr>${
+      goals.find(g=>g.위치===4).actions.map(k => A[k]).map(a => `<tr><td>${esc(a.실천항목)}</td><td class="num">${a.위치}</td><td style="white-space:nowrap">${a.유형}</td><td style="white-space:nowrap">${a.빈도}</td><td class="muted">${esc(a.최소 행동)}</td>
+        <td><span class="tag ${a.활성?'bg-green':'bg-gray'}">${a.활성 상태||'활성'}</span></td><td style="white-space:nowrap">${a.최근 상태} ${esc(short(a))}</td><td class="muted" style="white-space:nowrap">${esc(a.자동 분해)}</td></tr>`).join('')}</tbody></table></div>`
+  });
+}
+
+function compare() {
+  const ms = [now, prev];
+  return page({icon:'📊', title:'비교 대시보드', cover:'linear-gradient(120deg,#89f7fe,#66a6ff)', links:['🏠 홈','🔍 작년 목표 해부','📝 회고'],
+    children: callout('📊','blue','<b>지난번의 나 vs 지금의 나.</b> 끝난 만다라트도 지우지 말고 상태 = 보관으로 두세요. 새 만다라트의 이전 만다라트에 연결하면 같은 시점끼리 비교돼요.')
+    + `<div class="btnrow"><button class="nbtn">🌱 새 만다라트 시작</button><button class="nbtn">➕ 지난 목표 옮겨 오기</button></div>`
+    + `<h2 class="c-blue">🏆 만다라트 성적표</h2><div class="gallery compare-cards">${ms.map(m => `<div class="card"><div class="t">${esc(m.핵심목표)}</div>
+        <div class="p"><span class="tag ${m.상태==='진행 중'?'bg-blue':'bg-brown'}">${m.상태}</span> <span class="tag bg-purple">${m.기간 모드}</span></div>
+        <div class="p">${bar(m.전체 달성률, m.상태==='진행 중'?'blue':'brown')}</div>
+        <div class="p">📈 ${m.전체 달성률}% · 🔁 유지 ${m.습관 유지율}% · 💤 ${m.방치 칸}칸 · 🔄 재시작 ${m.재시작 합계}회 · 📝 회고 ${m.회고 수}회</div>
+        ${m.작년 이맘때 비교 ? `<div class="p">${esc(m.작년 이맘때 비교).replace(/▲ (\d+)%p/, '<b class="c-green">▲ $1%p</b>')}</div>` : '<div class="p muted">기록된 달성률로 옮겨 온 지난 목표</div>'}</div>`).join('')}</div>`
+    + `<h2 class="c-blue">📸 같은 시점 비교</h2><div class="muted">월간 회고 때 적은 누적 달성률(스냅샷)을 경과 월끼리 맞춰 봐요.</div>${spark()}`
+    + `<h2 class="c-blue">🔍 작년의 교훈 → 올해</h2>` + D.lessons.map(l => `<div style="padding:5px 0;border-bottom:1px solid var(--line)"><b>${esc(l.지난 목표)}</b> · ${esc(l.주원인)} · ${esc(l.교훈 한 줄)} ${l.반영?'<b class="c-green">✅ 반영됨</b>':'<span class="c-orange">⏳ 아직 반영 안 됨</span>'}</div>`).join('')
+  });
+}
+
+function spark() {
+  const snaps = [9,14,18,22,27,31], cur = now.전체 달성률, m = now.경과 월;
+  const W = 640, H = 170, L = 34, R = 14, T = 14, B = 28, x = i => L + i*(W-L-R)/5, y = v => T + (H-T-B)*(1 - v/40);
+  const grid = [0,10,20,30,40].map(v => `<line x1="${L}" x2="${W-R}" y1="${y(v)}" y2="${y(v)}" stroke="var(--line)"/><text x="${L-6}" y="${y(v)+4}" text-anchor="end" font-size="11" fill="var(--muted)">${v}%</text>`).join('');
+  const xs = snaps.map((_,i) => `<text x="${x(i)}" y="${H-8}" text-anchor="middle" font-size="11" fill="var(--muted)">${i+1}개월</text>`).join('');
+  const line = snaps.map((v,i) => `${i?'L':'M'}${x(i)},${y(v)}`).join(' ');
+  return `<div class="tbl-wrap" style="border:0"><svg viewBox="0 0 ${W} ${H}" width="100%" style="max-width:${W}px;min-width:420px" role="img" aria-label="지난 만다라트 월별 누적 달성률과 지금 만다라트 비교">
+    ${grid}${xs}<path d="${line}" fill="none" stroke="var(--brown)" stroke-width="2"/>
+    ${snaps.map((v,i) => `<circle cx="${x(i)}" cy="${y(v)}" r="3" fill="var(--brown)"/>`).join('')}
+    <circle cx="${x(m)}" cy="${y(Math.min(cur,40))}" r="5.5" fill="var(--blue)"/>
+    <text x="${x(m)+10}" y="${y(Math.min(cur,40))+4}" font-size="12" font-weight="600" fill="var(--blue)">지금 ${cur}%</text>
+    <text x="${x(5)}" y="${y(31)-9}" text-anchor="end" font-size="12" fill="var(--brown)">지난 만다라트 31%</text></svg></div>
+    <div class="muted">갈색 = 2026 상반기 다시 시작 프로젝트(월간 회고 스냅샷) · 파랑 = 지금(${m+1}개월 차). 노션에서는 이 그래프 대신 "같은 시점(${m+1}개월 차) 9% → 지금 ${cur}% ▲${cur-9}%p" 문장으로 보여요(차트 뷰는 선택).</div>`;
+}
+
+function lastyear() {
+  const dist = (l) => `<span class="dist"><span class="c-purple">🧩 ${'■'.repeat(l.설계)}</span>  <span class="c-orange">🏃 ${'■'.repeat(l.실행)}</span>  <span class="c-blue">🌦 ${'■'.repeat(l.환경)}</span></span>`;
+  const rx = {'🧩 설계 문제':'목표를 숫자로 바꾸고, 최소 행동 정하기 → Step 1·3','🏃 실행 문제':'원탭 기록 + 주간 회고 고정 → Step 5·6','🌦 환경 문제':'시간 블록·0원 대안·재시작 규칙 → 재시작 센터'};
+  return page({icon:'🔍', title:'작년 목표 해부', cover:'linear-gradient(120deg,#ff9a9e,#fecfef)', links:['Step 0. 작년 목표 해부하기','📊 비교 대시보드','🗺️ 만다라트 보드'],
+    children: callout('🔍','red','<b>자책 말고 해부.</b> 작년 목표가 무너진 건 대부분 설계·실행·환경 셋 중 하나예요. 원인을 체크하면 주원인과 처방이 자동으로 나와요.')
+    + `<div class="btnrow"><button class="nbtn">➕ 지난 목표 하나 해부하기</button></div>`
+    + view('해부 목록','표 · 실제 달성률 오름차순')
+    + `<div class="tbl-wrap"><table class="nt"><thead><tr><th>지난 목표</th><th>실제</th><th>멈춘 시점</th><th>원인 분포</th><th>주원인</th><th>처방</th><th>반영</th></tr></thead><tbody>${
+      [...D.lessons].sort((a,b)=>a.실제 달성률-b.실제 달성률).map(l => `<tr><td><b>${esc(l.지난 목표)}</b><div class="muted">${esc(l.언제)} · ${esc(l.분야)}</div></td><td class="num">${l.실제 달성률}%</td>
+        <td><span class="tag bg-orange">${esc(l.멈춘 시점)}</span></td><td>${dist(l)}</td><td style="white-space:nowrap"><b>${esc(l.주원인)}</b></td><td class="muted">${esc(rx[l.주원인]||'')}</td>
+        <td style="white-space:nowrap">${l.반영?'<b class="c-green">✅ 반영됨</b>':'<span class="c-orange">⏳ 미반영</span>'}</td></tr>`).join('')}</tbody></table></div>`
+    + `<h2 class="c-red">💌 교훈 카드</h2><div class="gallery lesson-cards">${D.lessons.map(l => `<div class="card"><div class="t">${esc(l.지난 목표)}</div>
+        <div class="p">💡 ${esc(l.교훈 한 줄)}</div><div class="p muted">🛡 ${esc(l.재발 방지 규칙)}</div><div class="p"><span class="tag bg-green">${esc(l.다음 결정)}</span></div></div>`).join('')}</div>`
+  });
+}
+
+function restart() {
+  const sig = D.actions.filter(a => a.재설계 신호 && gOf(a).만다라트[0]==='M_NOW');
+  const redo = D.actions.filter(a => a.재시작 횟수 > 0);
+  return page({icon:'🔄', title:'재시작 센터', cover:'linear-gradient(120deg,#fbc2eb,#a6c1ee)', links:['무너졌을 때: 다시 시작하는 법','🔁 습관 체크','📝 회고'],
+    children: callout('🔄','pink','<b>계획은 원래 깨져요. 중요한 건 다시 시작하는 속도.</b> 아래 🚨 목록은 수식이 찾아낸 멈춘 칸이에요. 지우지 말고 줄여서 다시 시작하세요.')
+    + callout('🧯','gray','<b>3분 재시작 루틴</b><br>1. 🚨 목록에서 칸 1개 고르기<br>2. 문장 줄이기: 빈도 ↓ 시간 ↓ 최소 행동 더 작게 (원래 문장은 이전 버전에 복사)<br>3. 🔄 다시 시작 누르기 → 오늘부터 달성률을 새로 셈<br>4. 바꾼 이유를 🔄 재설계 회고에 한 줄')
+    + `<h2 class="c-pink">🚨 재설계 신호</h2>` + view('🚨 재설계 신호','표 · 기록 공백 내림차순')
+    + `<div class="tbl-wrap"><table class="nt"><thead><tr><th>실천항목</th><th></th><th>칸</th><th>재설계 신호</th><th>공백</th><th>최소 행동</th></tr></thead><tbody>${
+      sig.sort((a,b)=>b.공백-a.공백).map(a => `<tr><td>${esc(a.실천항목)}</td><td><button class="pbtn">🔄 다시 시작</button></td><td style="white-space:nowrap">${a.최근 상태} ${esc(short(a))}</td>
+        <td><b class="${a.재설계 신호.startsWith('💤')?'c-red':'c-orange'}">${esc(a.재설계 신호)}</b></td><td class="num">${a.공백}일</td><td class="muted">${esc(a.최소 행동)}</td></tr>`).join('')}</tbody></table></div>`
+    + `<h3>🔁 다시 시작한 칸</h3>` + redo.map(a => `<div class="card" style="margin-top:6px"><div class="t">${esc(a.실천항목)}</div>
+        <div class="p muted">이전 버전: <s>${esc(a.이전 버전)}</s> → 재시작일 ${esc(a.재시작일)} · ${a.재시작 횟수}회</div>
+        <div class="p">재시작 뒤 ${a.누적}회 / 지금까지 목표 ${a.경과 목표 횟수}회 · ${a.최근 상태} ${a.연속>=2?'🔥 '+a.연속+'일 연속':''}</div></div>`).join('')
+  });
+}
+
+const PAGES = {home, board, compare, lastyear, restart};
+function show() {
+  const k = (location.hash || '#home').slice(1);
+  const key = PAGES[k] ? k : 'home';
+  document.querySelectorAll('.tab').forEach(t => t.setAttribute('aria-selected', String(t.dataset.p === key)));
+  const app = document.getElementById('app');
+  app.replaceChildren($(`<section class="panel" role="tabpanel" aria-labelledby="t-${key}">${PAGES[key]()}</section>`));
+  app.querySelectorAll('.pbtn').forEach(b => b.addEventListener('click', () => b.setAttribute('aria-pressed', String(b.getAttribute('aria-pressed') !== 'true'))));
+}
+document.getElementById('base').textContent = D.base_date;
+document.querySelectorAll('.tab').forEach(t => t.addEventListener('click', () => { location.hash = t.dataset.p; }));
+window.addEventListener('hashchange', () => { show(); window.scrollTo(0,0); });
+show();
+</script>

@@ -1,10 +1,10 @@
 ---
 db: retros
 name: 중간 점검
-icon: ⏸
+icon: ⏸️
 props: {유형: 중간 점검}
 ---
-<callout icon="⏸" color="orange_bg">
+<callout icon="⏸️" color="orange_bg">
 	1년 모드 6개월 차 / 6개월 모드 각 스프린트 6주 차. 목표를 **다시 맞추는** 날이에요. 줄이는 건 실패가 아니라 조정이에요.
 </callout>
 ## 🚀 지금 페이스
