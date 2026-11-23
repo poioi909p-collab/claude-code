@@ -738,7 +738,12 @@
     const d1 = pos0.map((q) => Math.hypot(rowOf(q) - c, colOf(q) - c) / maxD);
     const d2 = Array.from({ length: N }, (_, i) => (A[i] ? sIdx[i] / Math.max(1, outerLen) : (sIdx[pos2[i]] - outerLen) / Math.max(1, inner.length)));
     const d3 = Array.from({ length: N }, (_, i) => (A[i] ? 0 : (sIdx[i] - outerLen) / Math.max(1, inner.length - 1)));
-    return { n, N, pos0, pos2, rot, inv, A, d1, d2, d3, structured: true };
+    // 탁자에 흩어진 퍼즐 카드처럼: 조각마다 정해진 기울기·어긋남 (② 단계에서 바로 섬)
+    const tilt = Array.from({ length: N }, (_, i) => ((((i * 7919) % 19) - 9) * Math.PI) / 180);
+    const jx = Array.from({ length: N }, (_, i) => ((((i * 31) % 9) - 4) / 4) * 0.06);
+    const jy = Array.from({ length: N }, (_, i) => ((((i * 17) % 9) - 4) / 4) * 0.06);
+    const order = pos0.map((q) => sIdx[q] / N); // 등장 순서: 판 위 나선 순서
+    return { n, N, pos0, pos2, rot, inv, A, d1, d2, d3, tilt, jx, jy, order, structured: true, born: null };
   }
   register('shuffle', {
     label: '조각 재배치',
@@ -746,6 +751,7 @@
     fit: ['early', 'mid'],
     stages: 3,
     defaults: { grid: 5, invert: 0.3, rotate: true, layout: 'random', pos0: null, invSlots: null },
+    animated: (t, o) => o.layout === 'frame' && t < 1,
     init({ opts, rand }) {
       const n = Math.max(2, opts.grid | 0), N = n * n;
       if (opts.layout === 'frame') return frameLayout(n, opts);
@@ -783,6 +789,13 @@
       ctx.restore();
       const gap = Math.max(1, w * 0.008) * (1 - s3);
       const items = [];
+      // 구조적 배치: 라운드 시작 때 조각이 판 밖에서 날아와 자리 잡음
+      let intro = 1;
+      if (st.structured) {
+        if (st.born == null) st.born = t > 0 ? -1e9 : s.time;
+        intro = clamp((s.time - st.born) / 1.9, 0, 1);
+      }
+      const D = Math.max(w, h);
       for (let i = 0; i < st.N; i++) {
         const d = st.delay ? st.delay[i] : 0;
         const d1 = st.d1 ? st.d1[i] : d, d2 = st.d2 ? st.d2[i] : d, d3 = st.d3 ? st.d3[i] : d;
@@ -796,12 +809,27 @@
         const fx = ((from % n) + 0.5) * pw, fy = (Math.floor(from / n) + 0.5) * ph;
         const tx = ((to % n) + 0.5) * pw, ty = (Math.floor(to / n) + 0.5) * ph;
         const fly = from !== to ? Math.sin(Math.PI * u) : 0;
+        let cx = lerp(fx, tx, u), cy = lerp(fy, ty, u) - fly * h * 0.08, sc = 1 + fly * 0.35, ex = 0, flyAll = fly;
+        if (st.structured) {
+          const straight = 1 - Ease.inOut(k1);
+          cx += st.jx[i] * pw * straight; cy += st.jy[i] * ph * straight;
+          ex = st.tilt[i] * straight + Math.sin(s.time * 0.9 + i * 1.7) * 0.018 * straight;
+          if (intro < 1) {
+            const ki = Ease.out(stagger(intro, st.order[i], 0.55));
+            let dx = fx - w / 2, dy = fy - h / 2;
+            const L = Math.hypot(dx, dy) || 1;
+            if (L < 1) { dx = 0; dy = 1; }
+            const sx0 = fx + (dx / L) * D * 0.95, sy0 = fy + (dy / L) * D * 0.95;
+            cx = lerp(sx0, cx, ki); cy = lerp(sy0, cy, ki);
+            ex += (1 - ki) * 2.4 * (i % 2 ? 1 : -1);
+            sc *= lerp(0.55, 1, ki);
+            flyAll = Math.max(flyAll, 1 - ki);
+          }
+        }
         items.push({
-          i, fly,
-          cx: lerp(fx, tx, u),
-          cy: lerp(fy, ty, u) - fly * h * 0.08,
-          sc: 1 + fly * 0.35,
-          ang: st.rot[i] * (Math.PI / 2) * (1 - r1) + fly * (st.structured ? 0.25 : 0.5) * ((st.structured ? tx < fx : i % 2) ? 1 : -1),
+          i, fly: flyAll, ex, card: st.structured,
+          cx, cy, sc,
+          ang: st.rot[i] * (Math.PI / 2) * (1 - r1) + fly * (st.structured ? 0.25 : 0.5) * ((st.structured ? tx < fx : i % 2) ? 1 : -1) + ex,
           invA: st.inv[i] ? (st.structured ? 1 - Ease.inOut(k1) : 1 - (st.A[i] ? u2 : u3)) : 0,
         });
       }
@@ -815,7 +843,15 @@
         ctx.translate(it.cx, it.cy);
         ctx.rotate(it.ang);
         ctx.scale(it.sc * fit, it.sc * fit);
-        if (it.fly > 0.05) { ctx.shadowColor = 'rgba(0,0,0,0.55)'; ctx.shadowBlur = 24 * s.dpr * it.fly; }
+        if (it.card && s3 < 1) {
+          // 퍼즐 카드: 얇은 크림색 테두리 + 그림자 (완성될수록 사라짐)
+          const bw = pw * 0.035 * (1 - Ease.inOut(s3));
+          ctx.shadowColor = 'rgba(0,0,0,' + (0.5 * (1 - s3)).toFixed(3) + ')';
+          ctx.shadowBlur = (10 + 20 * it.fly) * s.dpr; ctx.shadowOffsetY = 3 * s.dpr * (1 - s3);
+          ctx.fillStyle = '#efe4cc';
+          ctx.fillRect(-dw / 2 - bw, -dh / 2 - bw, dw + bw * 2, dh + bw * 2);
+          ctx.shadowColor = 'transparent'; ctx.shadowBlur = 0; ctx.shadowOffsetY = 0;
+        } else if (it.fly > 0.05) { ctx.shadowColor = 'rgba(0,0,0,0.55)'; ctx.shadowBlur = 24 * s.dpr * it.fly; }
         ctx.drawImage(src, sx, sy, pw, ph, -dw / 2, -dh / 2, dw, dh);
         ctx.shadowColor = 'transparent';
         ctx.shadowBlur = 0;

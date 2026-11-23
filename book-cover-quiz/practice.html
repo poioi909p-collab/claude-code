@@ -48,6 +48,32 @@ header { display: flex; align-items: baseline; justify-content: space-between; g
 @keyframes chIn { from { opacity: 0; transform: translateY(.45em); filter: blur(6px); } to { opacity: 1; transform: none; filter: none; } }
 @media (prefers-reduced-motion: reduce) { .reveal.show *, .reveal.show .t .c { animation-duration: 1ms !important; animation-delay: 0s !important; } }
 .bar.hide { display: none; }
+/* 시작 화면 · 라운드 타이틀 카드 */
+.intro, .card { position: absolute; inset: 0; z-index: 4; display: none; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 16px;
+  background: radial-gradient(ellipse 80% 70% at 50% 45%, #22304a, #0b111a 80%); }
+.intro.on, .card.on { display: flex; }
+.intro .k { font-family: var(--latin); font-style: italic; font-size: 13px; letter-spacing: .3em; color: var(--gold); display: flex; align-items: center; gap: 10px; }
+.intro .k::before, .intro .k::after { content: ""; width: 28px; height: 1px; background: var(--gold); }
+.intro h1 { font-family: var(--serif); font-weight: 700; font-size: clamp(26px, 8vw, 40px); line-height: 1.2; margin: 10px 0 6px; color: var(--paper); text-wrap: balance; word-break: keep-all; }
+.intro p { margin: 0; font-family: var(--serif); color: var(--muted); font-size: 14px; }
+.shelf { display: flex; align-items: flex-end; gap: 4px; margin-top: 26px; padding: 0 10px; position: relative; }
+.shelf::after { content: ""; position: absolute; left: -8px; right: -8px; bottom: -7px; height: 7px; background: linear-gradient(180deg, #3a2c1d, #24190f); border-top: 1px solid rgba(240,217,162,.35); border-radius: 2px; }
+.spine { width: 48px; height: var(--h); border-radius: 3px 3px 1px 1px; color: var(--gold-hi); display: flex; flex-direction: column; align-items: center; padding: 10px 0;
+  background: linear-gradient(90deg, rgba(0,0,0,.35), rgba(255,255,255,.08) 18%, rgba(0,0,0,.2) 80%, rgba(0,0,0,.4)), var(--c);
+  box-shadow: inset 0 0 0 1px rgba(0,0,0,.25), 3px 0 8px rgba(0,0,0,.35); animation: shelfIn .9s cubic-bezier(.2,.9,.25,1.05) both; }
+.spine b { font-family: var(--latin); font-style: italic; font-size: 16px; }
+.spine span { writing-mode: vertical-rl; font-family: var(--serif); font-weight: 700; font-size: 14px; letter-spacing: .2em; margin-top: 8px; }
+@keyframes shelfIn { from { opacity: 0; transform: translateY(-24px) rotate(-3deg); } }
+.card .ey { font-family: var(--latin); font-size: 13px; letter-spacing: .4em; color: var(--gold); text-transform: uppercase; animation: fadeIn .6s both; }
+.card .num { font-family: var(--latin); font-style: italic; font-weight: 700; font-size: 96px; line-height: 1; margin: 4px 0 8px;
+  background: linear-gradient(180deg, #fff6df, var(--gold-hi) 40%, var(--gold) 70%, #9b7a3e); -webkit-background-clip: text; background-clip: text; color: transparent;
+  animation: numIn 1s cubic-bezier(.2,.9,.25,1) both; }
+.card .rl { width: 160px; height: 1px; background: linear-gradient(90deg, transparent, var(--gold), transparent); animation: lnIn2 .8s .3s both; }
+.card .nm { font-family: var(--serif); font-weight: 700; font-size: 26px; margin-top: 12px; color: var(--paper); animation: riseIn .8s .45s both; }
+.card.out { animation: cardOut .45s forwards; }
+@keyframes numIn { from { opacity: 0; transform: scale(1.3); filter: blur(10px); } }
+@keyframes lnIn2 { from { transform: scaleX(0); } }
+@keyframes cardOut { to { opacity: 0; } }
 .end { position: absolute; inset: 0; display: none; flex-direction: column; align-items: center; justify-content: center; gap: 10px; text-align: center; padding: 16px; z-index: 3;
   background: radial-gradient(circle at 50% 40%, #233350, var(--stage) 75%); }
 .end.on { display: flex; }
@@ -76,6 +102,18 @@ button.next:focus-visible { outline: 2px solid var(--gold-hi); outline-offset: 3
   <div class="stage">
     <div id="box" role="button" tabindex="0" aria-label="표지. 누르면 다음으로"></div>
     <div class="end" id="end"><h2>연습 끝!</h2><ol id="endList"></ol></div>
+    <div class="intro on" id="intro">
+      <div class="k">BOOK QUIZ</div>
+      <h1>표지 보고 책 제목 맞히기</h1>
+      <p>변신한 책 표지, 원래 무슨 책이었을까요? · 연습판</p>
+      <div class="shelf">
+        <div class="spine" style="--c:#7a2b3a;--h:150px;animation-delay:.15s"><b>I</b><span>조각 재배치</span></div>
+        <div class="spine" style="--c:#24493d;--h:162px;animation-delay:.25s"><b>II</b><span>타일 뒤집기</span></div>
+        <div class="spine" style="--c:#22345a;--h:156px;animation-delay:.35s"><b>III</b><span>김 서린 유리</span></div>
+        <div class="spine" style="--c:#8c6a27;--h:168px;animation-delay:.45s"><b>IV</b><span>손전등</span></div>
+      </div>
+    </div>
+    <div class="card" id="card"><div class="ey">Round</div><div class="num" id="cardNum">I</div><div class="rl"></div><div class="nm" id="cardNm"></div></div>
   </div>
   <div class="bar" id="bar"><div class="dots" id="dots"></div><div class="pts" id="pts"></div></div>
   <div class="reveal" id="reveal" aria-live="polite">
@@ -109,7 +147,24 @@ button.next:focus-visible { outline: 2px solid var(--gold-hi); outline-offset: 3
   ];
   ROUNDS.forEach((r) => { const i = new Image(); i.src = r.src; }); // 미리 불러오기
   const fx = CoverFX.create('#box', { padding: 0.03, duration: 1050, onChange: render });
-  let ri = 0, ended = false;
+  let ri = 0, ended = false, inIntro = true, cardT = 0;
+  function showCard() {
+    const c = $('#card');
+    $('#cardNum').textContent = ROMAN[ri];
+    $('#cardNm').textContent = (CoverFX.get(ROUNDS[ri].effect) || {}).label || '';
+    c.classList.remove('on', 'out'); void c.offsetWidth; c.classList.add('on');
+    clearTimeout(cardT); cardT = setTimeout(hideCard, 1700);
+  }
+  function hideCard() {
+    const c = $('#card');
+    if (!c.classList.contains('on') || c.classList.contains('out')) return false;
+    clearTimeout(cardT);
+    c.classList.add('out');
+    // 카드가 걷히는 순간 효과를 새로 시작해서 등장 연출이 보이게
+    fx.setEffect(ROUNDS[ri].effect, ROUNDS[ri].opts);
+    setTimeout(() => c.classList.remove('on', 'out'), 450);
+    return true;
+  }
 
   function load(i) {
     ri = i; ended = false;
@@ -119,6 +174,7 @@ button.next:focus-visible { outline: 2px solid var(--gold-hi); outline-offset: 3
     fx.setOptions({ regions: r.regions, text: r.answer, protect: true });
     fx.setEffect(r.effect, r.opts);
     fx.setImage(r.src);
+    showCard();
     render();
   }
   const esc = (t) => String(t).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -132,12 +188,19 @@ button.next:focus-visible { outline: 2px solid var(--gold-hi); outline-offset: 3
     el.classList.remove('show'); void el.offsetWidth; el.classList.add('show');
     $('#bar').classList.add('hide');
   }
-  function hideReveal() { $('#reveal').classList.remove('show'); $('#bar').classList.remove('hide'); }
+  function hideReveal() { $('#reveal').classList.remove('show'); $('#bar').classList.toggle('hide', inIntro); }
   function pts() {
     const S = fx.stages, k = Math.min(fx.stage, S - 1);
     return S <= 1 ? 30 : Math.round(30 - (20 * k) / (S - 1));
   }
   function render() {
+    if (inIntro) {
+      $('#rno').innerHTML = 'Book Quiz<span>연습</span>';
+      $('#fxname').textContent = ''; $('#desc').textContent = '';
+      $('#bar').classList.add('hide');
+      $('#next').textContent = '시작하기';
+      return;
+    }
     if (!fx.stages) return;
     $('#rno').innerHTML = 'Round ' + ROMAN[ri] + '<span>of IV</span>';
     $('#fxname').textContent = ended ? '' : fx.label;
@@ -146,9 +209,11 @@ button.next:focus-visible { outline: 2px solid var(--gold-hi); outline-offset: 3
     for (let k = 0; k <= fx.stages; k++) d += '<span class="' + (k < fx.stage ? 'done' : k === fx.stage ? 'cur' : '') + '"></span>';
     $('#dots').innerHTML = d + '<em>' + (fx.revealed ? '정답 공개' : '힌트 ' + (fx.stage + 1) + ' / ' + fx.stages) + '</em>';
     $('#pts').innerHTML = fx.revealed ? '' : pts() + '<small>점</small>';
-    $('#next').textContent = ended ? '처음부터 다시' : fx.revealed ? (ri < ROUNDS.length - 1 ? '다음 라운드' : '결과 보기') : fx.stage === fx.stages - 1 ? '정답 공개' : '다음 힌트';
+    $('#next').textContent = inIntro ? '시작하기' : ended ? '처음부터 다시' : fx.revealed ? (ri < ROUNDS.length - 1 ? '다음 라운드' : '결과 보기') : fx.stage === fx.stages - 1 ? '정답 공개' : '다음 힌트';
   }
   function next() {
+    if (inIntro) { inIntro = false; $('#intro').classList.remove('on'); load(0); return; }
+    if ($('#card').classList.contains('on')) { hideCard(); return; }
     if (ended) { load(0); return; }
     if (!fx.revealed) {
       if (fx.stage === fx.stages - 1) {
@@ -170,7 +235,8 @@ button.next:focus-visible { outline: 2px solid var(--gold-hi); outline-offset: 3
   document.addEventListener('keydown', (e) => {
     if (['ArrowRight', ' ', 'PageDown'].includes(e.key) && e.target.tagName !== 'BUTTON') { e.preventDefault(); next(); }
   });
-  load(0);
+  // 시작 화면: 첫 라운드는 시작을 눌러야 시작 (표지는 아직 안 보임)
+  render();
 })();
 </script>
 </body></html>

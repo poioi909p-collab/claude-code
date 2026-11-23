@@ -883,6 +883,8 @@ function endSplash(quiet) {
     setTimeout(() => sp.classList.remove('on', 'out'), 450);
   }
   S.screen = 'play';
+  // 스플래시가 걷히는 순간 효과를 새로 시작 (조각이 날아드는 등장 연출이 보이게)
+  if (!quiet && !fx.revealed && fx.stage === 0) fx.setEffect(curRound().effect, effectOpts(curRound()));
   if (!quiet && cfg.timerAuto && !fx.revealed) timer.start();
   else timer.render();
 }
