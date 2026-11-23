@@ -29,40 +29,47 @@ body::after { content: ""; position: fixed; inset: 0; pointer-events: none; z-in
 
 /* 상단: 번호 · 효과 · 진행 */
 .top { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+.top .yr { font-size: 12px; color: var(--muted); letter-spacing: .04em; }
 .no { font-family: var(--serif); font-size: 26px; line-height: 1; }
 .no i { font-style: italic; color: var(--accent); margin-right: 4px; }
 .no small { font-family: var(--sans); font-size: 12px; color: var(--muted); margin-left: 6px; letter-spacing: .02em; }
-.fxname { font-size: 14px; font-weight: 500; color: var(--muted); }
-.fxname b { color: var(--text); font-weight: 700; }
-.prog { display: flex; gap: 4px; }
+.prog { display: none; }
 .prog span { flex: 1; height: 3px; border-radius: 2px; background: var(--line); overflow: hidden; position: relative; }
 .prog span::after { content: ""; position: absolute; inset: 0; background: var(--accent); transform: scaleX(0); transform-origin: left; transition: transform .6s cubic-bezier(.3,.8,.2,1); }
 .prog span.on::after { transform: scaleX(1); }
 
 /* 표지 무대 */
-.stage { position: relative; flex: 1; min-height: 300px; border-radius: 18px; overflow: hidden; background: var(--bg-2);
-  box-shadow: inset 0 0 0 1px var(--line); }
-#box { position: absolute; inset: 0; cursor: pointer; }
+.stage { position: relative; flex: 1; min-height: 340px; }
+.stage::before { content: ""; position: absolute; left: -16px; right: -16px; top: -40px; height: 75%; pointer-events: none;
+  background: radial-gradient(ellipse 55% 70% at 50% 0%, rgba(255,248,232,.11), transparent 72%); }
+.stage::after { content: ""; position: absolute; left: 8%; right: 8%; bottom: 112px; height: 1px; pointer-events: none;
+  background: linear-gradient(90deg, transparent, var(--line), transparent); }
+.wm { position: absolute; right: -6px; top: 4%; font-family: var(--serif); font-style: italic; font-size: min(62vw, 330px); line-height: .8; letter-spacing: -0.06em;
+  color: var(--accent); opacity: .1; pointer-events: none; transition: color .8s; user-select: none; }
+#box { position: absolute; left: 0; right: 0; top: 0; bottom: 112px; cursor: pointer;
+  -webkit-box-reflect: below 2px linear-gradient(transparent 82%, rgba(255,255,255,.16)); }
+.dots { position: absolute; left: 0; right: 0; bottom: 74px; display: flex; justify-content: center; gap: 8px; transition: opacity .4s; }
+.dots span { width: 6px; height: 6px; border-radius: 50%; background: var(--line); transition: all .5s cubic-bezier(.3,.8,.2,1); }
+.dots span.on { background: var(--accent); }
+.dots span.cur { width: 22px; border-radius: 3px; background: var(--accent); }
+.dots.hide { opacity: 0; }
 
 /* 하단 정보: 점수 · 설명 */
-.meta { display: grid; grid-template-columns: auto 1fr; gap: 14px; align-items: end; min-height: 74px; }
-.pts { font-family: var(--serif); font-size: 64px; line-height: .8; font-variant-numeric: lining-nums; }
-.pts small { font-family: var(--sans); font-size: 13px; color: var(--muted); margin-left: 4px; letter-spacing: 0; }
-.desc { margin: 0; font-size: 13px; line-height: 1.55; color: var(--muted); word-break: keep-all; padding-bottom: 4px; }
-.meta.hide { display: none; }
+
 
 /* 정답: 전시 캡션 라벨 */
-.label { display: none; min-height: 74px; }
-.label.show { display: block; }
+.label { position: absolute; left: 0; right: 0; bottom: 0; height: 112px; display: none; flex-direction: column; align-items: center; justify-content: flex-end; text-align: center;
+  padding-bottom: 2px; background: linear-gradient(transparent, var(--bg) 38%); }
+.label.show { display: flex; }
 .label .ln { overflow: hidden; }
 .label .ln > * { display: block; transform: translateY(105%); }
 .label.show .ln > * { animation: up .9s cubic-bezier(.2,.8,.15,1) forwards; animation-delay: var(--d, 0s); }
 .label .k { font-family: var(--serif); font-size: 17px; color: var(--accent); }
 .label .k i { font-style: italic; }
-.label .t { font-size: 27px; font-weight: 700; line-height: 1.2; letter-spacing: -0.03em; padding: 2px 0 4px; word-break: keep-all; text-wrap: balance; }
+.label .t { font-size: 25px; font-weight: 700; line-height: 1.2; letter-spacing: -0.03em; padding: 2px 0 4px; word-break: keep-all; text-wrap: balance; }
 .label .a { font-size: 15px; font-weight: 500; }
 .label .m { font-size: 12.5px; color: var(--muted); padding-top: 2px; }
-.label .bar { height: 1px; background: var(--accent); transform: scaleX(0); transform-origin: left; margin: 8px 0 10px; width: 48px; }
+.label .bar { height: 1px; background: var(--accent); transform: scaleX(0); transform-origin: center; margin: 6px auto 8px; width: 40px; }
 .label.show .bar { animation: grow .8s .1s cubic-bezier(.3,.8,.2,1) forwards; }
 @keyframes up { to { transform: none; } }
 @keyframes grow { to { transform: scaleX(1); } }
@@ -77,7 +84,7 @@ button.next .arr { font-family: var(--serif); font-style: italic; font-size: 20p
 /* 시작 화면: 잡지 표지 + 목차 */
 .intro { position: absolute; inset: 0 0 72px 0; z-index: 10; display: none; flex-direction: column; justify-content: space-between; gap: 18px; padding: 6px 2px 0; background: transparent; }
 .intro.on { display: flex; }
-.app.intro-mode > .top, .app.intro-mode > .prog, .app.intro-mode > .stage, .app.intro-mode > .meta { visibility: hidden; }
+.app.intro-mode > .top, .app.intro-mode > .prog, .app.intro-mode > .stage { visibility: hidden; }
 .intro .eyebrow { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); letter-spacing: .04em; }
 .intro .mast { font-family: var(--serif); font-style: italic; font-size: clamp(44px, 14vw, 72px); line-height: .9; color: var(--accent); margin-top: 18px; }
 .intro h1 { margin: 6px 0 0; font-size: clamp(38px, 11.5vw, 60px); font-weight: 700; line-height: 1.04; letter-spacing: -0.05em; word-break: keep-all; }
@@ -107,12 +114,15 @@ button.next .arr { font-family: var(--serif); font-style: italic; font-size: 20p
 /* 끝 화면: 오늘의 네 권 */
 .end { position: absolute; inset: 0 0 72px 0; z-index: 10; display: none; flex-direction: column; gap: 16px; background: var(--bg); padding-top: 6px; }
 .end.on { display: flex; }
-.end .mast { font-family: var(--serif); font-style: italic; font-size: 44px; line-height: 1; color: var(--text); }
-.end h2 { margin: 0; font-size: 24px; letter-spacing: -0.04em; }
+.end .yr { font-size: 12px; color: var(--muted); letter-spacing: .04em; }
+.end h2 { margin: 6px 0 0; font-size: 30px; letter-spacing: -0.05em; }
+.end h2 em { font-family: var(--serif); font-style: italic; font-weight: 400; color: var(--muted); font-size: .8em; margin-left: 6px; letter-spacing: 0; }
 .end { overflow-y: auto; }
 .end .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 14px; align-content: start; }
-.end figure { margin: 0; opacity: 0; transform: translateY(12px); animation: tocIn .8s cubic-bezier(.2,.8,.2,1) forwards; }
-.end figure img { width: 100%; aspect-ratio: 4 / 5; object-position: top; object-fit: cover; border-radius: 10px; display: block; box-shadow: 0 10px 24px rgba(0,0,0,.4); }
+.end figure { margin: 0; opacity: 0; transform: translateY(12px) rotate(var(--r, 0deg)); animation: pinIn .8s cubic-bezier(.2,.8,.2,1) forwards; }
+.end figure:nth-child(1) { --r: -2deg; } .end figure:nth-child(2) { --r: 1.5deg; } .end figure:nth-child(3) { --r: 1deg; } .end figure:nth-child(4) { --r: -1.5deg; }
+@keyframes pinIn { to { opacity: 1; transform: rotate(var(--r, 0deg)); } }
+.end figure img { width: 100%; aspect-ratio: 4 / 5; object-position: top; object-fit: cover; border-radius: 4px; display: block; box-shadow: 0 14px 28px rgba(0,0,0,.5); outline: 6px solid #f3efe7; outline-offset: -1px; }
 .end figcaption { margin-top: 8px; font-size: 13px; font-weight: 700; letter-spacing: -0.02em; line-height: 1.35; word-break: keep-all; }
 .end figcaption b { font-family: var(--serif); font-weight: 400; font-style: italic; color: var(--muted); margin-right: 4px; }
 .end figcaption span { display: block; font-weight: 400; color: var(--muted); font-size: 12px; margin-top: 2px; }
@@ -121,19 +131,20 @@ button.next .arr { font-family: var(--serif); font-style: italic; font-size: 20p
 <div class="app intro-mode" id="app">
   <div class="top">
     <div class="no" id="no"><i>No.</i>01<small>/ 04</small></div>
-    <div class="fxname" id="fxname"></div>
+    <div class="yr">2026 송년회 Book Quiz</div>
   </div>
   <div class="prog" id="prog"></div>
   <div class="stage">
+    <div class="wm" id="wm" aria-hidden="true">01</div>
     <div id="box" role="button" tabindex="0" aria-label="표지. 누르면 다음으로"></div>
-  </div>
-  <div class="meta" id="meta"><div class="pts" id="pts"></div><p class="desc" id="desc"></p></div>
+    <div class="dots" id="dots"></div>
   <div class="label" id="label" aria-live="polite">
     <div class="ln"><div class="k" id="lk"></div></div>
     <div class="ln"><div class="t" id="lt"></div></div>
     <div class="bar"></div>
     <div class="ln"><div class="a" id="la"></div></div>
     <div class="ln"><div class="m" id="lm"></div></div>
+  </div>
   </div>
   <button class="next" id="next" type="button"><span id="nextTx">시작하기</span><span class="arr">→</span></button>
 
@@ -147,7 +158,7 @@ button.next .arr { font-family: var(--serif); font-style: italic; font-size: 20p
     <ol class="toc" id="toc"></ol>
   </section>
   <section class="end" id="end" aria-label="결과">
-    <div><div class="mast">Fin.</div><h2>오늘의 네 권</h2></div>
+    <div><div class="yr">2026 송년회 Book Quiz</div><h2>오늘의 네 권</h2></div>
     <div class="grid" id="endGrid"></div>
   </section>
   <div class="card" id="card"><div class="ey" id="cardEy">Round</div><div class="num" id="cardNum"></div><div class="nm" id="cardNm"></div><div class="ds" id="cardDs"></div></div>
@@ -177,7 +188,7 @@ button.next .arr { font-family: var(--serif); font-style: italic; font-size: 20p
   ROUNDS.forEach((r) => { const i = new Image(); i.src = r.src; });
   const label = (r) => (CoverFX.get(r.effect) || {}).label || r.effect;
   const hintsOf = (r) => { const d = CoverFX.get(r.effect); return typeof d.stages === 'function' ? d.stages(Object.assign({}, d.defaults, r.opts || {})) : d.stages; };
-  const fx = CoverFX.create('#box', { padding: 0.04, duration: 1050, onChange: render });
+  const fx = CoverFX.create('#box', { padding: 0.02, duration: 1050, onChange: render });
   let ri = 0, ended = false, inIntro = true, cardT = 0;
 
   // 시작 화면 목차
@@ -229,30 +240,30 @@ button.next .arr { font-family: var(--serif); font-style: italic; font-size: 20p
     const lines = el.querySelectorAll('.ln > *');
     lines.forEach((n, k) => n.style.setProperty('--d', (0.35 + k * 0.12).toFixed(2) + 's'));
     el.classList.remove('show'); void el.offsetWidth; el.classList.add('show');
-    $('#meta').classList.add('hide');
+    $('#dots').classList.add('hide');
   }
-  function hideLabel() { $('#label').classList.remove('show'); $('#meta').classList.remove('hide'); }
+  function hideLabel() { $('#label').classList.remove('show'); $('#dots').classList.remove('hide'); }
   function setBtn(t) { $('#nextTx').textContent = t; }
   function render() {
     if (inIntro) {
       $('#no').innerHTML = '<i>No.</i>00<small>/ 04</small>';
-      $('#fxname').textContent = ''; $('#prog').innerHTML = '';
-      $('#meta').classList.add('hide');
+      $('#prog').innerHTML = '';
       setBtn('시작하기');
       return;
     }
     if (!fx.stages) return;
     $('#no').innerHTML = '<i>No.</i>' + two(ri + 1) + '<small>/ 04</small>';
-    $('#fxname').innerHTML = ended ? '' : '<b>' + esc(fx.label) + '</b> · ' + (fx.revealed ? '정답' : '힌트 ' + (fx.stage + 1) + '/' + fx.stages);
     let p = '';
     for (let k = 0; k < fx.stages; k++) p += '<span class="' + (k <= fx.stage ? 'on' : '') + '"></span>';
     $('#prog').innerHTML = p;
-    $('#pts').innerHTML = pts() + '<small>점</small>';
-    $('#desc').textContent = '지금 맞히면 ' + pts() + '점. ' + fx.desc;
+    $('#wm').textContent = two(ri + 1);
+    let dd = '';
+    for (let k = 0; k < fx.stages; k++) dd += '<span class="' + (k < fx.stage ? 'on' : k === fx.stage ? 'cur' : '') + '"></span>';
+    $('#dots').innerHTML = dd;
     setBtn(ended ? '처음부터 다시' : fx.revealed ? (ri < ROUNDS.length - 1 ? '다음 책' : '결과 보기') : fx.stage === fx.stages - 1 ? '정답 보기' : '다음 힌트');
   }
   function next() {
-    if (inIntro) { inIntro = false; $('#intro').classList.remove('on'); $('#app').classList.remove('intro-mode'); $('#meta').classList.remove('hide'); load(0); return; }
+    if (inIntro) { inIntro = false; $('#intro').classList.remove('on'); $('#app').classList.remove('intro-mode'); load(0); return; }
     if ($('#card').classList.contains('on')) { hideCard(); return; }
     if (ended) { load(0); return; }
     if (!fx.revealed) {

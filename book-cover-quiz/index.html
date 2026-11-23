@@ -158,9 +158,9 @@ kbd { font-family:var(--sans); font-size:.8em; padding:.05em .45em; border-radiu
 
 /* ───────── 종료 화면: 오늘의 네 권 ───────── */
 #end .inner { height:100%; display:flex; flex-direction:column; justify-content:center; padding:6vh 6vw; gap:3.4vh; }
-.end-head { display:flex; align-items:baseline; gap:2vw; }
-.end-head .mast { font-family:var(--serif); font-style:italic; font-size:6vw; line-height:.9; }
-#end h2 { font-weight:700; font-size:2.6vw; letter-spacing:-.05em; margin:0; }
+.end-head { display:flex; flex-direction:column; gap:1vh; }
+.end-head .yr { font-size:1.1vw; color:var(--muted); letter-spacing:.04em; }
+#end h2 { font-weight:700; font-size:4.2vw; letter-spacing:-.055em; margin:0; line-height:1.05; }
 .end-list { display:grid; grid-template-columns:repeat(4, 1fr); gap:2.4vw; }
 .end-item { animation:rise .9s cubic-bezier(.2,.8,.2,1) both; }
 .end-item .th { aspect-ratio:3 / 4; overflow:hidden; border-radius:.8vw; box-shadow:0 1.4vw 2.6vw rgba(0,0,0,.5); }
@@ -293,7 +293,7 @@ label.sbtn input { display:none; }
 <!-- 종료 화면 -->
 <section id="end" class="screen">
   <div class="inner">
-    <div class="end-head"><span class="mast">Fin.</span><h2>오늘의 네 권</h2></div>
+    <div class="end-head"><span class="yr" id="endYr">2026 송년회 Book Quiz</span><h2>오늘의 네 권</h2></div>
     <div class="rank" id="rank"></div>
     <div class="end-list" id="endList"></div>
     <div class="start-row">
