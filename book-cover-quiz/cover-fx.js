@@ -171,7 +171,7 @@
   }
 
   const SERIF = '"Gowun Batang", "Nanum Myeongjo", "AppleMyungjo", "Batang", serif';
-  const LATIN = '"Playfair Display", Georgia, "Times New Roman", serif';
+  const LATIN = '"Instrument Serif", "Playfair Display", Georgia, "Times New Roman", serif';
 
   const Helpers = { clamp, lerp, seg, stagger, Ease, rng, shuffled, derange, makeCanvas, pixelate, invert, rainbow, sweep, ring, roundRect };
 
@@ -1125,7 +1125,7 @@
   });
 
   // 8) (예비) 타일 뒤집기 ── 번호판이 하나씩 뒤집히며 표지가 드러남 (제목 칸은 마지막에)
-  const TILE_COLORS = [['#5e1f2c', '#8a3242'], ['#183329', '#2a5646']];
+  const TILE_COLORS = [['#1d1c1a', '#2b2926'], ['#24231f', '#34312c']];
   function tileLayout(s) {
     const st = s.state;
     const cols = Math.max(2, s.opts.cols | 0);
@@ -1181,7 +1181,7 @@
       const fs = Math.min(tw, th) * 0.42;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
-      ctx.font = 'italic 700 ' + fs + 'px ' + LATIN;
+      ctx.font = 'italic 400 ' + fs * 1.15 + 'px ' + LATIN;
       for (let i = 0; i < N; i++) {
         const k = st.openAt[i];
         const f = k === 0 ? 1 : Ease.inOut(stagger(seg(t, k - 1, k), st.delay[i], 0.55));
@@ -1200,9 +1200,9 @@
           roundRect(ctx, -tw / 2 + gap / 2, -th / 2 + gap / 2, tw - gap, th - gap, Math.min(tw, th) * 0.08);
           ctx.fill();
           ctx.lineWidth = Math.max(1, gap * 0.8);
-          ctx.strokeStyle = 'rgba(226,194,127,0.75)';
+          ctx.strokeStyle = 'rgba(243,239,231,0.22)';
           ctx.stroke();
-          ctx.fillStyle = '#ecd29a';
+          ctx.fillStyle = '#f3efe7';
           ctx.fillText(String(i + 1), 0, fs * 0.04);
         } else {
           ctx.drawImage(src, x, y, tw, th, -tw / 2, -th / 2, tw, th);

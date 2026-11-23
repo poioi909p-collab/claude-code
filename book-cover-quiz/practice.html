@@ -1,175 +1,214 @@
 <!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"></head><body>
+<style>@font-face{font-family:"IBM Plex Sans KR";font-weight:400;src:url("fonts/IBMPlexSansKR-Regular.woff2") format("woff2")}@font-face{font-family:"IBM Plex Sans KR";font-weight:500;src:url("fonts/IBMPlexSansKR-Medium.woff2") format("woff2")}@font-face{font-family:"IBM Plex Sans KR";font-weight:700;src:url("fonts/IBMPlexSansKR-Bold.woff2") format("woff2")}@font-face{font-family:"Instrument Serif";font-style:normal;src:url("fonts/InstrumentSerif-Regular.woff2") format("woff2")}@font-face{font-family:"Instrument Serif";font-style:italic;src:url("fonts/InstrumentSerif-Italic.woff2") format("woff2")}</style>
 <title>북 퀴즈 연습</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=Playfair+Display:ital,wght@1,600;1,700&family=Noto+Sans+KR:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;700&family=Instrument+Serif:ital@0;1&display=swap">
 <style>
-/* 한 화면 퀴즈: 위 라운드 정보, 가운데 표지, 아래 '다음' 버튼. 본편과 같은 밤의 서재 단일 어두운 테마 */
+/* 컨셉: 연말 책 전시회. 갤러리 벽 같은 웜 차콜 + 라운드마다 표지에서 뽑은 포인트 색 하나.
+   본문은 모던 산세리프, 숫자와 라벨은 에디토리얼 세리프 이탤릭. */
 :root {
-  --bg: #0d1520; --stage: #131e2d; --line: rgba(214,178,110,.28);
-  --text: #efe7d6; --muted: #97a1b3; --gold: #d6b26e; --gold-hi: #f0d9a2; --ink: #0d1520;
-  --paper: #f3ead9; --paper-ink: #2a2118; --paper-mute: #7a6650;
-  --serif: "Gowun Batang", "Nanum Myeongjo", "AppleMyungjo", "Batang", serif;
-  --latin: "Playfair Display", Georgia, serif;
-  --body: "Noto Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
+  --bg: #121110; --bg-2: #1b1a18; --text: #f3efe7; --muted: #8e8981; --line: rgba(243,239,231,.14);
+  --accent: #f2c500; --on-accent: #121110;
+  --sans: "IBM Plex Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
+  --serif: "Instrument Serif", "Times New Roman", serif;
   color-scheme: dark;
 }
 * { box-sizing: border-box; }
 html, body { height: 100%; background: var(--bg); color: var(--text); }
-body { margin: 0; font-family: var(--body); font-size: 15px;
-  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 12px 16px; }
-.app { max-width: 720px; height: 100%; margin: 0 auto; display: flex; flex-direction: column; gap: 12px; }
-header { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
-.rno { font-family: var(--latin); font-style: italic; font-weight: 700; color: var(--gold); font-size: 20px; }
-.rno span { font-size: 14px; color: var(--muted); margin-left: 6px; }
-.fx { font-family: var(--serif); font-weight: 700; font-size: 22px; }
-.desc { margin: 0; color: var(--muted); font-size: 13.5px; font-family: var(--serif); min-height: 2.6em; }
-.stage { position: relative; flex: 1; min-height: 300px; border-radius: 4px; border: 1px solid var(--line); overflow: hidden;
-  background: radial-gradient(circle at 50% 40%, #233350, var(--stage) 70%); }
+body { margin: 0; font-family: var(--sans); font-size: 15px; letter-spacing: -0.01em;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 14px 16px;
+  background:
+    radial-gradient(ellipse 90% 55% at 50% 38%, color-mix(in srgb, var(--accent) 16%, transparent), transparent 70%),
+    var(--bg);
+  transition: background .8s; }
+body::after { content: ""; position: fixed; inset: 0; pointer-events: none; z-index: 50; opacity: .09; mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); }
+.app { position: relative; max-width: 560px; height: 100%; margin: 0 auto; display: flex; flex-direction: column; gap: 14px; }
+
+/* 상단: 번호 · 효과 · 진행 */
+.top { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+.no { font-family: var(--serif); font-size: 26px; line-height: 1; }
+.no i { font-style: italic; color: var(--accent); margin-right: 4px; }
+.no small { font-family: var(--sans); font-size: 12px; color: var(--muted); margin-left: 6px; letter-spacing: .02em; }
+.fxname { font-size: 14px; font-weight: 500; color: var(--muted); }
+.fxname b { color: var(--text); font-weight: 700; }
+.prog { display: flex; gap: 4px; }
+.prog span { flex: 1; height: 3px; border-radius: 2px; background: var(--line); overflow: hidden; position: relative; }
+.prog span::after { content: ""; position: absolute; inset: 0; background: var(--accent); transform: scaleX(0); transform-origin: left; transition: transform .6s cubic-bezier(.3,.8,.2,1); }
+.prog span.on::after { transform: scaleX(1); }
+
+/* 표지 무대 */
+.stage { position: relative; flex: 1; min-height: 300px; border-radius: 18px; overflow: hidden; background: var(--bg-2);
+  box-shadow: inset 0 0 0 1px var(--line); }
 #box { position: absolute; inset: 0; cursor: pointer; }
-.reveal { display: none; flex-direction: column; align-items: center; text-align: center; gap: 6px; padding: 4px 0 2px; }
-.reveal.show { display: flex; }
-.reveal .ey { display: flex; align-items: center; gap: 12px; width: 100%; font-family: var(--latin); font-style: italic; font-weight: 600; font-size: 12.5px; letter-spacing: .28em; color: var(--gold); }
-.reveal .ln { flex: 1; height: 1px; background: linear-gradient(90deg, transparent, var(--gold)); transform: scaleX(0); transform-origin: right; }
-.reveal .ln:last-child { background: linear-gradient(90deg, var(--gold), transparent); transform-origin: left; }
-.reveal .tx { opacity: 0; white-space: nowrap; }
-.reveal .t { font-family: var(--serif); font-weight: 700; font-size: 26px; line-height: 1.25; color: var(--paper); word-break: keep-all; margin-top: 4px; }
-.reveal .t .w { display: inline-block; white-space: nowrap; }
-.reveal .t .c { display: inline-block; opacity: 0; }
-.reveal .s { font-family: var(--serif); font-size: 13.5px; color: var(--muted); opacity: 0; word-break: keep-all; }
-.reveal.show .ln { animation: lnIn 1.1s .15s cubic-bezier(.3,.8,.2,1) forwards; }
-.reveal.show .tx { animation: fadeIn .8s .4s forwards; }
-.reveal.show .t .c { animation: chIn .9s cubic-bezier(.2,.7,.2,1) forwards; animation-delay: calc(.6s + var(--i) * 55ms); }
-.reveal.show .s { animation: riseIn .9s forwards; animation-delay: var(--after, 1.2s); }
-@keyframes lnIn { to { transform: scaleX(1); } }
-@keyframes fadeIn { to { opacity: 1; } }
-@keyframes riseIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
-@keyframes chIn { from { opacity: 0; transform: translateY(.45em); filter: blur(6px); } to { opacity: 1; transform: none; filter: none; } }
-@media (prefers-reduced-motion: reduce) { .reveal.show *, .reveal.show .t .c { animation-duration: 1ms !important; animation-delay: 0s !important; } }
-.bar.hide { display: none; }
-/* 시작 화면 · 라운드 타이틀 카드 */
-.intro, .card { position: absolute; inset: 0; z-index: 4; display: none; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 16px;
-  background: radial-gradient(ellipse 80% 70% at 50% 45%, #22304a, #0b111a 80%); }
-.intro.on, .card.on { display: flex; }
-.intro .k { font-family: var(--latin); font-style: italic; font-size: 13px; letter-spacing: .3em; color: var(--gold); display: flex; align-items: center; gap: 10px; }
-.intro .k::before, .intro .k::after { content: ""; width: 28px; height: 1px; background: var(--gold); }
-.intro h1 { font-family: var(--serif); font-weight: 700; font-size: clamp(26px, 8vw, 40px); line-height: 1.2; margin: 10px 0 6px; color: var(--paper); text-wrap: balance; word-break: keep-all; }
-.intro p { margin: 0; font-family: var(--serif); color: var(--muted); font-size: 14px; }
-.shelf { display: flex; align-items: flex-end; gap: 4px; margin-top: 26px; padding: 0 10px; position: relative; }
-.shelf::after { content: ""; position: absolute; left: -8px; right: -8px; bottom: -7px; height: 7px; background: linear-gradient(180deg, #3a2c1d, #24190f); border-top: 1px solid rgba(240,217,162,.35); border-radius: 2px; }
-.spine { width: 48px; height: var(--h); border-radius: 3px 3px 1px 1px; color: var(--gold-hi); display: flex; flex-direction: column; align-items: center; padding: 10px 0;
-  background: linear-gradient(90deg, rgba(0,0,0,.35), rgba(255,255,255,.08) 18%, rgba(0,0,0,.2) 80%, rgba(0,0,0,.4)), var(--c);
-  box-shadow: inset 0 0 0 1px rgba(0,0,0,.25), 3px 0 8px rgba(0,0,0,.35); animation: shelfIn .9s cubic-bezier(.2,.9,.25,1.05) both; }
-.spine b { font-family: var(--latin); font-style: italic; font-size: 16px; }
-.spine span { writing-mode: vertical-rl; font-family: var(--serif); font-weight: 700; font-size: 14px; letter-spacing: .2em; margin-top: 8px; }
-@keyframes shelfIn { from { opacity: 0; transform: translateY(-24px) rotate(-3deg); } }
-.card .ey { font-family: var(--latin); font-size: 13px; letter-spacing: .4em; color: var(--gold); text-transform: uppercase; animation: fadeIn .6s both; }
-.card .num { font-family: var(--latin); font-style: italic; font-weight: 700; font-size: 96px; line-height: 1; margin: 4px 0 8px;
-  background: linear-gradient(180deg, #fff6df, var(--gold-hi) 40%, var(--gold) 70%, #9b7a3e); -webkit-background-clip: text; background-clip: text; color: transparent;
-  animation: numIn 1s cubic-bezier(.2,.9,.25,1) both; }
-.card .rl { width: 160px; height: 1px; background: linear-gradient(90deg, transparent, var(--gold), transparent); animation: lnIn2 .8s .3s both; }
-.card .nm { font-family: var(--serif); font-weight: 700; font-size: 26px; margin-top: 12px; color: var(--paper); animation: riseIn .8s .45s both; }
-.card.out { animation: cardOut .45s forwards; }
-@keyframes numIn { from { opacity: 0; transform: scale(1.3); filter: blur(10px); } }
-@keyframes lnIn2 { from { transform: scaleX(0); } }
-@keyframes cardOut { to { opacity: 0; } }
-.end { position: absolute; inset: 0; display: none; flex-direction: column; align-items: center; justify-content: center; gap: 10px; text-align: center; padding: 16px; z-index: 3;
-  background: radial-gradient(circle at 50% 40%, #233350, var(--stage) 75%); }
+
+/* 하단 정보: 점수 · 설명 */
+.meta { display: grid; grid-template-columns: auto 1fr; gap: 14px; align-items: end; min-height: 74px; }
+.pts { font-family: var(--serif); font-size: 64px; line-height: .8; font-variant-numeric: lining-nums; }
+.pts small { font-family: var(--sans); font-size: 13px; color: var(--muted); margin-left: 4px; letter-spacing: 0; }
+.desc { margin: 0; font-size: 13px; line-height: 1.55; color: var(--muted); word-break: keep-all; padding-bottom: 4px; }
+.meta.hide { display: none; }
+
+/* 정답: 전시 캡션 라벨 */
+.label { display: none; min-height: 74px; }
+.label.show { display: block; }
+.label .ln { overflow: hidden; }
+.label .ln > * { display: block; transform: translateY(105%); }
+.label.show .ln > * { animation: up .9s cubic-bezier(.2,.8,.15,1) forwards; animation-delay: var(--d, 0s); }
+.label .k { font-family: var(--serif); font-size: 17px; color: var(--accent); }
+.label .k i { font-style: italic; }
+.label .t { font-size: 27px; font-weight: 700; line-height: 1.2; letter-spacing: -0.03em; padding: 2px 0 4px; word-break: keep-all; text-wrap: balance; }
+.label .a { font-size: 15px; font-weight: 500; }
+.label .m { font-size: 12.5px; color: var(--muted); padding-top: 2px; }
+.label .bar { height: 1px; background: var(--accent); transform: scaleX(0); transform-origin: left; margin: 8px 0 10px; width: 48px; }
+.label.show .bar { animation: grow .8s .1s cubic-bezier(.3,.8,.2,1) forwards; }
+@keyframes up { to { transform: none; } }
+@keyframes grow { to { transform: scaleX(1); } }
+
+/* 버튼 */
+button.next { width: 100%; font: 700 16px var(--sans); letter-spacing: -0.01em; color: var(--bg); background: var(--text);
+  border: 0; border-radius: 14px; padding: 16px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: transform .15s, background .3s; }
+button.next:active { transform: scale(.985); }
+button.next:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+button.next .arr { font-family: var(--serif); font-style: italic; font-size: 20px; font-weight: 400; }
+
+/* 시작 화면: 잡지 표지 + 목차 */
+.intro { position: absolute; inset: 0 0 72px 0; z-index: 10; display: none; flex-direction: column; justify-content: space-between; gap: 18px; padding: 6px 2px 0; background: transparent; }
+.intro.on { display: flex; }
+.app.intro-mode > .top, .app.intro-mode > .prog, .app.intro-mode > .stage, .app.intro-mode > .meta { visibility: hidden; }
+.intro .eyebrow { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); letter-spacing: .04em; }
+.intro .mast { font-family: var(--serif); font-style: italic; font-size: clamp(44px, 14vw, 72px); line-height: .9; color: var(--accent); margin-top: 18px; }
+.intro h1 { margin: 6px 0 0; font-size: clamp(38px, 11.5vw, 60px); font-weight: 700; line-height: 1.04; letter-spacing: -0.05em; word-break: keep-all; }
+.intro .lead { margin: 14px 0 0; font-size: 14px; line-height: 1.6; color: var(--muted); max-width: 30ch; }
+.toc { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--line); }
+.toc li { display: grid; grid-template-columns: 44px 1fr auto; align-items: baseline; padding: 12px 0; border-bottom: 1px solid var(--line);
+  opacity: 0; transform: translateY(10px); animation: tocIn .7s cubic-bezier(.2,.8,.2,1) forwards; }
+.toc li b { font-family: var(--serif); font-weight: 400; font-size: 22px; }
+.toc li span { font-weight: 500; }
+.toc li em { font-style: normal; font-size: 12px; color: var(--muted); }
+.toc li .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 8px; vertical-align: 1px; }
+@keyframes tocIn { to { opacity: 1; transform: none; } }
+
+/* 라운드 카드: 라운드 색으로 화면을 덮었다가 위로 걷힘 */
+.card { position: absolute; inset: -14px -16px; z-index: 20; display: none; flex-direction: column; justify-content: flex-end; padding: 28px 24px 40px;
+  background: var(--accent); color: var(--on-accent); clip-path: inset(100% 0 0 0); }
+.card.on { display: flex; animation: cardIn .7s cubic-bezier(.7,0,.2,1) forwards; }
+.card.out { animation: cardOut .6s cubic-bezier(.7,0,.2,1) forwards; }
+.card .ey { font-size: 13px; font-weight: 500; letter-spacing: .04em; opacity: .7; }
+.card .num { font-family: var(--serif); font-size: clamp(120px, 42vw, 200px); line-height: .82; letter-spacing: -0.04em; margin: 6px 0 14px; }
+.card .num i { font-style: italic; }
+.card .nm { font-size: 30px; font-weight: 700; letter-spacing: -0.04em; }
+.card .ds { font-size: 14px; margin-top: 8px; opacity: .75; max-width: 30ch; line-height: 1.5; word-break: keep-all; }
+@keyframes cardIn { from { clip-path: inset(100% 0 0 0); } to { clip-path: inset(0 0 0 0); } }
+@keyframes cardOut { from { clip-path: inset(0 0 0 0); } to { clip-path: inset(0 0 100% 0); } }
+
+/* 끝 화면: 오늘의 네 권 */
+.end { position: absolute; inset: 0 0 72px 0; z-index: 10; display: none; flex-direction: column; gap: 16px; background: var(--bg); padding-top: 6px; }
 .end.on { display: flex; }
-.end h2 { font-family: var(--serif); font-size: 26px; margin: 0 0 6px; }
-.end ol { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 6px; font-family: var(--serif); }
-.end li b { font-family: var(--latin); font-style: italic; color: var(--gold); margin-right: 8px; }
-.bar { display: flex; align-items: center; gap: 12px; }
-.dots { display: flex; gap: 6px; flex: 1; align-items: center; }
-.dots span { width: 10px; height: 10px; border-radius: 50%; border: 1px solid var(--line); }
-.dots span.done { background: rgba(214,178,110,.5); border-color: var(--gold); }
-.dots span.cur { background: var(--gold); border-color: var(--gold-hi); box-shadow: 0 0 10px rgba(240,217,162,.6); }
-.dots em { font-style: normal; font-size: 13px; color: var(--muted); margin-left: 6px; }
-.pts { font-family: var(--latin); font-weight: 700; font-size: 22px; color: var(--gold-hi); font-variant-numeric: lining-nums; }
-.pts small { font-family: var(--serif); font-size: 13px; color: var(--gold); margin-left: 2px; }
-button.next { width: 100%; font: 700 18px var(--serif); color: var(--ink); background: linear-gradient(180deg, var(--gold-hi), var(--gold) 60%, #9b7a3e);
-  border: 0; border-radius: 3px; padding: 14px; cursor: pointer; letter-spacing: .04em; }
-button.next:focus-visible { outline: 2px solid var(--gold-hi); outline-offset: 3px; }
-.hint { text-align: center; font-size: 12px; color: var(--muted); margin: 0; }
+.end .mast { font-family: var(--serif); font-style: italic; font-size: 44px; line-height: 1; color: var(--text); }
+.end h2 { margin: 0; font-size: 24px; letter-spacing: -0.04em; }
+.end { overflow-y: auto; }
+.end .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 14px; align-content: start; }
+.end figure { margin: 0; opacity: 0; transform: translateY(12px); animation: tocIn .8s cubic-bezier(.2,.8,.2,1) forwards; }
+.end figure img { width: 100%; aspect-ratio: 4 / 5; object-position: top; object-fit: cover; border-radius: 10px; display: block; box-shadow: 0 10px 24px rgba(0,0,0,.4); }
+.end figcaption { margin-top: 8px; font-size: 13px; font-weight: 700; letter-spacing: -0.02em; line-height: 1.35; word-break: keep-all; }
+.end figcaption b { font-family: var(--serif); font-weight: 400; font-style: italic; color: var(--muted); margin-right: 4px; }
+.end figcaption span { display: block; font-weight: 400; color: var(--muted); font-size: 12px; margin-top: 2px; }
+@media (prefers-reduced-motion: reduce) { .label.show .ln > *, .label.show .bar, .toc li, .end figure, .card.on, .card.out { animation-duration: 1ms !important; animation-delay: 0s !important; } }
 </style>
-<div class="app">
-  <header>
-    <div class="rno" id="rno">Round I<span>of IV</span></div>
-    <div class="fx" id="fxname"></div>
-  </header>
-  <p class="desc" id="desc"></p>
+<div class="app intro-mode" id="app">
+  <div class="top">
+    <div class="no" id="no"><i>No.</i>01<small>/ 04</small></div>
+    <div class="fxname" id="fxname"></div>
+  </div>
+  <div class="prog" id="prog"></div>
   <div class="stage">
     <div id="box" role="button" tabindex="0" aria-label="표지. 누르면 다음으로"></div>
-    <div class="end" id="end"><h2>연습 끝!</h2><ol id="endList"></ol></div>
-    <div class="intro on" id="intro">
-      <div class="k">BOOK QUIZ</div>
-      <h1>표지 보고 책 제목 맞히기</h1>
-      <p>변신한 책 표지, 원래 무슨 책이었을까요? · 연습판</p>
-      <div class="shelf">
-        <div class="spine" style="--c:#7a2b3a;--h:150px;animation-delay:.15s"><b>I</b><span>조각 재배치</span></div>
-        <div class="spine" style="--c:#24493d;--h:162px;animation-delay:.25s"><b>II</b><span>타일 뒤집기</span></div>
-        <div class="spine" style="--c:#22345a;--h:156px;animation-delay:.35s"><b>III</b><span>김 서린 유리</span></div>
-        <div class="spine" style="--c:#8c6a27;--h:168px;animation-delay:.45s"><b>IV</b><span>손전등</span></div>
-      </div>
+  </div>
+  <div class="meta" id="meta"><div class="pts" id="pts"></div><p class="desc" id="desc"></p></div>
+  <div class="label" id="label" aria-live="polite">
+    <div class="ln"><div class="k" id="lk"></div></div>
+    <div class="ln"><div class="t" id="lt"></div></div>
+    <div class="bar"></div>
+    <div class="ln"><div class="a" id="la"></div></div>
+    <div class="ln"><div class="m" id="lm"></div></div>
+  </div>
+  <button class="next" id="next" type="button"><span id="nextTx">시작하기</span><span class="arr">→</span></button>
+
+  <section class="intro on" id="intro" aria-label="시작 화면">
+    <div>
+      <div class="eyebrow"><span>2026 송년회</span><span>연습판</span></div>
+      <div class="mast">Book Quiz</div>
+      <h1>표지 보고<br>책 제목 맞히기</h1>
+      <p class="lead">익숙한 책 표지가 낯설게 변신했어요. 힌트가 하나씩 열릴수록 점수는 줄어듭니다.</p>
     </div>
-    <div class="card" id="card"><div class="ey">Round</div><div class="num" id="cardNum">I</div><div class="rl"></div><div class="nm" id="cardNm"></div></div>
-  </div>
-  <div class="bar" id="bar"><div class="dots" id="dots"></div><div class="pts" id="pts"></div></div>
-  <div class="reveal" id="reveal" aria-live="polite">
-    <div class="ey"><span class="ln"></span><span class="tx" id="ansEy">ROUND I · 정답</span><span class="ln"></span></div>
-    <div class="t" id="ansT"></div>
-    <div class="s" id="ansS"></div>
-  </div>
-  <button class="next" id="next" type="button">다음</button>
-  <p class="hint">다음 버튼(또는 표지 탭, → 키)만 누르면 힌트 → 정답 → 다음 라운드로 넘어가요</p>
+    <ol class="toc" id="toc"></ol>
+  </section>
+  <section class="end" id="end" aria-label="결과">
+    <div><div class="mast">Fin.</div><h2>오늘의 네 권</h2></div>
+    <div class="grid" id="endGrid"></div>
+  </section>
+  <div class="card" id="card"><div class="ey" id="cardEy">Round</div><div class="num" id="cardNum"></div><div class="nm" id="cardNm"></div><div class="ds" id="cardDs"></div></div>
 </div>
 </script>
 <script src="cover-fx.js"></script>
 <script>
 (() => {
   const $ = (s) => document.querySelector(s);
-  const ROMAN = ['I', 'II', 'III', 'IV'];
-  // 라운드 4개, 순서 고정, 라운드마다 ★ 지정 효과 하나 (본편과 같은 설정)
+  const esc = (t) => String(t).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const two = (n) => String(n).padStart(2, '0');
+  // 라운드 4개, 순서 고정, 라운드마다 ★ 지정 효과 하나. accent: 표지에서 뽑은 색
   const ROUNDS = [
-    { src: 'covers/1.jpg', answer: '무서운 게 딱! 좋아!', sub: '이구성 · 딱이야 시리즈 1 (ILB, 2002)', effect: 'shuffle',
-      // 고정 배치: 노란 달 조각 9개는 네 모서리·네 변 가운데·한가운데, 검은 밤 조각 16개는 그 사이 (원래 이웃끼리 붙지 않게 미리 계산)
-      opts: { layout: 'frame', pos0: [21, 19, 17, 15, 23, 7, 10, 20, 4, 11, 16, 24, 2, 22, 8, 5, 14, 0, 12, 6, 9, 3, 18, 1, 13], invSlots: [6, 8, 16, 18] },
+    { src: 'covers/1.jpg', answer: '무서운 게 딱! 좋아!', author: '이구성', meta: 'ILB · 2002 · 딱이야 시리즈 1', accent: '#f2c500', ink: '#121110',
+      effect: 'shuffle', opts: { layout: 'frame', pos0: [21, 19, 17, 15, 23, 7, 10, 20, 4, 11, 16, 24, 2, 22, 8, 5, 14, 0, 12, 6, 9, 3, 18, 1, 13], invSlots: [6, 8, 16, 18] },
       regions: [{ x: 0.15, y: 0.245, w: 0.7, h: 0.37 }] },
-    { src: 'covers/2.jpg', answer: '해리 포터와 마법사의 돌', sub: 'J.K. 롤링 · 문학수첩 1999년판 1권 (구표지)', effect: 'tiles',
-      opts: { key: [{ x: 0.67, y: 0.5, r: 0.5 }], open: [0.14, 0.28, 0.44, 0.6] },
+    { src: 'covers/2.jpg', answer: '해리 포터와 마법사의 돌', author: 'J.K. 롤링', meta: '문학수첩 · 1999 · 1권 (구표지)', accent: '#e09a45', ink: '#121110',
+      effect: 'tiles', opts: { key: [{ x: 0.67, y: 0.5, r: 0.5 }], open: [0.14, 0.28, 0.44, 0.6] },
       regions: [{ x: 0.1, y: 0, w: 0.82, h: 0.25 }, { x: 0.27, y: 0.26, w: 0.52, h: 0.13 }, { x: 0.25, y: 0.845, w: 0.5, h: 0.045 }] },
-    { src: 'covers/3.jpg', answer: '지구 끝의 온실', sub: '김초엽 · 자이언트북스 (2021)', effect: 'steam',
+    { src: 'covers/3.jpg', answer: '지구 끝의 온실', author: '김초엽', meta: '자이언트북스 · 2021', accent: '#f19bb8', ink: '#121110',
+      effect: 'steam',
       regions: [{ x: 0.2, y: 0.07, w: 0.6, h: 0.165 }, { x: 0.3, y: 0.79, w: 0.4, h: 0.05 }] },
-    { src: 'covers/4.jpg', answer: '물고기는 존재하지 않는다', sub: '룰루 밀러 · 곰출판 (2021)', effect: 'spotlight',
-      opts: { area: { x: 0.12, y: 0.12, w: 0.76, h: 0.56 } },
+    { src: 'covers/4.jpg', answer: '물고기는 존재하지 않는다', author: '룰루 밀러', meta: '곰출판 · 2021 · 정지인 옮김', accent: '#48b07a', ink: '#121110',
+      effect: 'spotlight', opts: { area: { x: 0.12, y: 0.12, w: 0.76, h: 0.56 } },
       regions: [{ x: 0.17, y: 0.05, w: 0.66, h: 0.27 }, { x: 0.28, y: 0.64, w: 0.44, h: 0.075 }, { x: 0.9, y: 0.45, w: 0.08, h: 0.17 }] },
   ];
-  ROUNDS.forEach((r) => { const i = new Image(); i.src = r.src; }); // 미리 불러오기
-  const fx = CoverFX.create('#box', { padding: 0.03, duration: 1050, onChange: render });
+  ROUNDS.forEach((r) => { const i = new Image(); i.src = r.src; });
+  const label = (r) => (CoverFX.get(r.effect) || {}).label || r.effect;
+  const hintsOf = (r) => { const d = CoverFX.get(r.effect); return typeof d.stages === 'function' ? d.stages(Object.assign({}, d.defaults, r.opts || {})) : d.stages; };
+  const fx = CoverFX.create('#box', { padding: 0.04, duration: 1050, onChange: render });
   let ri = 0, ended = false, inIntro = true, cardT = 0;
+
+  // 시작 화면 목차
+  $('#toc').innerHTML = ROUNDS.map((r, i) => '<li style="animation-delay:' + (0.15 + i * 0.08) + 's"><b>' + two(i + 1) + '</b><span><i class="dot" style="background:' + r.accent + '"></i>' + esc(label(r)) + '</span><em>힌트 ' + hintsOf(r) + '</em></li>').join('');
+
+  function setAccent(r) {
+    document.documentElement.style.setProperty('--accent', r.accent);
+    document.documentElement.style.setProperty('--on-accent', r.ink);
+  }
   function showCard() {
-    const c = $('#card');
-    $('#cardNum').textContent = ROMAN[ri];
-    $('#cardNm').textContent = (CoverFX.get(ROUNDS[ri].effect) || {}).label || '';
+    const r = ROUNDS[ri], c = $('#card');
+    $('#cardEy').textContent = 'Round ' + two(ri + 1) + ' / 04';
+    $('#cardNum').innerHTML = '<i>No.</i>' + two(ri + 1);
+    $('#cardNm').textContent = label(r);
+    $('#cardDs').textContent = (CoverFX.get(r.effect) || {}).desc || '';
     c.classList.remove('on', 'out'); void c.offsetWidth; c.classList.add('on');
-    clearTimeout(cardT); cardT = setTimeout(hideCard, 1700);
+    clearTimeout(cardT); cardT = setTimeout(hideCard, 1900);
   }
   function hideCard() {
     const c = $('#card');
-    if (!c.classList.contains('on') || c.classList.contains('out')) return false;
+    if (!c.classList.contains('on') || c.classList.contains('out')) return;
     clearTimeout(cardT);
     c.classList.add('out');
-    // 카드가 걷히는 순간 효과를 새로 시작해서 등장 연출이 보이게
-    fx.setEffect(ROUNDS[ri].effect, ROUNDS[ri].opts);
-    setTimeout(() => c.classList.remove('on', 'out'), 450);
-    return true;
+    fx.setEffect(ROUNDS[ri].effect, ROUNDS[ri].opts); // 카드가 걷히는 순간 등장 연출 시작
+    setTimeout(() => c.classList.remove('on', 'out'), 620);
   }
-
   function load(i) {
     ri = i; ended = false;
     const r = ROUNDS[i];
-    hideReveal();
+    setAccent(r);
+    hideLabel();
     $('#end').classList.remove('on');
     fx.setOptions({ regions: r.regions, text: r.answer, protect: true });
     fx.setEffect(r.effect, r.opts);
@@ -177,65 +216,65 @@ button.next:focus-visible { outline: 2px solid var(--gold-hi); outline-offset: 3
     showCard();
     render();
   }
-  const esc = (t) => String(t).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-  function showReveal(r) {
-    let n = 0;
-    $('#ansEy').textContent = 'ROUND ' + ROMAN[ri] + ' · 정답';
-    $('#ansT').innerHTML = r.answer.split(' ').map((w) => '<span class="w">' + Array.from(w).map((ch) => '<span class="c" style="--i:' + (n++) + '">' + esc(ch) + '</span>').join('') + '</span>').join(' ');
-    $('#ansS').textContent = r.sub;
-    const el = $('#reveal');
-    el.style.setProperty('--after', (0.6 + n * 0.055 + 0.35).toFixed(2) + 's');
-    el.classList.remove('show'); void el.offsetWidth; el.classList.add('show');
-    $('#bar').classList.add('hide');
-  }
-  function hideReveal() { $('#reveal').classList.remove('show'); $('#bar').classList.toggle('hide', inIntro); }
   function pts() {
     const S = fx.stages, k = Math.min(fx.stage, S - 1);
     return S <= 1 ? 30 : Math.round(30 - (20 * k) / (S - 1));
   }
+  function showLabel(r) {
+    $('#lk').innerHTML = '<i>No.</i> ' + two(ri + 1) + ' — 정답';
+    $('#lt').textContent = r.answer;
+    $('#la').textContent = r.author;
+    $('#lm').textContent = r.meta;
+    const el = $('#label');
+    const lines = el.querySelectorAll('.ln > *');
+    lines.forEach((n, k) => n.style.setProperty('--d', (0.35 + k * 0.12).toFixed(2) + 's'));
+    el.classList.remove('show'); void el.offsetWidth; el.classList.add('show');
+    $('#meta').classList.add('hide');
+  }
+  function hideLabel() { $('#label').classList.remove('show'); $('#meta').classList.remove('hide'); }
+  function setBtn(t) { $('#nextTx').textContent = t; }
   function render() {
     if (inIntro) {
-      $('#rno').innerHTML = 'Book Quiz<span>연습</span>';
-      $('#fxname').textContent = ''; $('#desc').textContent = '';
-      $('#bar').classList.add('hide');
-      $('#next').textContent = '시작하기';
+      $('#no').innerHTML = '<i>No.</i>00<small>/ 04</small>';
+      $('#fxname').textContent = ''; $('#prog').innerHTML = '';
+      $('#meta').classList.add('hide');
+      setBtn('시작하기');
       return;
     }
     if (!fx.stages) return;
-    $('#rno').innerHTML = 'Round ' + ROMAN[ri] + '<span>of IV</span>';
-    $('#fxname').textContent = ended ? '' : fx.label;
-    $('#desc').textContent = ended ? '' : fx.desc;
-    let d = '';
-    for (let k = 0; k <= fx.stages; k++) d += '<span class="' + (k < fx.stage ? 'done' : k === fx.stage ? 'cur' : '') + '"></span>';
-    $('#dots').innerHTML = d + '<em>' + (fx.revealed ? '정답 공개' : '힌트 ' + (fx.stage + 1) + ' / ' + fx.stages) + '</em>';
-    $('#pts').innerHTML = fx.revealed ? '' : pts() + '<small>점</small>';
-    $('#next').textContent = inIntro ? '시작하기' : ended ? '처음부터 다시' : fx.revealed ? (ri < ROUNDS.length - 1 ? '다음 라운드' : '결과 보기') : fx.stage === fx.stages - 1 ? '정답 공개' : '다음 힌트';
+    $('#no').innerHTML = '<i>No.</i>' + two(ri + 1) + '<small>/ 04</small>';
+    $('#fxname').innerHTML = ended ? '' : '<b>' + esc(fx.label) + '</b> · ' + (fx.revealed ? '정답' : '힌트 ' + (fx.stage + 1) + '/' + fx.stages);
+    let p = '';
+    for (let k = 0; k < fx.stages; k++) p += '<span class="' + (k <= fx.stage ? 'on' : '') + '"></span>';
+    $('#prog').innerHTML = p;
+    $('#pts').innerHTML = pts() + '<small>점</small>';
+    $('#desc').textContent = '지금 맞히면 ' + pts() + '점. ' + fx.desc;
+    setBtn(ended ? '처음부터 다시' : fx.revealed ? (ri < ROUNDS.length - 1 ? '다음 책' : '결과 보기') : fx.stage === fx.stages - 1 ? '정답 보기' : '다음 힌트');
   }
   function next() {
-    if (inIntro) { inIntro = false; $('#intro').classList.remove('on'); load(0); return; }
+    if (inIntro) { inIntro = false; $('#intro').classList.remove('on'); $('#app').classList.remove('intro-mode'); $('#meta').classList.remove('hide'); load(0); return; }
     if ($('#card').classList.contains('on')) { hideCard(); return; }
     if (ended) { load(0); return; }
     if (!fx.revealed) {
-      if (fx.stage === fx.stages - 1) {
-        fx.reveal();
-        showReveal(ROUNDS[ri]);
-      } else fx.next();
+      if (fx.stage === fx.stages - 1) { fx.reveal(); showLabel(ROUNDS[ri]); }
+      else fx.next();
     } else if (ri < ROUNDS.length - 1) load(ri + 1);
     else {
       ended = true;
-      $('#endList').innerHTML = ROUNDS.map((r, i) => '<li><b>' + ROMAN[i] + '</b>' + r.answer + '</li>').join('');
-      hideReveal();
+      document.documentElement.style.setProperty('--accent', '#f3efe7');
+      $('#endGrid').innerHTML = ROUNDS.map((r, i) => '<figure style="animation-delay:' + (0.1 + i * 0.1) + 's"><img src="' + r.src + '" alt=""><figcaption><b>' + two(i + 1) + '</b>' + esc(r.answer) + '<span>' + esc(r.author) + '</span></figcaption></figure>').join('');
+      hideLabel();
       $('#end').classList.add('on');
     }
     render();
   }
   $('#next').onclick = next;
+  $('#card').addEventListener('click', hideCard);
   $('#box').addEventListener('click', next);
   $('#box').addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); next(); } });
   document.addEventListener('keydown', (e) => {
     if (['ArrowRight', ' ', 'PageDown'].includes(e.key) && e.target.tagName !== 'BUTTON') { e.preventDefault(); next(); }
   });
-  // 시작 화면: 첫 라운드는 시작을 눌러야 시작 (표지는 아직 안 보임)
   render();
 })();
 </script>
