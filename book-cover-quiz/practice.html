@@ -86,14 +86,43 @@ button.next:focus-visible { outline: 2px solid var(--accent); outline-offset: 3p
 button.next .arr { font-family: var(--serif); font-style: italic; font-size: 20px; font-weight: 400; }
 
 /* 시작 화면: 잡지 표지 + 목차 */
-.intro { position: absolute; inset: 0 0 72px 0; z-index: 10; display: none; flex-direction: column; justify-content: space-between; gap: 18px; padding: 6px 2px 0; background: transparent; }
-.intro.on { display: flex; }
+.intro { position: absolute; inset: 42px 0 72px 0; z-index: 10; display: none; overflow-y: auto; overscroll-behavior: contain; padding: 0 2px 28px;
+  -webkit-mask-image: linear-gradient(#000 calc(100% - 28px), transparent); mask-image: linear-gradient(#000 calc(100% - 28px), transparent); }
+.intro.on { display: block; }
+/* 첫 화면: 예시 표지가 효과로 변신하는 애니메이션 */
+.hero { position: relative; }
+.hero-stage { position: relative; height: min(56vh, 430px); min-height: 300px; border-radius: 18px; overflow: hidden;
+  background: radial-gradient(ellipse 70% 60% at 50% 30%, color-mix(in srgb, var(--accent) 18%, #1b1a18), #141312 75%); }
+#demo { position: absolute; inset: 42px 14px 48px; }
+.hero-q { position: absolute; left: 0; right: 0; top: 14px; text-align: center; font-family: var(--serif); font-style: italic; font-size: 15px; color: var(--muted); z-index: 2; pointer-events: none; }
+.hero-chip { position: absolute; left: 50%; bottom: 12px; transform: translateX(-50%); display: inline-flex; align-items: center; gap: 8px; white-space: nowrap;
+  font-size: 12.5px; font-weight: 500; padding: 6px 12px; border-radius: 999px; background: rgba(18,17,16,.75); border: 1px solid var(--line); backdrop-filter: blur(6px); }
+.hero-chip b { font-weight: 700; }
+.hero-chip i { font-style: normal; color: var(--accent); }
+.hero-chip .ans { color: var(--accent); font-weight: 700; }
+.hero-dots { display: flex; justify-content: center; gap: 6px; margin-top: 10px; }
+.hero-dots span { width: 6px; height: 6px; border-radius: 50%; background: var(--line); transition: all .4s; }
+.hero-dots span.on { width: 18px; border-radius: 3px; background: var(--accent); }
+.sec { margin-top: 34px; }
+.sec h3 { margin: 0 0 12px; font-size: 13px; font-weight: 500; color: var(--muted); letter-spacing: .02em; display: flex; align-items: baseline; gap: 8px; }
+.sec h3 i { font-family: var(--serif); font-size: 22px; color: var(--text); }
+.sec p { margin: 0; font-size: 14.5px; line-height: 1.7; color: #cfcac1; word-break: keep-all; }
+.sec p b { color: var(--text); }
+.steps { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.steps li { display: grid; grid-template-columns: 34px 1fr; gap: 10px; padding: 14px; border-radius: 14px; background: var(--bg-2); border: 1px solid var(--line-2, rgba(243,239,231,.08)); }
+.steps li b { font-family: var(--serif); font-style: italic; font-weight: 400; font-size: 26px; line-height: 1; color: var(--accent); }
+.steps li strong { display: block; font-size: 15px; letter-spacing: -0.02em; margin-bottom: 3px; }
+.steps li span { font-size: 13px; line-height: 1.55; color: var(--muted); word-break: keep-all; }
+.tips { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.tips li { font-size: 13.5px; line-height: 1.6; color: #cfcac1; padding-left: 16px; position: relative; word-break: keep-all; }
+.tips li::before { content: ""; position: absolute; left: 0; top: .7em; width: 6px; height: 1px; background: var(--accent); }
 .app.intro-mode > .prog, .app.intro-mode > .stage { visibility: hidden; }
 .app.intro-mode > .top { position: relative; z-index: 11; justify-content: flex-end; }
 .app.intro-mode > .top .no { display: none; }
 .intro .eyebrow { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); letter-spacing: .04em; }
-.intro .mast { font-family: var(--serif); font-style: italic; font-size: clamp(44px, 14vw, 72px); line-height: .9; color: var(--accent); margin-top: 18px; }
-.intro h1 { margin: 6px 0 0; font-size: clamp(38px, 11.5vw, 60px); font-weight: 700; line-height: 1.04; letter-spacing: -0.05em; word-break: keep-all; }
+.intro .eyebrow { margin-top: 26px; }
+.intro .mast { font-family: var(--serif); font-style: italic; font-size: clamp(40px, 12vw, 64px); line-height: .9; color: var(--accent); margin-top: 10px; }
+.intro h1 { margin: 6px 0 0; font-size: clamp(34px, 10.5vw, 54px); font-weight: 700; line-height: 1.04; letter-spacing: -0.05em; word-break: keep-all; }
 .intro .lead { margin: 14px 0 0; font-size: 14px; line-height: 1.6; color: var(--muted); max-width: 30ch; }
 .toc { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--line); }
 .toc li { display: grid; grid-template-columns: 44px 1fr auto; align-items: baseline; padding: 12px 0; border-bottom: 1px solid var(--line);
@@ -166,14 +195,48 @@ button.next .arr { font-family: var(--serif); font-style: italic; font-size: 20p
   </div>
   <button class="next" id="next" type="button"><span id="nextTx">시작하기</span><span class="arr">→</span></button>
 
-  <section class="intro on" id="intro" aria-label="시작 화면">
-    <div>
-      <div class="eyebrow"><span>2026 송년회 · 연습판</span></div>
-      <div class="mast">Book Quiz</div>
-      <h1>표지 보고<br>책 제목 맞히기</h1>
-      <p class="lead">익숙한 책 표지가 낯설게 변신했어요. 힌트가 하나씩 열릴 때마다 정답을 외쳐 보세요.</p>
+  <section class="intro on" id="intro" aria-label="게임 소개">
+    <div class="hero">
+      <div class="hero-stage">
+        <div class="hero-q">이 표지, 무슨 책일까요?</div>
+        <div id="demo" aria-label="예시 표지가 여러 효과로 변신하는 애니메이션"></div>
+        <div class="hero-chip" id="demoChip"></div>
+      </div>
+      <div class="hero-dots" id="demoDots"></div>
     </div>
-    <ol class="toc" id="toc"></ol>
+    <div class="eyebrow"><span>2026 송년회 · 연습판</span></div>
+    <div class="mast">Book Quiz</div>
+    <h1>표지 보고<br>책 제목 맞히기</h1>
+    <p class="lead">위 표지는 예시예요. 실제 게임에서는 진짜 책 네 권이 이렇게 변신해서 나와요.</p>
+
+    <div class="sec">
+      <h3><i>Why</i>이런 게임이에요</h3>
+      <p>제목은 가물가물해도 <b>표지는 기억나는 책</b>, 있잖아요. 서점 매대에서, 친구 책상 위에서, 지하철 옆자리에서 스쳐 본 그 표지요.
+      이 게임은 그 어렴풋한 기억만으로 책을 맞혀 보는 게임이에요. <b>읽은 책이 아니어도 괜찮아요.</b> 본 적만 있으면 충분합니다.</p>
+    </div>
+
+    <div class="sec">
+      <h3><i>How</i>이렇게 해요</h3>
+      <ol class="steps">
+        <li><b>1</b><div><strong>표지가 낯설게 변신해서 나와요</strong><span>조각나고, 문이 닫히고, 김이 서리고, 어둠에 묻힌 채로요. 처음엔 색과 분위기만 보여요.</span></div></li>
+        <li><b>2</b><div><strong>'다음'을 누를 때마다 힌트가 하나씩 열려요</strong><span>조각이 제자리를 찾고, 문이 열리고, 빛이 넓어져요. 알 것 같으면 그때 바로 외치세요.</span></div></li>
+        <li><b>3</b><div><strong>정답이 나오면 원래 표지로 돌아와요</strong><span>제목과 저자가 전시 캡션처럼 나타나요. 다시 '다음'을 누르면 다음 책으로 넘어가요.</span></div></li>
+      </ol>
+    </div>
+
+    <div class="sec">
+      <h3><i>Rounds</i>오늘의 네 권</h3>
+      <ol class="toc" id="toc"></ol>
+    </div>
+
+    <div class="sec">
+      <h3><i>Tips</i>알아두면 좋아요</h3>
+      <ul class="tips">
+        <li>점수는 없어요. 먼저 외친 사람이 이기는, 가볍게 즐기는 게임이에요.</li>
+        <li>힌트가 열리는 순서는 라운드마다 정해져 있어요. 오른쪽 위 버튼으로 <b>랜덤 배치</b>로 바꾸면 매번 다르게 섞여요.</li>
+        <li>'다음' 버튼 말고도 표지를 탭하거나 키보드 → 키로 넘길 수 있어요.</li>
+      </ul>
+    </div>
   </section>
   <section class="end" id="end" aria-label="결과">
     <div><div class="yr">2026 송년회 Book Quiz</div><h2>오늘의 네 권</h2></div>
@@ -222,6 +285,68 @@ button.next .arr { font-family: var(--serif); font-style: italic; font-size: 20p
 
   // 시작 화면 목차
   $('#toc').innerHTML = ROUNDS.map((r, i) => '<li style="animation-delay:' + (0.15 + i * 0.08) + 's"><b>' + two(i + 1) + '</b><span><i class="dot" style="background:' + r.accent + '"></i>' + esc(label(r)) + '</span><em>힌트 ' + hintsOf(r) + '</em></li>').join('');
+
+  // ── 소개 화면 예시 애니메이션: 실제 문제와 상관없는 가상의 표지 ──
+  function makeDemoCover() {
+    const W = 600, H = 880, c = document.createElement('canvas'); c.width = W; c.height = H;
+    const g = c.getContext('2d');
+    const bg = g.createLinearGradient(0, 0, 0, H); bg.addColorStop(0, '#16424a'); bg.addColorStop(1, '#0a1c26');
+    g.fillStyle = bg; g.fillRect(0, 0, W, H);
+    let seed = 7; const r = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
+    for (let i = 0; i < 90; i++) { g.fillStyle = 'rgba(255,248,225,' + (0.25 + r() * 0.6) + ')'; g.beginPath(); g.arc(r() * W, r() * H * 0.62, 0.6 + r() * 1.8, 0, 7); g.fill(); }
+    const mg = g.createRadialGradient(410, 360, 10, 410, 360, 230); mg.addColorStop(0, 'rgba(255,236,180,.35)'); mg.addColorStop(1, 'rgba(255,236,180,0)');
+    g.fillStyle = mg; g.fillRect(0, 0, W, H);
+    g.fillStyle = '#f6e7bd'; g.beginPath(); g.arc(410, 360, 112, 0, 7); g.fill();
+    g.fillStyle = 'rgba(200,170,110,.35)'; [[380, 330, 18], [440, 395, 12], [395, 410, 9]].forEach(([x, y, rr]) => { g.beginPath(); g.arc(x, y, rr, 0, 7); g.fill(); });
+    const cols = ['#c8553d', '#f2a65a', '#3d7a74', '#e8d5b5', '#6b4e71', '#d98f6f', '#2f5d62', '#b8a07e'];
+    let x = 30; const shelfY = 690;
+    while (x < W - 40) { const bw = 22 + r() * 26, bh = 120 + r() * 70; g.fillStyle = cols[Math.floor(r() * cols.length)];
+      g.fillRect(x, shelfY - bh, bw, bh); g.fillStyle = 'rgba(255,255,255,.18)'; g.fillRect(x + 4, shelfY - bh + 14, bw - 8, 3); g.fillRect(x + 4, shelfY - 24, bw - 8, 3); x += bw + 3; }
+    g.fillStyle = '#3a2a1c'; g.fillRect(0, shelfY, W, 18); g.fillStyle = '#1d140d'; g.fillRect(0, shelfY + 18, W, H - shelfY - 18);
+    g.fillStyle = '#0b0b0d'; const cx = 170, cy = 548;
+    g.beginPath(); g.ellipse(cx, cy, 46, 38, 0, 0, 7); g.fill();
+    g.beginPath(); g.arc(cx + 30, cy - 42, 24, 0, 7); g.fill();
+    g.beginPath(); g.moveTo(cx + 14, cy - 58); g.lineTo(cx + 18, cy - 82); g.lineTo(cx + 30, cy - 62); g.fill();
+    g.beginPath(); g.moveTo(cx + 34, cy - 62); g.lineTo(cx + 46, cy - 82); g.lineTo(cx + 50, cy - 56); g.fill();
+    g.lineWidth = 9; g.lineCap = 'round'; g.strokeStyle = '#0b0b0d'; g.beginPath(); g.moveTo(cx - 40, cy + 20); g.quadraticCurveTo(cx - 90, cy + 30, cx - 70, cy - 20); g.stroke();
+    g.textAlign = 'center'; g.fillStyle = '#f3efe7';
+    g.font = '700 76px "IBM Plex Sans KR", "Apple SD Gothic Neo", sans-serif'; g.fillText('밤의 서점', W / 2, 150);
+    g.font = 'italic 30px "Instrument Serif", Georgia, serif'; g.fillStyle = 'rgba(243,239,231,.75)'; g.fillText('a bookstore at night', W / 2, 196);
+    g.font = '500 22px "IBM Plex Sans KR", sans-serif'; g.fillStyle = 'rgba(243,239,231,.8)'; g.fillText('북 퀴즈 예시 표지', W / 2, 800);
+    return c;
+  }
+  const DEMO = [
+    { effect: 'shuffle', opts: { layout: 'frame', finish: true } },
+    { effect: 'tiles', opts: { style: 'door', random: false, key: [{ x: 0.3, y: 0.62, r: 0.5 }], open: [0.2, 0.45, 0.7] } },
+    { effect: 'steam', opts: { seed: 11 } },
+    { effect: 'spotlight', opts: { path: 'eight', area: { x: 0.14, y: 0.3, w: 0.72, h: 0.5 } } },
+  ];
+  let demoFx = null, demoT = 0, demoI = 0;
+  function demoChip(html) { $('#demoChip').innerHTML = html; }
+  function demoRun() {
+    if (!demoFx) return;
+    const d = DEMO[demoI % DEMO.length], lab = (CoverFX.get(d.effect) || {}).label;
+    $('#demoDots').innerHTML = DEMO.map((x, k) => '<span class="' + (k === demoI % DEMO.length ? 'on' : '') + '"></span>').join('');
+    demoFx.setEffect(d.effect, Object.assign({ seed: 2026 }, d.opts));
+    const S = demoFx.stages;
+    let k = 0;
+    const step = () => {
+      if (!demoFx) return;
+      if (k < S) { demoChip('<b>' + esc(lab) + '</b> 힌트 <i>' + (k + 1) + '</i> / ' + S); if (k > 0) demoFx.next(); k++; demoT = setTimeout(step, k === 1 ? 1900 : 1500); }
+      else if (k === S) { demoFx.reveal(); demoChip('정답 · <span class="ans">밤의 서점</span> (예시)'); k++; demoT = setTimeout(step, 2300); }
+      else { demoI++; demoRun(); }
+    };
+    step();
+  }
+  function startDemo() {
+    const go = () => {
+      if (!inIntro || demoFx) return;
+      demoFx = CoverFX.create('#demo', { padding: 0.02, duration: 1000, regions: [{ x: 0.08, y: 0.08, w: 0.84, h: 0.18 }], protect: true });
+      demoFx.setImage(makeDemoCover()).then(demoRun);
+    };
+    (document.fonts && document.fonts.ready ? document.fonts.ready : Promise.resolve()).then(go, go);
+  }
+  function stopDemo() { clearTimeout(demoT); if (demoFx) { demoFx.destroy(); demoFx = null; } }
 
   function setAccent(r) {
     document.documentElement.style.setProperty('--accent', r.accent);
@@ -290,7 +415,7 @@ button.next .arr { font-family: var(--serif); font-style: italic; font-size: 20p
     setBtn(ended ? '처음부터 다시' : fx.revealed ? (ri < ROUNDS.length - 1 ? '다음 책' : '결과 보기') : fx.stage === fx.stages - 1 ? '정답 보기' : '다음 힌트');
   }
   function next() {
-    if (inIntro) { inIntro = false; $('#intro').classList.remove('on'); $('#app').classList.remove('intro-mode'); load(0); return; }
+    if (inIntro) { inIntro = false; stopDemo(); $('#intro').classList.remove('on'); $('#app').classList.remove('intro-mode'); load(0); return; }
     if ($('#card').classList.contains('on')) { hideCard(); return; }
     if (ended) { load(0); return; }
     if (!fx.revealed) {
@@ -328,6 +453,7 @@ button.next .arr { font-family: var(--serif); font-style: italic; font-size: 20p
     if (['ArrowRight', ' ', 'PageDown'].includes(e.key) && e.target.tagName !== 'BUTTON') { e.preventDefault(); next(); }
   });
   render();
+  startDemo();
 })();
 </script>
 </body></html>
