@@ -1032,7 +1032,7 @@
     desc: '어둠 속을 헤매는 손전등. 빛이 비추는 곳을 잘 보세요!',
     fit: ['early', 'mid'],
     stages: (o) => (o.radius || []).length || 3,
-    defaults: { radius: [0.13, 0.2, 0.3], dim: 0.96, speed: 0.11, count: 1, area: null, path: null },
+    defaults: { radius: [0.13, 0.2, 0.3], dim: 0.96, speed: 0.11, count: 1, area: null, path: null, paths: null },
     animated: (t, o, S) => t < S,
     init({ rand }) {
       const ph = [];
@@ -1056,7 +1056,15 @@
       g.fillRect(0, 0, w, h);
       g.globalCompositeOperation = 'destination-out';
       const sp = s.opts.speed * Math.PI * 2;
-      const A = s.opts.area || { x: 0.14, y: 0.12, w: 0.72, h: 0.76 }; // 빛이 돌아다니는 범위 (표지 비율)
+      // 빛이 돌아다니는 범위 (표지 비율). paths 를 주면 힌트 단계마다 다른 범위를 돌고, 단계가 바뀔 때 부드럽게 옮겨 간다
+      let A = s.opts.area || { x: 0.14, y: 0.12, w: 0.72, h: 0.76 };
+      const P = s.opts.paths;
+      if (Array.isArray(P) && P.length) {
+        const pi = Math.min(Math.floor(t), S - 1), pu = t - pi;
+        const a = P[Math.min(pi, P.length - 1)], b = P[Math.min(pi + 1, P.length - 1)];
+        const e = Ease.inOut(pu);
+        A = pi + 1 < S ? { x: lerp(a.x, b.x, e), y: lerp(a.y, b.y, e), w: lerp(a.w, b.w, e), h: lerp(a.h, b.h, e) } : a;
+      }
       const pts = [];
       if (st.born == null) st.born = time;
       for (let k = 0; k < Math.max(1, s.opts.count | 0); k++) {

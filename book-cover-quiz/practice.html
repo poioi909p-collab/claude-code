@@ -202,39 +202,30 @@ button.next .arr { font-family: var(--serif); font-style: italic; font-size: 20p
         <div id="demo" aria-label="예시 표지가 여러 효과로 변신하는 애니메이션"></div>
         <div class="hero-chip" id="demoChip"></div>
       </div>
-      <div class="hero-dots" id="demoDots"></div>
     </div>
     <div class="eyebrow"><span>2026 송년회 · 연습판</span></div>
     <div class="mast">Book Quiz</div>
     <h1>표지 보고<br>책 제목 맞히기</h1>
-    <p class="lead">위 표지는 예시예요. 실제 게임에서는 진짜 책 네 권이 이렇게 변신해서 나와요.</p>
-
-    <div class="sec">
-      <h3><i>Why</i>이런 게임이에요</h3>
-      <p>제목은 가물가물해도 <b>표지는 기억나는 책</b>, 있잖아요. 서점 매대에서, 친구 책상 위에서, 지하철 옆자리에서 스쳐 본 그 표지요.
-      이 게임은 그 어렴풋한 기억만으로 책을 맞혀 보는 게임이에요. <b>읽은 책이 아니어도 괜찮아요.</b> 본 적만 있으면 충분합니다.</p>
-    </div>
 
     <div class="sec">
       <h3><i>How</i>이렇게 해요</h3>
       <ol class="steps">
-        <li><b>1</b><div><strong>표지가 낯설게 변신해서 나와요</strong><span>조각나고, 문이 닫히고, 김이 서리고, 어둠에 묻힌 채로요. 처음엔 색과 분위기만 보여요.</span></div></li>
-        <li><b>2</b><div><strong>'다음'을 누를 때마다 힌트가 하나씩 열려요</strong><span>조각이 제자리를 찾고, 문이 열리고, 빛이 넓어져요. 알 것 같으면 그때 바로 외치세요.</span></div></li>
-        <li><b>3</b><div><strong>정답이 나오면 원래 표지로 돌아와요</strong><span>제목과 저자가 전시 캡션처럼 나타나요. 다시 '다음'을 누르면 다음 책으로 넘어가요.</span></div></li>
+        <li><b>1</b><div><strong>책 표지를 일부러 바꿔 놨어요</strong><span>위 예시처럼 조각내거나, 가리거나, 어둡게 만들었어요.</span></div></li>
+        <li><b>2</b><div><strong>보이는 부분만 보고 맞히면 돼요</strong><span>책을 안 읽었어도 괜찮아요. 표지를 본 적만 있으면 돼요.</span></div></li>
+        <li><b>3</b><div><strong>'다음'을 누르면 조금씩 더 보여요</strong><span>알 것 같으면 바로 외치세요!</span></div></li>
       </ol>
     </div>
 
     <div class="sec">
-      <h3><i>Rounds</i>오늘의 네 권</h3>
+      <h3><i>Rounds</i>문제마다 바뀌는 방식이 달라요</h3>
       <ol class="toc" id="toc"></ol>
     </div>
 
     <div class="sec">
-      <h3><i>Tips</i>알아두면 좋아요</h3>
+      <h3><i>Tips</i>알아두기</h3>
       <ul class="tips">
-        <li>점수는 없어요. 먼저 외친 사람이 이기는, 가볍게 즐기는 게임이에요.</li>
-        <li>힌트가 열리는 순서는 라운드마다 정해져 있어요. 오른쪽 위 버튼으로 <b>랜덤 배치</b>로 바꾸면 매번 다르게 섞여요.</li>
-        <li>'다음' 버튼 말고도 표지를 탭하거나 키보드 → 키로 넘길 수 있어요.</li>
+        <li>점수는 없어요. 먼저 맞힌 사람이 이겨요.</li>
+        <li>오른쪽 위 버튼으로 매번 다르게 섞을 수도 있어요.</li>
       </ul>
     </div>
   </section>
@@ -254,7 +245,7 @@ button.next .arr { font-family: var(--serif); font-style: italic; font-size: 20p
   // 라운드 4개, 순서 고정, 라운드마다 ★ 지정 효과 하나. accent: 표지에서 뽑은 색
   const ROUNDS = [
     { src: 'covers/1.jpg', answer: '무서운 게 딱! 좋아!', author: '이구성', meta: 'ILB · 2002 · 딱이야 시리즈 1', accent: '#f2c500', ink: '#121110',
-      effect: 'shuffle', rnd: { layout: 'random' }, opts: { layout: 'frame', pos0: [21, 19, 17, 15, 23, 7, 10, 20, 4, 11, 16, 24, 2, 22, 8, 5, 14, 0, 12, 6, 9, 3, 18, 1, 13], invSlots: [6, 8, 16, 18], finish: true },
+      effect: 'shuffle', rnd: { layout: 'random' }, opts: { layout: 'frame', grid: 4, pos0: [14, 7, 13, 6, 11, 12, 0, 8, 2, 15, 3, 1, 5, 10, 4, 9], invSlots: [5, 6, 9, 10], finish: true },
       regions: [{ x: 0.15, y: 0.245, w: 0.7, h: 0.37 }, { x: 0.02, y: 0.035, w: 0.31, h: 0.07 }] },
     { src: 'covers/2.jpg', answer: '해리 포터와 마법사의 돌', author: 'J.K. 롤링', meta: '문학수첩 · 1999 · 1권 (구표지)', accent: '#e09a45', ink: '#121110',
       // 고정: 바깥에서 해리 얼굴 쪽으로 원을 좁혀 오며, 체크무늬 리듬으로 열림. 제목 칸은 맨 마지막
@@ -269,8 +260,9 @@ button.next .arr { font-family: var(--serif); font-style: italic; font-size: 20p
       ] },
       regions: [{ x: 0.2, y: 0.07, w: 0.6, h: 0.165 }, { x: 0.3, y: 0.79, w: 0.4, h: 0.05 }] },
     { src: 'covers/4.jpg', answer: '물고기는 존재하지 않는다', author: '룰루 밀러', meta: '곰출판 · 2021 · 정지인 옮김', accent: '#48b07a', ink: '#121110',
-      // 고정: 물고기 떼 위를 가운데에서 출발해 가로 8자로 도는 정해진 길
-      effect: 'spotlight', rnd: { path: null }, opts: { area: { x: 0.12, y: 0.12, w: 0.76, h: 0.56 }, path: 'eight' },
+      // 고정: 힌트 1 오른쪽 가장자리 작은 물고기 → 힌트 2 왼쪽 아래 물고기 떼 → 힌트 3 가운데 큰 물고기. 빛은 점점 커짐
+      effect: 'spotlight', rnd: { path: null }, opts: { path: 'eight', radius: [0.08, 0.11, 0.16], area: { x: 0.72, y: 0.42, w: 0.2, h: 0.28 },
+        paths: [{ x: 0.72, y: 0.42, w: 0.2, h: 0.28 }, { x: 0.06, y: 0.4, w: 0.28, h: 0.3 }, { x: 0.3, y: 0.36, w: 0.4, h: 0.2 }] },
       regions: [{ x: 0.17, y: 0.05, w: 0.66, h: 0.27 }, { x: 0.28, y: 0.64, w: 0.44, h: 0.075 }, { x: 0.9, y: 0.45, w: 0.08, h: 0.17 }] },
   ];
   ROUNDS.forEach((r) => { const i = new Image(); i.src = r.src; });
@@ -315,18 +307,12 @@ button.next .arr { font-family: var(--serif); font-style: italic; font-size: 20p
     g.font = '500 22px "IBM Plex Sans KR", sans-serif'; g.fillStyle = 'rgba(243,239,231,.8)'; g.fillText('북 퀴즈 예시 표지', W / 2, 800);
     return c;
   }
-  const DEMO = [
-    { effect: 'shuffle', opts: { layout: 'frame', finish: true } },
-    { effect: 'tiles', opts: { style: 'door', random: false, key: [{ x: 0.3, y: 0.62, r: 0.5 }], open: [0.2, 0.45, 0.7] } },
-    { effect: 'steam', opts: { seed: 11 } },
-    { effect: 'spotlight', opts: { path: 'eight', area: { x: 0.14, y: 0.3, w: 0.72, h: 0.5 } } },
-  ];
+  const DEMO = [{ effect: 'shuffle', opts: { layout: 'frame', grid: 4, finish: true } }];
   let demoFx = null, demoT = 0, demoI = 0;
   function demoChip(html) { $('#demoChip').innerHTML = html; }
   function demoRun() {
     if (!demoFx) return;
     const d = DEMO[demoI % DEMO.length], lab = (CoverFX.get(d.effect) || {}).label;
-    $('#demoDots').innerHTML = DEMO.map((x, k) => '<span class="' + (k === demoI % DEMO.length ? 'on' : '') + '"></span>').join('');
     demoFx.setEffect(d.effect, Object.assign({ seed: 2026 }, d.opts));
     const S = demoFx.stages;
     let k = 0;
