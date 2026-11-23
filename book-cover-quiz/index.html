@@ -141,6 +141,19 @@ kbd { font-family:var(--sans); font-size:.8em; padding:.05em .45em; border-radiu
 #splash .f { font-weight:700; font-size:4.6vw; letter-spacing:-.05em; line-height:1.05; }
 #splash .d { font-size:1.5vw; margin-top:1.5vh; opacity:.75; max-width:44ch; line-height:1.5; word-break:keep-all; }
 #splash .rule, #splash .glow { display:none; }
+/* 번호 → 효과 이름 → 설명 순서로 등장, 다 보인 뒤 '다음을 누르면 시작' */
+#splash .eyebrow, #splash .num, #splash .f, #splash .d, #splash .go { opacity:0; }
+#splash.on .eyebrow { animation:spIn .5s .3s ease forwards; }
+#splash.on .num { animation:spUp .9s .38s cubic-bezier(.2,.8,.2,1) forwards; }
+#splash.on .f { animation:spUp .8s .72s cubic-bezier(.2,.8,.2,1) forwards; }
+#splash.on .d { animation:spUp .8s .95s cubic-bezier(.2,.8,.2,1) forwards; }
+#splash.on .go { animation:spIn .5s 1.5s ease forwards, spPulse 1.6s 2s ease-in-out infinite; }
+#splash .eyebrow { --o:.7; } #splash .d { --o:.75; }
+#splash .go { position:absolute; right:6vw; top:8vh; font-size:1.3vw; font-weight:700; }
+#splash .go i { font-family:var(--serif); font-weight:400; font-size:1.6vw; margin-left:.4vw; }
+@keyframes spIn { to { opacity:var(--o, 1); } }
+@keyframes spUp { from { opacity:0; transform:translateY(1.5vw); } to { opacity:var(--o, 1); transform:none; } }
+@keyframes spPulse { 50% { opacity:.45; } }
 @keyframes cardIn { from { clip-path:inset(100% 0 0 0); } to { clip-path:inset(0 0 0 0); } }
 @keyframes cardOut { from { clip-path:inset(0 0 0 0); } to { clip-path:inset(0 0 100% 0); } }
 #flash { display:none; }
@@ -302,7 +315,7 @@ label.sbtn input { display:none; }
   </div>
 </section>
 
-<div id="splash"><div class="eyebrow" id="spE">Round 01 / 04</div><div class="num" id="spR"></div><div class="f" id="spF"></div><div class="d" id="spD"></div></div>
+<div id="splash"><div class="eyebrow" id="spE">Round 01 / 04</div><div class="num" id="spR"></div><div class="f" id="spF"></div><div class="d" id="spD"></div><div class="go">다음을 누르면 바로 시작<i>→</i></div></div>
 <div id="flash"></div>
 <canvas id="confetti"></canvas>
 <div id="ddaeng"><div class="st">땡!<span class="sm">Time's up</span></div></div>
@@ -844,8 +857,9 @@ function gotoRound(i, opt) {
   const sp = $('#splash');
   sp.classList.remove('on', 'out'); void sp.offsetWidth; sp.classList.add('on');
   sfx.splash();
+  S.splashAt = performance.now();
   clearTimeout(S.splashT);
-  S.splashT = setTimeout(() => endSplash(), 2600);
+  S.splashT = setTimeout(() => endSplash(), 4000); // 설명까지 읽을 시간
 }
 function endSplash(quiet) {
   clearTimeout(S.splashT);
@@ -898,7 +912,11 @@ function startGame() {
 // ── 진행 (버튼 하나로 전체 진행) ──
 function next() {
   if (S.screen === 'start') return startGame();
-  if (S.screen === 'splash') return endSplash();
+  if (S.screen === 'splash') {
+    // 효과 설명이 다 나오기 전(1.3초)에 누른 건 무시: 두 번 눌러 설명을 건너뛰는 일 방지
+    if (performance.now() - (S.splashAt || 0) < 1300) return;
+    return endSplash();
+  }
   if (S.screen === 'play') {
     if (!fx.revealed) {
       if (fx.stage < fx.stages - 1) {
@@ -910,7 +928,7 @@ function next() {
   }
 }
 function prev() {
-  if (S.screen === 'splash') return endSplash();
+  if (S.screen === 'splash') { if (performance.now() - (S.splashAt || 0) < 1300) return; return endSplash(); }
   if (S.screen === 'end') { gotoRound(cfg.rounds.length - 1, { revealed: true }); return; }
   if (S.screen === 'play') {
     if (fx.revealed) unreveal();

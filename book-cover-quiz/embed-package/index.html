@@ -109,11 +109,23 @@ button.next .arr { font-family: var(--serif); font-style: italic; font-size: 20p
   background: var(--accent); color: var(--on-accent); clip-path: inset(100% 0 0 0); }
 .card.on { display: flex; animation: cardIn .7s cubic-bezier(.7,0,.2,1) forwards; }
 .card.out { animation: cardOut .6s cubic-bezier(.7,0,.2,1) forwards; }
-.card .ey { font-size: 13px; font-weight: 500; letter-spacing: .04em; opacity: .7; }
+/* 카드 글자는 번호 → 이름 → 설명 순서로 등장, 다 보인 뒤에 '탭하면 시작' 표시 */
+.card .ey, .card .num, .card .nm, .card .ds, .card .go { opacity: 0; }
+.card.on .ey { animation: cIn .5s .3s ease forwards; }
+.card.on .num { animation: cUp .8s .38s cubic-bezier(.2,.8,.2,1) forwards; }
+.card.on .nm { animation: cUp .7s .7s cubic-bezier(.2,.8,.2,1) forwards; }
+.card.on .ds { animation: cUp .7s .92s cubic-bezier(.2,.8,.2,1) forwards; }
+.card.on .go { animation: cIn .5s 1.4s ease forwards, goPulse 1.6s 1.9s ease-in-out infinite; }
+@keyframes cIn { to { opacity: var(--o, 1); } }
+@keyframes cUp { from { opacity: 0; transform: translateY(14px); } to { opacity: var(--o, 1); transform: none; } }
+@keyframes goPulse { 50% { opacity: .45; } }
+.card .go { position: absolute; right: 24px; top: 34px; font-size: 13px; font-weight: 700; }
+.card .go i { font-family: var(--serif); font-weight: 400; font-size: 18px; margin-left: 4px; }
+.card .ey { font-size: 13px; font-weight: 500; letter-spacing: .04em; --o: .7; }
 .card .num { font-family: var(--serif); font-size: clamp(120px, 42vw, 200px); line-height: .82; letter-spacing: -0.04em; margin: 6px 0 14px; }
 .card .num i { font-style: italic; }
 .card .nm { font-size: 30px; font-weight: 700; letter-spacing: -0.04em; }
-.card .ds { font-size: 14px; margin-top: 8px; opacity: .75; max-width: 30ch; line-height: 1.5; word-break: keep-all; }
+.card .ds { font-size: 14px; margin-top: 8px; --o: .78; max-width: 30ch; line-height: 1.5; word-break: keep-all; }
 @keyframes cardIn { from { clip-path: inset(100% 0 0 0); } to { clip-path: inset(0 0 0 0); } }
 @keyframes cardOut { from { clip-path: inset(0 0 0 0); } to { clip-path: inset(0 0 100% 0); } }
 
@@ -132,7 +144,7 @@ button.next .arr { font-family: var(--serif); font-style: italic; font-size: 20p
 .end figcaption { margin-top: 8px; font-size: 13px; font-weight: 700; letter-spacing: -0.02em; line-height: 1.35; word-break: keep-all; }
 .end figcaption b { font-family: var(--serif); font-weight: 400; font-style: italic; color: var(--muted); margin-right: 4px; }
 .end figcaption span { display: block; font-weight: 400; color: var(--muted); font-size: 12px; margin-top: 2px; }
-@media (prefers-reduced-motion: reduce) { .label.show .ln > *, .label.show .bar, .toc li, .end figure, .card.on, .card.out { animation-duration: 1ms !important; animation-delay: 0s !important; } }
+@media (prefers-reduced-motion: reduce) { .label.show .ln > *, .label.show .bar, .toc li, .end figure, .card.on, .card.out, .card.on .ey, .card.on .num, .card.on .nm, .card.on .ds, .card.on .go { animation-duration: 1ms !important; animation-delay: 0s !important; } }
 </style>
 <div class="app intro-mode" id="app">
   <div class="top">
@@ -167,7 +179,7 @@ button.next .arr { font-family: var(--serif); font-style: italic; font-size: 20p
     <div><div class="yr">2026 송년회 Book Quiz</div><h2>오늘의 네 권</h2></div>
     <div class="grid" id="endGrid"></div>
   </section>
-  <div class="card" id="card"><div class="ey" id="cardEy">Round</div><div class="num" id="cardNum"></div><div class="nm" id="cardNm"></div><div class="ds" id="cardDs"></div></div>
+  <div class="card" id="card"><div class="ey" id="cardEy">Round</div><div class="num" id="cardNum"></div><div class="nm" id="cardNm"></div><div class="ds" id="cardDs"></div><div class="go">탭하면 바로 시작<i>→</i></div></div>
 </div>
 </script>
 <script src="cover-fx.js"></script>
@@ -205,7 +217,8 @@ button.next .arr { font-family: var(--serif); font-style: italic; font-size: 20p
   const label = (r) => (CoverFX.get(r.effect) || {}).label || r.effect;
   const hintsOf = (r) => { const d = CoverFX.get(r.effect); return typeof d.stages === 'function' ? d.stages(Object.assign({}, d.defaults, optsOf(r))) : d.stages; };
   const fx = CoverFX.create('#box', { padding: 0.02, duration: 1050, onChange: render });
-  let ri = 0, ended = false, inIntro = true, cardT = 0;
+  let ri = 0, ended = false, inIntro = true, cardT = 0, cardAt = 0;
+  const CARD_SHOW = 4200, CARD_LOCK = 1300; // 카드는 4.2초 보이고, 처음 1.3초는 탭해도 넘어가지 않음
 
   // 시작 화면 목차
   $('#toc').innerHTML = ROUNDS.map((r, i) => '<li style="animation-delay:' + (0.15 + i * 0.08) + 's"><b>' + two(i + 1) + '</b><span><i class="dot" style="background:' + r.accent + '"></i>' + esc(label(r)) + '</span><em>힌트 ' + hintsOf(r) + '</em></li>').join('');
@@ -221,11 +234,13 @@ button.next .arr { font-family: var(--serif); font-style: italic; font-size: 20p
     $('#cardNm').textContent = label(r);
     $('#cardDs').textContent = (CoverFX.get(r.effect) || {}).desc || '';
     c.classList.remove('on', 'out'); void c.offsetWidth; c.classList.add('on');
-    clearTimeout(cardT); cardT = setTimeout(hideCard, 1900);
+    cardAt = performance.now();
+    clearTimeout(cardT); cardT = setTimeout(() => hideCard(true), CARD_SHOW);
   }
-  function hideCard() {
+  function hideCard(force) {
     const c = $('#card');
     if (!c.classList.contains('on') || c.classList.contains('out')) return;
+    if (force !== true && performance.now() - cardAt < CARD_LOCK) return; // 설명이 다 나오기 전 탭은 무시
     clearTimeout(cardT);
     c.classList.add('out');
     fx.setEffect(ROUNDS[ri].effect, optsOf(ROUNDS[ri])); // 카드가 걷히는 순간 등장 연출 시작
@@ -306,7 +321,7 @@ button.next .arr { font-family: var(--serif); font-style: italic; font-size: 20p
     if (!inIntro && !ended) load(ri); // 지금 라운드를 새 배치로 다시 시작
   };
   renderMode();
-  $('#card').addEventListener('click', hideCard);
+  $('#card').addEventListener('click', () => hideCard());
   $('#box').addEventListener('click', next);
   $('#box').addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); next(); } });
   document.addEventListener('keydown', (e) => {
