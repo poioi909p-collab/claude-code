@@ -702,14 +702,53 @@
   });
 
   // 2) 조각 재배치 ── ① 섞임+회전+일부 반전 ② 회전 풀림 ③ 절반 제자리 → 공개
+  // 구조적 배치: 위치는 정해 둔 배열(pos0) 또는 고양이 사상, 회전은 모두 180°, 대각선 X자 칸은 색 반전.
+  // ② 가운데부터 바깥으로 물결처럼 바로 서며 색이 돌아옴 ③ 테두리 조각이 시계 방향으로 제자리(퍼즐 테두리부터)
+  // 공개: 안쪽 조각이 나선 순서로 제자리.
+  function frameLayout(n, opts) {
+    const N = n * n;
+    const rowOf = (q) => Math.floor(q / n), colOf = (q) => q % n;
+    const ringOf = (q) => Math.min(rowOf(q), colOf(q), n - 1 - rowOf(q), n - 1 - colOf(q));
+    const spiral = [];
+    let top = 0, bot = n - 1, l = 0, r = n - 1;
+    while (top <= bot && l <= r) {
+      for (let c = l; c <= r; c++) spiral.push(top * n + c);
+      top++;
+      for (let rr = top; rr <= bot; rr++) spiral.push(rr * n + r);
+      r--;
+      if (top <= bot) { for (let c = r; c >= l; c--) spiral.push(bot * n + c); bot--; }
+      if (l <= r) { for (let rr = bot; rr >= top; rr--) spiral.push(rr * n + l); l++; }
+    }
+    const sIdx = new Array(N);
+    spiral.forEach((q, k) => (sIdx[q] = k));
+    const pos0 = Array.isArray(opts.pos0) && opts.pos0.length === N ? opts.pos0.slice()
+      : Array.from({ length: N }, (_, q) => ((2 * rowOf(q) + colOf(q) + 1) % n) * n + ((rowOf(q) + colOf(q) + 2) % n));
+    const A = Array.from({ length: N }, (_, i) => n >= 3 && ringOf(i) === 0);
+    const inner = spiral.filter((q) => !A[q]);
+    const shift = Math.max(1, Math.floor(inner.length / 2));
+    const pos2 = Array.from({ length: N }, (_, i) => i);
+    inner.forEach((q, k) => (pos2[q] = inner[(k + shift) % inner.length]));
+    const diag = (q) => rowOf(q) === colOf(q) || rowOf(q) + colOf(q) === n - 1;
+    const rot = new Array(N).fill(opts.rot != null ? opts.rot : 2);
+    // 반전할 칸: invSlots(판 위치 목록)를 주면 그 칸, 없으면 대각선 X자
+    const invSet = Array.isArray(opts.invSlots) ? new Set(opts.invSlots) : null;
+    const inv = Array.from({ length: N }, (_, i) => opts.invert > 0 && (invSet ? invSet.has(pos0[i]) : diag(pos0[i])));
+    const c = (n - 1) / 2, maxD = Math.hypot(c, c) || 1;
+    const outerLen = N - inner.length;
+    const d1 = pos0.map((q) => Math.hypot(rowOf(q) - c, colOf(q) - c) / maxD);
+    const d2 = Array.from({ length: N }, (_, i) => (A[i] ? sIdx[i] / Math.max(1, outerLen) : (sIdx[pos2[i]] - outerLen) / Math.max(1, inner.length)));
+    const d3 = Array.from({ length: N }, (_, i) => (A[i] ? 0 : (sIdx[i] - outerLen) / Math.max(1, inner.length - 1)));
+    return { n, N, pos0, pos2, rot, inv, A, d1, d2, d3, structured: true };
+  }
   register('shuffle', {
     label: '조각 재배치',
     desc: '표지가 조각조각 흩어졌어요. 조각들이 제자리를 찾아갑니다!',
     fit: ['early', 'mid'],
     stages: 3,
-    defaults: { grid: 5, invert: 0.3, rotate: true },
+    defaults: { grid: 5, invert: 0.3, rotate: true, layout: 'random', pos0: null, invSlots: null },
     init({ opts, rand }) {
       const n = Math.max(2, opts.grid | 0), N = n * n;
+      if (opts.layout === 'frame') return frameLayout(n, opts);
       const pos0 = shuffled(N, rand);
       for (let i = 0; i < N; i++) {
         if (pos0[i] === i) {
@@ -745,10 +784,12 @@
       const gap = Math.max(1, w * 0.008) * (1 - s3);
       const items = [];
       for (let i = 0; i < st.N; i++) {
-        const d = st.delay[i];
-        const r1 = Ease.outBack(stagger(s1, d, 0.45));
-        const u2 = Ease.inOut(stagger(s2, d, 0.45));
-        const u3 = Ease.inOut(stagger(s3, d, 0.45));
+        const d = st.delay ? st.delay[i] : 0;
+        const d1 = st.d1 ? st.d1[i] : d, d2 = st.d2 ? st.d2[i] : d, d3 = st.d3 ? st.d3[i] : d;
+        const k1 = stagger(s1, d1, 0.45);
+        const r1 = Ease.outBack(k1);
+        const u2 = Ease.inOut(stagger(s2, d2, st.structured ? 0.55 : 0.45));
+        const u3 = Ease.inOut(stagger(s3, d3, st.structured ? 0.55 : 0.45));
         let from, to, u;
         if (s3 > 0 && !st.A[i]) { from = st.pos2[i]; to = i; u = u3; }
         else { from = st.pos0[i]; to = st.pos2[i]; u = u2; }
@@ -760,8 +801,8 @@
           cx: lerp(fx, tx, u),
           cy: lerp(fy, ty, u) - fly * h * 0.08,
           sc: 1 + fly * 0.35,
-          ang: st.rot[i] * (Math.PI / 2) * (1 - r1) + fly * 0.5 * (i % 2 ? 1 : -1),
-          invA: st.inv[i] ? 1 - (st.A[i] ? u2 : u3) : 0,
+          ang: st.rot[i] * (Math.PI / 2) * (1 - r1) + fly * (st.structured ? 0.25 : 0.5) * ((st.structured ? tx < fx : i % 2) ? 1 : -1),
+          invA: st.inv[i] ? (st.structured ? 1 - Ease.inOut(k1) : 1 - (st.A[i] ? u2 : u3)) : 0,
         });
       }
       items.sort((a, b) => a.fly - b.fly);

@@ -416,9 +416,9 @@ const DEFAULT_MIX = ['zoom', 'tiles', 'chosung'];
 // 표지 4개 고정, 라운드마다 효과 하나 (★ 지정 효과) + 바꿔 볼 만한 대안
 const COVER_REC = {
   r1: {
-    pick: ['titlemask', '노란 달과 캐릭터 그림이 강렬해서 제목만 가려도 충분해요'],
-    alts: [['spotlight', '공포 분위기라 어둠 속 손전등도 어울려요'], ['door', '삐걱 열리는 문틈, 무서운 이야기 느낌']],
-    opts: { zoom: { focus: { x: 0.5, y: 0.72 }, drift: 0.02 } },
+    pick: ['shuffle', '노란 달 조각이 모서리·가운데에 대칭으로 흩어져 있다가, 바로 서고 → 테두리부터 맞춰져요 (고정 배치)'],
+    alts: [['titlemask', '노란 달과 캐릭터 그림이 강렬해서 제목만 가려도 충분해요'], ['spotlight', '공포 분위기라 어둠 속 손전등도 어울려요']],
+    opts: { zoom: { focus: { x: 0.5, y: 0.72 }, drift: 0.02 }, shuffle: { layout: 'frame', pos0: [21, 19, 17, 15, 23, 7, 10, 20, 4, 11, 16, 24, 2, 22, 8, 5, 14, 0, 12, 6, 9, 3, 18, 1, 13], invSlots: [6, 8, 16, 18] } },
   },
   r2: {
     pick: ['tiles', '바깥 배경부터 한 칸씩 열리고, 해리 얼굴과 제목은 맨 마지막에 열려요'],
@@ -447,11 +447,11 @@ function roman(n) {
 const DEFAULTS = {
   title: '표지 보고 책 제목 맞히기',
   subtitle: '2026 송년회',
-  schema: 3,
+  schema: 4,
   timer: 30, timerAuto: true, maxPts: 30, minPts: 10, sound: true,
   teams: [],
   rounds: [
-    { id: 'r1', answer: '무서운 게 딱! 좋아!', sub: '이구성 · 딱이야 시리즈 1 (ILB, 2002)', effect: 'titlemask', protect: true,
+    { id: 'r1', answer: '무서운 게 딱! 좋아!', sub: '이구성 · 딱이야 시리즈 1 (ILB, 2002)', effect: 'shuffle', protect: true,
       img: { path: 'covers/1.jpg' }, regions: [{ x: 0.15, y: 0.245, w: 0.7, h: 0.37 }] },
     { id: 'r2', answer: '해리 포터와 마법사의 돌', sub: 'J.K. 롤링 · 문학수첩 1999년판 1권 (구표지)', effect: 'tiles', protect: true,
       img: { path: 'covers/2.jpg' }, regions: [{ x: 0.1, y: 0, w: 0.82, h: 0.25 }, { x: 0.27, y: 0.26, w: 0.52, h: 0.13 }, { x: 0.25, y: 0.845, w: 0.5, h: 0.045 }] },
@@ -471,11 +471,11 @@ function normalizeCfg(data) {
     const r = clone(def);
     const from = saved.find((x) => x && x.id === def.id) || saved[i];
     // 지정 효과가 바뀌기 전에 저장된 효과 선택은 버리고 라운드별 지정 효과로 맞춘다
-    const keys = data && data.schema === 3 ? ROUND_KEYS : ROUND_KEYS.filter((k) => k !== 'effect' && k !== 'mix');
+    const keys = data && data.schema === 4 ? ROUND_KEYS : ROUND_KEYS.filter((k) => k !== 'effect' && k !== 'mix');
     if (from) keys.forEach((k) => { if (from[k] !== undefined) r[k] = clone(from[k]); });
     return r;
   });
-  c.schema = 3;
+  c.schema = 4;
   return c;
 }
 function loadCfg() {

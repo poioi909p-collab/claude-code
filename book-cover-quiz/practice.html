@@ -94,7 +94,9 @@ button.next:focus-visible { outline: 2px solid var(--gold-hi); outline-offset: 3
   const ROMAN = ['I', 'II', 'III', 'IV'];
   // 라운드 4개, 순서 고정, 라운드마다 ★ 지정 효과 하나 (본편과 같은 설정)
   const ROUNDS = [
-    { src: 'covers/1.jpg', answer: '무서운 게 딱! 좋아!', sub: '이구성 · 딱이야 시리즈 1 (ILB, 2002)', effect: 'titlemask',
+    { src: 'covers/1.jpg', answer: '무서운 게 딱! 좋아!', sub: '이구성 · 딱이야 시리즈 1 (ILB, 2002)', effect: 'shuffle',
+      // 고정 배치: 노란 달 조각 9개는 네 모서리·네 변 가운데·한가운데, 검은 밤 조각 16개는 그 사이 (원래 이웃끼리 붙지 않게 미리 계산)
+      opts: { layout: 'frame', pos0: [21, 19, 17, 15, 23, 7, 10, 20, 4, 11, 16, 24, 2, 22, 8, 5, 14, 0, 12, 6, 9, 3, 18, 1, 13], invSlots: [6, 8, 16, 18] },
       regions: [{ x: 0.15, y: 0.245, w: 0.7, h: 0.37 }] },
     { src: 'covers/2.jpg', answer: '해리 포터와 마법사의 돌', sub: 'J.K. 롤링 · 문학수첩 1999년판 1권 (구표지)', effect: 'tiles',
       opts: { key: [{ x: 0.67, y: 0.5, r: 0.5 }], open: [0.14, 0.28, 0.44, 0.6] },
