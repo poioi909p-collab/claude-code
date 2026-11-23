@@ -954,7 +954,7 @@
     desc: '어둠 속을 헤매는 손전등. 빛이 비추는 곳을 잘 보세요!',
     fit: ['early', 'mid'],
     stages: (o) => (o.radius || []).length || 3,
-    defaults: { radius: [0.13, 0.2, 0.3], dim: 0.96, speed: 0.11, count: 1 },
+    defaults: { radius: [0.13, 0.2, 0.3], dim: 0.96, speed: 0.11, count: 1, area: null },
     animated: (t, o, S) => t < S,
     init({ rand }) {
       const ph = [];
@@ -978,10 +978,11 @@
       g.fillRect(0, 0, w, h);
       g.globalCompositeOperation = 'destination-out';
       const sp = s.opts.speed * Math.PI * 2;
+      const A = s.opts.area || { x: 0.14, y: 0.12, w: 0.72, h: 0.76 }; // 빛이 돌아다니는 범위 (표지 비율)
       const pts = [];
       for (let k = 0; k < Math.max(1, s.opts.count | 0); k++) {
-        let cx = w * (0.5 + 0.36 * Math.sin(time * sp + st.ph[k * 2]));
-        let cy = h * (0.5 + 0.38 * Math.sin(time * sp * 0.71 + st.ph[k * 2 + 1]));
+        let cx = w * (A.x + A.w * (0.5 + 0.5 * Math.sin(time * sp + st.ph[k * 2])));
+        let cy = h * (A.y + A.h * (0.5 + 0.5 * Math.sin(time * sp * 0.71 + st.ph[k * 2 + 1])));
         cx = lerp(cx, w / 2, fade); cy = lerp(cy, h / 2, fade);
         const gr = g.createRadialGradient(cx, cy, 0, cx, cy, r);
         gr.addColorStop(0, 'rgba(0,0,0,1)');

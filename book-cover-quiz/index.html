@@ -423,14 +423,14 @@ const COVER_REC = {
     },
   },
   r3: {
-    pick: ['invert', '제목 쪽 절반을 가리고 색과 방향을 뒤집어요'],
-    alts: [['steam', '온실 유리에 김이 서린 느낌'], ['silhouette', '유리 돔 모양이 실루엣으로도 또렷해요']],
+    pick: ['steam', '온실 유리에 김이 서린 느낌. 손으로 닦은 자리만 조금씩 보여요'],
+    alts: [['invert', '제목 쪽 절반을 가리고 색과 방향을 뒤집어요'], ['silhouette', '유리 돔 모양이 실루엣으로도 또렷해요']],
     opts: { zoom: { focus: { x: 0.5, y: 0.45 }, drift: 0.02 } },
   },
   r4: {
-    pick: ['zoom', '물고기 떼 한 귀퉁이부터 시작해 점점 멀어지며 큰 물고기가 드러나요'],
-    alts: [['spotlight', '깊은 바닷속을 손전등으로 비추는 느낌'], ['bubbles', '물고기 떼 사이로 물방울이 떠올라요']],
-    opts: { zoom: { focus: { x: 0.6, y: 0.45 }, drift: 0.02 } },
+    pick: ['spotlight', '깊은 바닷속을 손전등으로 비추는 느낌. 빛이 점점 커져요'],
+    alts: [['zoom', '물고기 떼 한 귀퉁이부터 시작해 점점 멀어지며 큰 물고기가 드러나요'], ['bubbles', '물고기 떼 사이로 물방울이 떠올라요']],
+    opts: { zoom: { focus: { x: 0.6, y: 0.45 }, drift: 0.02 }, spotlight: { area: { x: 0.12, y: 0.12, w: 0.76, h: 0.56 } } },
   },
 };
 const SPINES = ['#7a2b3a', '#24493d', '#22345a', '#8c6a27', '#4a2c4c', '#5a3a24'];
@@ -441,7 +441,7 @@ function roman(n) {
 const DEFAULTS = {
   title: '표지 보고 책 제목 맞히기',
   subtitle: '2026 송년회',
-  schema: 2,
+  schema: 3,
   timer: 30, timerAuto: true, maxPts: 30, minPts: 10, sound: true,
   teams: [],
   rounds: [
@@ -449,9 +449,9 @@ const DEFAULTS = {
       img: { path: 'covers/1.jpg' }, regions: [{ x: 0.15, y: 0.245, w: 0.7, h: 0.37 }] },
     { id: 'r2', answer: '해리 포터와 마법사의 돌', sub: 'J.K. 롤링 · 문학수첩 1999년판 1권 (구표지)', effect: 'tiles', protect: true,
       img: { path: 'covers/2.jpg' }, regions: [{ x: 0.1, y: 0, w: 0.82, h: 0.25 }, { x: 0.27, y: 0.26, w: 0.52, h: 0.13 }, { x: 0.25, y: 0.845, w: 0.5, h: 0.045 }] },
-    { id: 'r3', answer: '지구 끝의 온실', sub: '김초엽 · 자이언트북스 (2021)', effect: 'invert', protect: true,
+    { id: 'r3', answer: '지구 끝의 온실', sub: '김초엽 · 자이언트북스 (2021)', effect: 'steam', protect: true,
       img: { path: 'covers/3.jpg' }, regions: [{ x: 0.2, y: 0.07, w: 0.6, h: 0.165 }, { x: 0.3, y: 0.79, w: 0.4, h: 0.05 }] },
-    { id: 'r4', answer: '물고기는 존재하지 않는다', sub: '룰루 밀러 · 곰출판 (2021)', effect: 'zoom', protect: true,
+    { id: 'r4', answer: '물고기는 존재하지 않는다', sub: '룰루 밀러 · 곰출판 (2021)', effect: 'spotlight', protect: true,
       img: { path: 'covers/4.jpg' }, regions: [{ x: 0.17, y: 0.05, w: 0.66, h: 0.27 }, { x: 0.28, y: 0.64, w: 0.44, h: 0.075 }, { x: 0.9, y: 0.45, w: 0.08, h: 0.17 }] },
   ],
 };
@@ -464,12 +464,12 @@ function normalizeCfg(data) {
   c.rounds = DEFAULTS.rounds.map((def, i) => {
     const r = clone(def);
     const from = saved.find((x) => x && x.id === def.id) || saved[i];
-    // 예전 형식(schema 1)의 효과 선택은 버리고 라운드별 지정 효과로 맞춘다
-    const keys = data && data.schema === 2 ? ROUND_KEYS : ROUND_KEYS.filter((k) => k !== 'effect' && k !== 'mix');
+    // 지정 효과가 바뀌기 전에 저장된 효과 선택은 버리고 라운드별 지정 효과로 맞춘다
+    const keys = data && data.schema === 3 ? ROUND_KEYS : ROUND_KEYS.filter((k) => k !== 'effect' && k !== 'mix');
     if (from) keys.forEach((k) => { if (from[k] !== undefined) r[k] = clone(from[k]); });
     return r;
   });
-  c.schema = 2;
+  c.schema = 3;
   return c;
 }
 function loadCfg() {
