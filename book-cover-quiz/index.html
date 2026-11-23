@@ -92,7 +92,7 @@ kbd { font-family:var(--sans); font-size:.78em; padding:.05em .45em; border-radi
 .round-no { font-size:1.05vw; display:flex; align-items:baseline; gap:.8vw; }
 .round-no .of { color:var(--muted); letter-spacing:.2em; }
 .fx-name { font-family:var(--serif); font-weight:700; font-size:3.7vw; line-height:1.15; margin-top:.8vw; color:var(--paper); word-break:keep-all; }
-.fx-desc { font-family:var(--serif); font-size:1.3vw; color:var(--muted); margin-top:.9vw; line-height:1.6; word-break:keep-all; min-height:4.2vw; }
+.fx-desc { transition:opacity .6s; font-family:var(--serif); font-size:1.3vw; color:var(--muted); margin-top:.9vw; line-height:1.6; word-break:keep-all; min-height:4.2vw; }
 #panel > .rule { margin:2vw 0 0; opacity:.6; }
 .body { position:relative; margin-top:2.2vw; height:23vw; perspective:90vw; }
 .info { position:absolute; inset:0; display:grid; grid-template-columns:1fr auto; gap:2vw; align-items:center; transition:opacity .45s, transform .45s; }
@@ -133,19 +133,28 @@ kbd { font-family:var(--sans); font-size:.78em; padding:.05em .45em; border-radi
 @keyframes pulse { 50% { transform:scale(1.1); } }
 @keyframes shake { 20%,60% { transform:translateX(-.5vw); } 40%,80% { transform:translateX(.5vw); } }
 
-/* 정답 카드: 장서표 */
-.answer { position:absolute; inset:0; opacity:0; transform:translateY(25%) rotateX(55deg); transform-origin:50% 100%; pointer-events:none; }
-.answer.show { opacity:1; transform:none; transition:transform 1s cubic-bezier(.2,1.25,.35,1), opacity .4s; }
-.plate { height:100%; padding:.7vw; background:var(--paper); border-radius:3px; color:var(--paper-ink);
-  background-image:radial-gradient(ellipse at 20% 0%, rgba(255,255,255,.6), transparent 60%), radial-gradient(ellipse at 100% 100%, rgba(160,122,44,.18), transparent 60%);
-  box-shadow:0 2vw 4vw rgba(0,0,0,.5), 0 0 0 1px rgba(0,0,0,.2); }
-.plate .in { height:100%; border:1px solid var(--gold-lo); outline:1px solid rgba(155,122,62,.45); outline-offset:-.45vw; padding:1.6vw 2.2vw;
-  display:flex; flex-direction:column; justify-content:center; }
-.plate .eyebrow { font-size:.95vw; color:var(--gold-lo); }
-.plate .t { font-family:var(--serif); font-weight:700; font-size:3.3vw; line-height:1.2; margin:1vw 0; word-break:keep-all; text-wrap:balance; }
-.plate .rule { width:6vw; background:var(--gold-lo); }
-.plate .s { font-family:var(--serif); font-size:1.25vw; color:var(--paper-mute); margin-top:1vw; word-break:keep-all; }
-.plate .aw { margin-top:.8vw; font-family:var(--serif); font-weight:700; font-size:1.3vw; color:var(--wine); min-height:1.7vw; }
+/* 정답 공개: 책 속표지처럼 조판 — 금선이 그어지고 제목이 한 글자씩 */
+.answer { position:absolute; inset:0; display:flex; flex-direction:column; justify-content:center; pointer-events:none; visibility:hidden; }
+.answer.show { visibility:visible; }
+.a-ey { display:flex; align-items:center; gap:1.2vw; font-family:var(--latin); font-style:italic; font-weight:600; font-size:1.15vw; letter-spacing:.28em; color:var(--gold); }
+.a-ey .ln { flex:1; height:1px; background:linear-gradient(90deg, transparent, var(--gold)); transform:scaleX(0); transform-origin:right; }
+.a-ey .ln:last-child { background:linear-gradient(90deg, var(--gold), transparent); transform-origin:left; }
+.a-ey .tx { opacity:0; white-space:nowrap; }
+.a-t { font-family:var(--serif); font-weight:700; font-size:var(--ts, 3.9vw); line-height:1.25; text-wrap:balance; color:var(--paper); margin:1.8vw 0 1.3vw; text-align:center; word-break:keep-all; text-shadow:0 .3vw 2vw rgba(0,0,0,.5); }
+.a-t .w { display:inline-block; white-space:nowrap; }
+.a-t .c { display:inline-block; opacity:0; }
+.a-s { font-family:var(--serif); font-size:1.35vw; color:var(--muted); text-align:center; opacity:0; word-break:keep-all; }
+.a-aw { margin-top:1.4vw; font-family:var(--serif); font-weight:700; font-size:1.3vw; color:var(--gold-hi); text-align:center; min-height:1.7vw; opacity:0; }
+.answer.show .a-ey .ln { animation:lnIn 1.1s .15s cubic-bezier(.3,.8,.2,1) forwards; }
+.answer.show .a-ey .tx { animation:fadeIn .8s .4s forwards; }
+.answer.show .a-t .c { animation:chIn .9s cubic-bezier(.2,.7,.2,1) forwards; animation-delay:calc(.6s + var(--i) * 55ms); }
+.answer.show .a-s { animation:riseIn .9s forwards; animation-delay:var(--after, 1.2s); }
+.answer.show .a-aw { animation:riseIn .9s forwards; animation-delay:calc(var(--after, 1.2s) + .25s); }
+.answer.instant, .answer.instant * { animation-duration:1ms !important; animation-delay:0s !important; }
+@keyframes lnIn { to { transform:scaleX(1); } }
+@keyframes fadeIn { to { opacity:1; } }
+@keyframes riseIn { from { opacity:0; transform:translateY(.8vw); } to { opacity:1; transform:none; } }
+@keyframes chIn { from { opacity:0; transform:translateY(.45em); filter:blur(6px); } to { opacity:1; transform:none; filter:none; } }
 .teams:empty { display:none; }
 .teams { display:flex; flex-wrap:wrap; gap:.6vw 1.8vw; margin-top:3vw; padding-top:1.2vw; border-top:1px solid var(--line-2); }
 .team { display:flex; align-items:baseline; gap:.6vw; font-size:1.2vw; padding-bottom:.25vw; border-bottom:2px solid transparent; transition:border-color .3s; }
@@ -305,13 +314,10 @@ label.sbtn input { display:none; }
           </div>
         </div>
         <div class="answer" id="answer">
-          <div class="plate"><div class="in">
-            <div class="eyebrow">Answer · 정답</div>
-            <div class="t" id="ansTitle"></div>
-            <div class="rule"></div>
-            <div class="s" id="ansSub"></div>
-            <div class="aw" id="ansAward"></div>
-          </div></div>
+          <div class="a-ey"><span class="ln"></span><span class="tx" id="ansEy">Round I · 정답</span><span class="ln"></span></div>
+          <div class="a-t" id="ansTitle"></div>
+          <div class="a-s" id="ansSub"></div>
+          <div class="a-aw" id="ansAward"></div>
         </div>
       </div>
       <div class="teams" id="teams"></div>
@@ -587,6 +593,11 @@ const sfx = (() => {
       tone(1046.5, 0.3, 1.1, 'triangle', 0.2); tone(1318.5, 0.3, 1.1, 'sine', 0.1); tone(1568, 0.3, 1.1, 'sine', 0.06);
       noise(0.28, 0.5, 4000, 9000, 0.15);
     },
+    chime() { // 정답 공개: 부드러운 종소리 한 번
+      tone(329.63, 0, 2.2, 'sine', 0.07);
+      [659.25, 987.77, 1318.51].forEach((f, i) => tone(f, 0.05 + i * 0.09, 2.4, 'sine', 0.11 / (i * 0.7 + 1)));
+      noise(0.1, 1.4, 6000, 9500, 0.03);
+    },
     ddaeng() { // 종소리 "땡~"
       [1, 2.76, 5.4, 8.93].forEach((m, i) => tone(520 * m, 0, 1.6 / (i + 1), 'sine', 0.3 / (i + 1)));
       tone(90, 0, 0.3, 'sine', 0.35, 50);
@@ -639,38 +650,39 @@ const sfx = (() => {
   })(last);
 })();
 
-// ═════════════════════ 꽃가루 ═════════════════════
-const confetti = (() => {
+// ═════════════════════ 금빛 먼지 (정답 공개) ═════════════════════
+const dust = (() => {
   const c = $('#confetti'), g = c.getContext('2d');
-  const colors = ['#f0d9a2', '#d6b26e', '#b8913f', '#f3ead9', '#c4566a', '#2f6a57', '#ffffff'];
-  let parts = [], running = false;
-  function burst() {
+  let parts = [], running = false, last = 0;
+  function burst(el) {
     c.width = innerWidth; c.height = innerHeight;
-    const W = c.width, H = c.height, k = W / 1400;
-    for (let side = 0; side < 2; side++) {
-      for (let i = 0; i < 70; i++) {
-        const ang = (side ? -1 : 1) * (0.35 + Math.random() * 0.55);
-        const sp = (14 + Math.random() * 16) * k;
-        parts.push({ x: side ? W + 10 : -10, y: H * 0.85, vx: Math.cos(ang - Math.PI / 2) * sp * (side ? 1 : 1), vy: -Math.abs(Math.sin(ang + Math.PI / 2)) * sp - 6 * k,
-          w: (8 + Math.random() * 8) * k, h: (5 + Math.random() * 6) * k, r: Math.random() * 6, vr: (Math.random() - 0.5) * 0.4,
-          c: colors[(Math.random() * colors.length) | 0], f: Math.random() * 6 });
-      }
+    const k = innerWidth / 1600;
+    const b = el ? el.getBoundingClientRect() : { left: innerWidth * 0.2, width: innerWidth * 0.6, top: innerHeight * 0.3, height: innerHeight * 0.5 };
+    for (let i = 0; i < 70; i++) {
+      parts.push({
+        x: b.left + Math.random() * b.width, y: b.top + b.height * (0.35 + Math.random() * 0.7),
+        vx: (Math.random() - 0.5) * 0.15 * k, vy: -(0.25 + Math.random() * 0.6) * k,
+        r: (0.8 + Math.random() * 1.8) * k * 1.4, life: 0, max: 2.6 + Math.random() * 2, ph: Math.random() * 6.28,
+        c: Math.random() < 0.7 ? '240,217,162' : '255,248,230',
+      });
     }
-    for (let i = 0; i < 50; i++) parts.push({ x: Math.random() * W, y: -20 - Math.random() * H * 0.4, vx: (Math.random() - 0.5) * 3 * k, vy: 2 * k,
-      w: (8 + Math.random() * 8) * k, h: (5 + Math.random() * 6) * k, r: Math.random() * 6, vr: (Math.random() - 0.5) * 0.3, c: colors[(Math.random() * colors.length) | 0], f: Math.random() * 6 });
-    parts.forEach((p) => { if (p.x < 0) p.vx = Math.abs(p.vx); if (p.x > W) p.vx = -Math.abs(p.vx); });
-    if (!running) { running = true; requestAnimationFrame(loop); }
+    if (!running) { running = true; last = performance.now(); requestAnimationFrame(loop); }
   }
-  function loop() {
-    const W = c.width, H = c.height, k = W / 1400;
-    g.clearRect(0, 0, W, H);
-    parts = parts.filter((p) => p.y < H + 40);
+  function loop(now) {
+    const dt = Math.min(50, now - last) / 1000; last = now;
+    g.clearRect(0, 0, c.width, c.height);
+    parts = parts.filter((p) => p.life < p.max);
+    g.globalCompositeOperation = 'lighter';
     for (const p of parts) {
-      p.vy += 0.35 * k; p.vx *= 0.985; p.vy *= 0.985; p.x += p.vx; p.y += p.vy; p.r += p.vr; p.f += 0.15;
-      g.save(); g.translate(p.x, p.y); g.rotate(p.r); g.scale(1, Math.cos(p.f));
-      g.fillStyle = p.c; g.fillRect(-p.w / 2, -p.h / 2, p.w, p.h); g.restore();
+      p.life += dt; p.ph += dt * 2;
+      p.x += p.vx * 60 * dt + Math.sin(p.ph) * 0.15; p.y += p.vy * 60 * dt;
+      const a = Math.sin(Math.PI * Math.min(1, p.life / p.max)) * 0.9;
+      const gr = g.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.r * 4);
+      gr.addColorStop(0, `rgba(${p.c},${a})`); gr.addColorStop(0.3, `rgba(${p.c},${a * 0.5})`); gr.addColorStop(1, `rgba(${p.c},0)`);
+      g.fillStyle = gr; g.beginPath(); g.arc(p.x, p.y, p.r * 4, 0, 6.283); g.fill();
     }
-    if (parts.length) requestAnimationFrame(loop); else { running = false; g.clearRect(0, 0, W, H); }
+    g.globalCompositeOperation = 'source-over';
+    if (parts.length) requestAnimationFrame(loop); else { running = false; g.clearRect(0, 0, c.width, c.height); }
   }
   return { burst, clear() { parts = []; } };
 })();
@@ -768,6 +780,7 @@ function renderPanel() {
   const val = String(curPts());
   if (p.textContent !== val) { p.textContent = val; p.classList.remove('bump'); void p.offsetWidth; p.classList.add('bump'); }
   $('#info').classList.toggle('hide', fx.revealed);
+  $('#fxDesc').style.opacity = fx.revealed ? 0.35 : 1;
   renderTeams();
 }
 
@@ -801,26 +814,33 @@ function renderAwardLine() {
 }
 
 // ── 정답 공개 ──
+function typeset(el, text) {
+  let i = 0;
+  el.innerHTML = String(text).split(' ').map((w) => '<span class="w">' + Array.from(w).map((ch) => `<span class="c" style="--i:${i++}">${esc(ch)}</span>`).join('') + '</span>').join(' ');
+  return i;
+}
 function showAnswer(instant) {
   const r = curRound();
-  $('#ansTitle').textContent = r.answer;
+  $('#ansEy').textContent = 'Round ' + roman(S.ri + 1) + ' · 정답';
+  const n = typeset($('#ansTitle'), r.answer);
   $('#ansSub').textContent = r.sub || '';
   renderAwardLine();
   const a = $('#answer');
-  if (instant) { a.classList.add('show'); return; }
-  a.classList.remove('show'); void a.offsetWidth;
-  setTimeout(() => a.classList.add('show'), 380);
+  a.style.setProperty('--after', (0.6 + n * 0.055 + 0.35).toFixed(2) + 's');
+  a.style.setProperty('--ts', n > 12 ? '3.1vw' : n > 8 ? '3.5vw' : '3.9vw');
+  a.classList.remove('show', 'instant'); void a.offsetWidth;
+  if (instant) a.classList.add('instant');
+  a.classList.add('show');
 }
-function hideAnswer() { $('#answer').classList.remove('show'); }
+function hideAnswer() { $('#answer').classList.remove('show', 'instant'); }
 function reveal() {
   if (fx.revealed) return;
   const r = curRound();
   S.revealPts[r.id] = curPts();
   fx.reveal();
   timer.stop(); $('#ddaeng').classList.remove('on');
-  const f = $('#flash'); f.classList.remove('go'); void f.offsetWidth; f.classList.add('go');
-  sfx.fanfare();
-  setTimeout(() => confetti.burst(), 250);
+  sfx.chime();
+  setTimeout(() => dust.burst($('#cover')), 500);
   showAnswer();
   renderPanel();
 }
@@ -836,7 +856,7 @@ function unreveal() {
 function gotoRound(i, opt) {
   opt = opt || {};
   i = clamp(i, 0, cfg.rounds.length - 1);
-  timer.stop(); $('#ddaeng').classList.remove('on'); confetti.clear();
+  timer.stop(); $('#ddaeng').classList.remove('on'); dust.clear();
   show('play');
   setupRound(i, opt);
   if (opt.revealed) { S.screen = 'play'; endSplash(true); return; }
@@ -886,7 +906,7 @@ async function showEnd() {
     $('#rank').innerHTML = order.map((i, k) => `<div class="team ${sc[i] === top && top > 0 ? 'first' : ''}">
       <span class="k">${k + 1}위</span><span class="nm">${esc(cfg.teams[i])}</span><span class="sc">${sc[i]}</span></div>`).join('');
   } else $('#rank').innerHTML = '';
-  sfx.fanfare(); confetti.burst();
+  sfx.chime(); dust.burst($('#endList'));
 }
 
 function goHome() {
