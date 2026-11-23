@@ -179,11 +179,11 @@ button.next .arr { font-family: var(--serif); font-style: italic; font-size: 20p
   // 라운드 4개, 순서 고정, 라운드마다 ★ 지정 효과 하나. accent: 표지에서 뽑은 색
   const ROUNDS = [
     { src: 'covers/1.jpg', answer: '무서운 게 딱! 좋아!', author: '이구성', meta: 'ILB · 2002 · 딱이야 시리즈 1', accent: '#f2c500', ink: '#121110',
-      effect: 'shuffle', rnd: { layout: 'random' }, opts: { layout: 'frame', pos0: [21, 19, 17, 15, 23, 7, 10, 20, 4, 11, 16, 24, 2, 22, 8, 5, 14, 0, 12, 6, 9, 3, 18, 1, 13], invSlots: [6, 8, 16, 18] },
-      regions: [{ x: 0.15, y: 0.245, w: 0.7, h: 0.37 }] },
+      effect: 'shuffle', rnd: { layout: 'random' }, opts: { layout: 'frame', pos0: [21, 19, 17, 15, 23, 7, 10, 20, 4, 11, 16, 24, 2, 22, 8, 5, 14, 0, 12, 6, 9, 3, 18, 1, 13], invSlots: [6, 8, 16, 18], finish: true },
+      regions: [{ x: 0.15, y: 0.245, w: 0.7, h: 0.37 }, { x: 0.02, y: 0.035, w: 0.31, h: 0.07 }] },
     { src: 'covers/2.jpg', answer: '해리 포터와 마법사의 돌', author: 'J.K. 롤링', meta: '문학수첩 · 1999 · 1권 (구표지)', accent: '#e09a45', ink: '#121110',
       // 고정: 바깥에서 해리 얼굴 쪽으로 원을 좁혀 오며, 체크무늬 리듬으로 열림. 제목 칸은 맨 마지막
-      effect: 'tiles', rnd: { random: true }, opts: { key: [{ x: 0.67, y: 0.5, r: 0.5 }], open: [0.14, 0.28, 0.44, 0.6], random: false },
+      effect: 'tiles', rnd: { random: true }, opts: { key: [{ x: 0.67, y: 0.5, r: 0.5 }], open: [0.14, 0.28, 0.44, 0.6], random: false, style: 'door', colors: { face: '#2a2018', face2: '#3b2c1e', line: 'rgba(224,154,69,0.5)', ink: '#e09a45', grout: '#0e0c0a' } },
       regions: [{ x: 0.1, y: 0, w: 0.82, h: 0.25 }, { x: 0.27, y: 0.26, w: 0.52, h: 0.13 }, { x: 0.25, y: 0.845, w: 0.5, h: 0.045 }] },
     { src: 'covers/3.jpg', answer: '지구 끝의 온실', author: '김초엽', meta: '자이언트북스 · 2021', accent: '#f19bb8', ink: '#121110',
       // 고정: ① 양옆 화분 → ② 돔 꼭대기와 가장자리 → ③ 돔 한가운데 (제목·띠지 자리도 이때 닦이지만 글자는 가려짐)

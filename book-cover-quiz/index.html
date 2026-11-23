@@ -380,17 +380,17 @@ const DEFAULT_MIX = ['zoom', 'tiles', 'chosung'];
 const COVER_REC = {
   r1: {
     accent: '#f2c500',
-    pick: ['shuffle', '노란 달 조각이 모서리·가운데에 대칭으로 흩어져 있다가, 바로 서고 → 테두리부터 맞춰져요 (고정 배치)'],
+    pick: ['shuffle', '노란 달 조각이 대칭으로 흩어져 있다가 바로 서고 → 테두리부터 → 다 맞춰진 그림(제목·몇 편인지는 가린 채)'],
     alts: [['titlemask', '노란 달과 캐릭터 그림이 강렬해서 제목만 가려도 충분해요'], ['spotlight', '공포 분위기라 어둠 속 손전등도 어울려요']],
-    opts: { zoom: { focus: { x: 0.5, y: 0.72 }, drift: 0.02 }, shuffle: { layout: 'frame', pos0: [21, 19, 17, 15, 23, 7, 10, 20, 4, 11, 16, 24, 2, 22, 8, 5, 14, 0, 12, 6, 9, 3, 18, 1, 13], invSlots: [6, 8, 16, 18] } },
+    opts: { zoom: { focus: { x: 0.5, y: 0.72 }, drift: 0.02 }, shuffle: { layout: 'frame', pos0: [21, 19, 17, 15, 23, 7, 10, 20, 4, 11, 16, 24, 2, 22, 8, 5, 14, 0, 12, 6, 9, 3, 18, 1, 13], invSlots: [6, 8, 16, 18], finish: true } },
   },
   r2: {
     accent: '#e09a45',
-    pick: ['tiles', '바깥 배경부터 한 칸씩 열리고, 해리 얼굴과 제목은 맨 마지막에 열려요'],
+    pick: ['tiles', '어드벤트 캘린더 문이 바깥부터 하나씩 열리고, 해리 얼굴과 제목은 맨 마지막에 열려요'],
     alts: [['shuffle', '그림이 상징적이라 조각 맞추기도 좋아요'], ['zoom', '아주 가까이에서 시작해 멀어져요']],
     opts: {
       // 고정: 바깥에서 해리 얼굴 쪽으로 원을 좁혀 오며, 체크무늬 리듬으로 열림. 제목 칸은 맨 마지막
-      tiles: { key: [{ x: 0.67, y: 0.5, r: 0.5 }], open: [0.14, 0.28, 0.44, 0.6], random: false },
+      tiles: { key: [{ x: 0.67, y: 0.5, r: 0.5 }], open: [0.14, 0.28, 0.44, 0.6], random: false, style: 'door', colors: { face: '#2a2018', face2: '#3b2c1e', line: 'rgba(224,154,69,0.5)', ink: '#e09a45', grout: '#0e0c0a' } },
       zoom: { focus: { x: 0.67, y: 0.5 }, drift: 0.012, rotate: 12 },
     },
   },
@@ -427,12 +427,12 @@ function roman(n) {
 const DEFAULTS = {
   title: '표지 보고 책 제목 맞히기',
   subtitle: '2026 송년회',
-  schema: 4,
+  schema: 5,
   timer: 30, timerAuto: true, sound: true, randomLayout: false,
   teams: [],
   rounds: [
     { id: 'r1', answer: '무서운 게 딱! 좋아!', sub: '이구성 · ILB · 2002 · 딱이야 시리즈 1', effect: 'shuffle', protect: true,
-      img: { path: 'covers/1.jpg' }, regions: [{ x: 0.15, y: 0.245, w: 0.7, h: 0.37 }] },
+      img: { path: 'covers/1.jpg' }, regions: [{ x: 0.15, y: 0.245, w: 0.7, h: 0.37 }, { x: 0.02, y: 0.035, w: 0.31, h: 0.07 }] },
     { id: 'r2', answer: '해리 포터와 마법사의 돌', sub: 'J.K. 롤링 · 문학수첩 · 1999 · 1권 (구표지)', effect: 'tiles', protect: true,
       img: { path: 'covers/2.jpg' }, regions: [{ x: 0.1, y: 0, w: 0.82, h: 0.25 }, { x: 0.27, y: 0.26, w: 0.52, h: 0.13 }, { x: 0.25, y: 0.845, w: 0.5, h: 0.045 }] },
     { id: 'r3', answer: '지구 끝의 온실', sub: '김초엽 · 자이언트북스 · 2021', effect: 'steam', protect: true,
@@ -451,11 +451,12 @@ function normalizeCfg(data) {
     const r = clone(def);
     const from = saved.find((x) => x && x.id === def.id) || saved[i];
     // 지정 효과가 바뀌기 전에 저장된 효과 선택은 버리고 라운드별 지정 효과로 맞춘다
-    const keys = data && data.schema === 4 ? ROUND_KEYS : ROUND_KEYS.filter((k) => k !== 'effect' && k !== 'mix');
+    // 예전 버전에서 저장된 효과·제목 영역은 버리고 새 기본값(라운드별 지정 효과, 배지 가림 영역)으로 맞춘다
+    const keys = data && data.schema === 5 ? ROUND_KEYS : ROUND_KEYS.filter((k) => k !== 'effect' && k !== 'mix' && k !== 'regions');
     if (from) keys.forEach((k) => { if (from[k] !== undefined) r[k] = clone(from[k]); });
     return r;
   });
-  c.schema = 4;
+  c.schema = 5;
   return c;
 }
 function loadCfg() {

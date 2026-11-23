@@ -749,8 +749,9 @@
     label: '조각 재배치',
     desc: '표지가 조각조각 흩어졌어요. 조각들이 제자리를 찾아갑니다!',
     fit: ['early', 'mid'],
-    stages: 3,
-    defaults: { grid: 5, invert: 0.3, rotate: true, layout: 'random', pos0: null, invSlots: null },
+    // finish:true 면 마지막 직전에 '다 맞춘 그림(제목 영역은 가린 채)' 단계가 하나 더 붙는다
+    stages: (o) => (o.finish ? 4 : 3),
+    defaults: { grid: 5, invert: 0.3, rotate: true, layout: 'random', pos0: null, invSlots: null, finish: false },
     animated: (t, o) => o.layout === 'frame' && t < 1,
     init({ opts, rand }) {
       const n = Math.max(2, opts.grid | 0), N = n * n;
@@ -1135,6 +1136,28 @@
 
   // 8) (예비) 타일 뒤집기 ── 번호판이 하나씩 뒤집히며 표지가 드러남 (제목 칸은 마지막에)
   const TILE_COLORS = [['#1d1c1a', '#2b2926'], ['#24231f', '#34312c']];
+  // 어드벤트 캘린더 문짝: 나무결 패널 + 안쪽 테두리 + 손잡이 (숫자는 그릴 때 얹음)
+  function makeDoorTile(w, h, c) {
+    const cv = makeCanvas(w, h), g = cv.getContext('2d');
+    const m = Math.min(w, h), r = m * 0.06;
+    const gr = g.createLinearGradient(0, 0, w, h);
+    gr.addColorStop(0, c.face2); gr.addColorStop(1, c.face);
+    roundRect(g, 0, 0, w, h, r); g.fillStyle = gr; g.fill();
+    g.save(); roundRect(g, 0, 0, w, h, r); g.clip();
+    const rr = rng(Math.round(w * 7 + h));
+    g.globalAlpha = 0.09; g.strokeStyle = '#000'; g.lineWidth = 1;
+    for (let i = 0; i < w / 4; i++) { const x = rr() * w; g.beginPath(); g.moveTo(x, 0); g.lineTo(x + (rr() - 0.5) * 6, h); g.stroke(); }
+    g.globalAlpha = 1;
+    const hl = g.createLinearGradient(0, 0, 0, h);
+    hl.addColorStop(0, 'rgba(255,255,255,0.10)'); hl.addColorStop(0.5, 'rgba(255,255,255,0)'); hl.addColorStop(1, 'rgba(0,0,0,0.25)');
+    g.fillStyle = hl; g.fillRect(0, 0, w, h);
+    g.restore();
+    const ins = m * 0.12;
+    roundRect(g, ins, ins, w - ins * 2, h - ins * 2, r * 0.6);
+    g.lineWidth = Math.max(1, m * 0.018); g.strokeStyle = c.line; g.stroke();
+    g.beginPath(); g.arc(w - ins * 0.55, h / 2, Math.max(1.5, m * 0.035), 0, Math.PI * 2); g.fillStyle = c.ink; g.fill();
+    return cv;
+  }
   function tileLayout(s) {
     const st = s.state;
     const cols = Math.max(2, s.opts.cols | 0);
@@ -1178,15 +1201,70 @@
     Object.assign(st, { key, cols, rows, N, tw, th, openAt, delay });
     return st;
   }
+  function renderDoors(ctx, s, st) {
+    const { w, h, t, src } = s;
+    const { cols, tw, th, N } = st;
+    const c = Object.assign({ face: '#2a2018', face2: '#3b2c1e', line: 'rgba(224,154,69,0.5)', ink: '#e09a45', grout: '#0e0c0a' }, s.opts.colors || {});
+    const gap = Math.max(2, w * 0.012);
+    const dw = Math.round(tw - gap), dh = Math.round(th - gap);
+    const key = dw + 'x' + dh + JSON.stringify(c);
+    if (st.doorKey !== key) { st.doorKey = key; st.door = makeDoorTile(dw, dh, c); }
+    const fin = seg(t, s.stages - 1, s.stages);
+    // 캘린더 판: 문 사이 홈 (마지막 공개 때 사라짐)
+    ctx.save(); ctx.globalAlpha = 1 - fin; ctx.fillStyle = c.grout; ctx.fillRect(0, 0, w, h); ctx.restore();
+    const prog = [];
+    for (let i = 0; i < N; i++) {
+      const k = st.openAt[i];
+      prog.push(k === 0 ? 1 : Ease.inOut(stagger(seg(t, k - 1, k), st.delay[i], 0.55)));
+    }
+    // 1) 열린 칸의 그림 (문 안쪽)
+    for (let i = 0; i < N; i++) {
+      const f = prog[i]; if (f <= 0) continue;
+      const x = (i % cols) * tw, y = Math.floor(i / cols) * th;
+      const ins = gap / 2 * (1 - fin);
+      ctx.drawImage(src, x + ins, y + ins, tw - ins * 2, th - ins * 2, x + ins, y + ins, tw - ins * 2, th - ins * 2);
+      // 문짝이 드리우는 그림자 (경첩 쪽)
+      const sw = tw * 0.35 * Math.sin(Math.PI * f) + tw * 0.08 * f * (1 - fin);
+      if (sw > 0.5) {
+        const g = ctx.createLinearGradient(x, 0, x + sw, 0);
+        g.addColorStop(0, 'rgba(0,0,0,' + (0.55 * (1 - fin)).toFixed(3) + ')'); g.addColorStop(1, 'rgba(0,0,0,0)');
+        ctx.fillStyle = g; ctx.fillRect(x + ins, y + ins, sw, th - ins * 2);
+      }
+    }
+    // 2) 문짝: 왼쪽 경첩을 축으로 열림
+    const fs = Math.min(dw, dh) * 0.46;
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    for (let i = 0; i < N; i++) {
+      const f = prog[i];
+      if (f >= 1 && fin > 0) continue;
+      const x = (i % cols) * tw + gap / 2, y = Math.floor(i / cols) * th + gap / 2;
+      const ang = f * Math.PI * 0.5, sx = Math.cos(ang);
+      const lift = 1 + 0.06 * Math.sin(Math.PI * f);
+      ctx.save();
+      ctx.globalAlpha = 1 - fin;
+      ctx.translate(x, y + dh / 2);
+      ctx.scale(Math.max(sx, 0.035), lift);
+      ctx.translate(0, -dh / 2);
+      if (f > 0.01) { ctx.shadowColor = 'rgba(0,0,0,0.5)'; ctx.shadowBlur = 14 * s.dpr * f; ctx.shadowOffsetX = 4 * s.dpr * f; }
+      ctx.drawImage(st.door, 0, 0);
+      ctx.shadowColor = 'transparent'; ctx.shadowBlur = 0; ctx.shadowOffsetX = 0;
+      ctx.font = 'italic 400 ' + fs + 'px ' + LATIN;
+      ctx.fillStyle = c.ink;
+      ctx.fillText(String(i + 1), dw / 2, dh / 2 + fs * 0.04);
+      if (f > 0.01) { ctx.fillStyle = 'rgba(0,0,0,' + (0.55 * f).toFixed(3) + ')'; ctx.fillRect(0, 0, dw, dh); }
+      ctx.restore();
+    }
+  }
   register('tiles', {
     label: '타일 뒤집기',
     desc: '번호판이 하나씩 뒤집히며 표지가 조금씩 드러나요. 결정적인 곳은 맨 마지막에!',
     fit: ['mid'],
     stages: (o) => (o.open || []).length || 3,
-    defaults: { cols: 5, open: [0.22, 0.42, 0.65], key: null, random: true },
+    defaults: { cols: 5, open: [0.22, 0.42, 0.65], key: null, random: true, style: 'card', colors: null },
     init({ rand }) { return { seed: (rand() * 1e9) | 0 }; },
     render(ctx, s) {
       const st = tileLayout(s);
+      if (s.opts.style === 'door') return renderDoors(ctx, s, st);
       const { w, t, src } = s;
       const { cols, tw, th, N } = st;
       const gap = Math.max(1, w * 0.005);
