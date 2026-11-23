@@ -70,12 +70,17 @@ CoverFX.placeholder({ title, sub });  // 임시 표지 canvas 생성
 | `palette` | 색감 팔레트 | 2 | 첫 | 표지 색만 물감 칩으로 보여줌 | `grids:[[3,4],[5,7]]` |
 | `silhouette` | 흑백 실루엣 | 2 | 중간 | 색을 지우고 형태만 | `contrast:[8,2.2]` |
 | `chosung` | 초성 힌트 | 2 | 마지막 | 정답 초성 카드 → 첫 글자 공개 (`text` 필요) | `text` |
+| `door` | 삐걱 문틈 | 3 | 첫 · 중간 | 어두운 나무 문이 조금씩 열리며 틈으로 엿보기 | `open:[0.08,0.22,0.42]`, `at` |
+| `steam` | 김 서린 유리 | 3 | 중간 · 마지막 | 김 서린 유리를 손으로 닦은 자리만 선명 | `wipes:[2,3,4]`, `blur`, `frost` |
+| `bubbles` | 물방울 | 3 | 중간 | 깊은 물속, 떠오르는 물방울 안만 또렷 | `count:[8,12,16]`, `radius`, `speed` |
 | `mix` | 단계별 조합 | 단계 수만큼 | - | 힌트마다 다른 효과, 책장 넘기듯 전환 | `steps:['zoom','tiles','chosung']` |
 
 ```js
 // 단계별 조합: 첫 힌트는 초근접 줌, 다음은 타일, 마지막은 초성
 fx.setOptions({ text: '지구 끝의 온실' });
 fx.setEffect('mix', { steps: ['zoom', 'tiles', 'chosung'] });
+// 단계마다 옵션도 줄 수 있음 (예: 줌 시작 위치)
+fx.setEffect('mix', { steps: ['zoom', 'tiles', 'chosung'], stepOpts: [{ focus: { x: 0.6, y: 0.47 } }, {}, {}] });
 ```
 
 ## 효과 추가하기

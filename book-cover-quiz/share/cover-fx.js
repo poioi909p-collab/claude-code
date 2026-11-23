@@ -1507,6 +1507,213 @@
     },
   });
 
+  // 16) 삐걱 문틈 ── 어두운 나무 문 두 짝이 조금씩 열리며 틈으로 엿보기
+  function makeDoor(w, h, side) {
+    const c = makeCanvas(w, h), g = c.getContext('2d');
+    const gr = g.createLinearGradient(0, 0, w, 0);
+    gr.addColorStop(0, side < 0 ? '#2a1a10' : '#3b2616'); gr.addColorStop(1, side < 0 ? '#3b2616' : '#2a1a10');
+    g.fillStyle = gr; g.fillRect(0, 0, w, h);
+    const r = rng(w * 13 + h + (side < 0 ? 1 : 2));
+    g.globalAlpha = 0.18;
+    for (let i = 0; i < w / 3; i++) {
+      g.strokeStyle = r() < 0.5 ? '#000' : '#6b4a2e';
+      g.lineWidth = 0.5 + r() * 1.5;
+      const x = r() * w;
+      g.beginPath(); g.moveTo(x, 0);
+      g.bezierCurveTo(x + (r() - 0.5) * 8, h * 0.3, x + (r() - 0.5) * 8, h * 0.7, x + (r() - 0.5) * 6, h);
+      g.stroke();
+    }
+    g.globalAlpha = 1;
+    const m = w * 0.14;
+    [[m, h * 0.06, w - m * 2, h * 0.38], [m, h * 0.52, w - m * 2, h * 0.42]].forEach(([x, y, pw, ph]) => {
+      g.strokeStyle = 'rgba(0,0,0,0.55)'; g.lineWidth = Math.max(2, w * 0.02); g.strokeRect(x, y, pw, ph);
+      g.strokeStyle = 'rgba(160,120,80,0.35)'; g.lineWidth = Math.max(1, w * 0.008); g.strokeRect(x + w * 0.02, y + w * 0.02, pw - w * 0.04, ph - w * 0.04);
+    });
+    const kx = side < 0 ? w - w * 0.12 : w * 0.12, ky = h * 0.5, kr = Math.max(3, w * 0.045);
+    const kg = g.createRadialGradient(kx - kr * 0.3, ky - kr * 0.3, kr * 0.1, kx, ky, kr);
+    kg.addColorStop(0, '#f6dca0'); kg.addColorStop(0.6, '#b8893f'); kg.addColorStop(1, '#5c3f17');
+    g.fillStyle = kg; g.beginPath(); g.arc(kx, ky, kr, 0, Math.PI * 2); g.fill();
+    return c;
+  }
+  register('door', {
+    label: '삐걱 문틈',
+    desc: '어두운 방, 문이 삐걱 조금씩 열려요. 틈 사이로 엿보세요!',
+    fit: ['early', 'mid'],
+    stages: (o) => (o.open || []).length || 3,
+    defaults: { open: [0.08, 0.22, 0.42], at: 0.5 },
+    render(ctx, s) {
+      const { w, h, t, src, state: st } = s;
+      const S = s.stages, open = s.opts.open;
+      const i = Math.min(Math.floor(t), S - 1), u = t - i;
+      const o = lerp(open[i], i + 1 >= S ? 1 : open[i + 1], u);
+      const hw = Math.ceil(w / 2);
+      if (!st.doors || st.doors[0].width !== hw || st.doors[0].height !== h) st.doors = [makeDoor(hw, h, -1), makeDoor(hw, h, 1)];
+      ctx.drawImage(src, 0, 0);
+      const gap = o * w, cx = s.opts.at * w;
+      const lw = Math.max(0, cx - gap / 2), rw = Math.max(0, w - cx - gap / 2);
+      // 틈 안쪽 그늘
+      const fade = seg(t, S - 1, S);
+      ctx.save();
+      ctx.globalAlpha = 0.55 * (1 - fade);
+      const sh = ctx.createLinearGradient(lw, 0, lw + gap, 0);
+      sh.addColorStop(0, 'rgba(0,0,0,1)'); sh.addColorStop(0.25, 'rgba(0,0,0,0)'); sh.addColorStop(0.75, 'rgba(0,0,0,0)'); sh.addColorStop(1, 'rgba(0,0,0,1)');
+      ctx.fillStyle = sh; ctx.fillRect(lw, 0, gap, h);
+      ctx.restore();
+      // 문짝: 경첩 쪽에서 눌려 보이며(원근) 열린 만큼 어두워짐
+      const drawDoor = (img, x, dw, side) => {
+        if (dw < 0.5) return;
+        ctx.save();
+        ctx.drawImage(img, 0, 0, img.width, h, x, 0, dw, h);
+        const k = 1 - dw / hw;
+        const g = ctx.createLinearGradient(x, 0, x + dw, 0);
+        g.addColorStop(side < 0 ? 0 : 1, 'rgba(0,0,0,' + (0.15 + 0.45 * k).toFixed(3) + ')');
+        g.addColorStop(side < 0 ? 1 : 0, 'rgba(0,0,0,' + (0.05 + 0.2 * k).toFixed(3) + ')');
+        ctx.fillStyle = g; ctx.fillRect(x, 0, dw, h);
+        ctx.fillStyle = 'rgba(255,220,160,0.25)';
+        ctx.fillRect(side < 0 ? x + dw - 2 : x, 0, 2, h);
+        ctx.restore();
+      };
+      drawDoor(st.doors[0], 0, lw, -1);
+      drawDoor(st.doors[1], w - rw, rw, 1);
+    },
+  });
+
+  // 17) 김 서린 유리 ── 뿌옇게 김 서린 유리를 손으로 닦아낸 자리만 선명
+  register('steam', {
+    label: '김 서린 유리',
+    desc: '김이 잔뜩 서린 유리창. 손으로 닦은 자리로 표지가 보여요.',
+    fit: ['mid', 'late'],
+    stages: (o) => (o.wipes || []).length || 3,
+    defaults: { wipes: [2, 3, 4], blur: 0.03, frost: 0.5 },
+    init({ opts, rand }) {
+      const groups = opts.wipes.map((n) => {
+        const list = [];
+        for (let k = 0; k < n; k++) {
+          const cx = 0.2 + rand() * 0.6, cy = 0.15 + rand() * 0.75, rx = 0.16 + rand() * 0.16, ry = 0.04 + rand() * 0.05;
+          const a0 = rand() * Math.PI * 2, turns = 1.4 + rand();
+          list.push({ cx, cy, rx, ry, a0, turns });
+        }
+        return list;
+      });
+      const drops = [];
+      for (let k = 0; k < 70; k++) drops.push({ x: rand(), y: rand(), r: 0.003 + rand() * rand() * 0.012 });
+      return { groups, drops };
+    },
+    render(ctx, s) {
+      const { w, h, t, src, state: st } = s;
+      const S = s.stages;
+      ctx.drawImage(src, 0, 0);
+      if (!st.frost || st.frost.width !== w || st.frost.height !== h) { st.frost = makeCanvas(w, h); st.layer = makeCanvas(w, h); st.frostKey = ''; }
+      if (st.frostKey !== 'k') {
+        const f = st.frost.getContext('2d');
+        f.clearRect(0, 0, w, h);
+        const r = s.opts.blur * w;
+        if (FILTER_OK) { f.filter = 'blur(' + r + 'px)'; f.drawImage(src, -r * 2, -r * 2, w + r * 4, h + r * 4); f.filter = 'none'; }
+        else { const k = Math.max(2, r / 1.5); const sm = shrink(src, 0, 0, w, h, w / k, h / k); f.drawImage(sm, 0, 0, Math.round(w / k), Math.round(h / k), 0, 0, w, h); }
+        f.fillStyle = 'rgba(228,236,240,' + s.opts.frost + ')';
+        f.fillRect(0, 0, w, h);
+        st.frostKey = 'k';
+      }
+      const g = st.layer.getContext('2d');
+      g.globalCompositeOperation = 'source-over';
+      g.clearRect(0, 0, w, h);
+      g.drawImage(st.frost, 0, 0);
+      g.globalCompositeOperation = 'destination-out';
+      g.lineCap = 'round'; g.lineJoin = 'round';
+      st.groups.forEach((list, gi) => {
+        if (gi >= S) return;
+        const prog = gi === 0 ? 1 : seg(t, gi - 1, gi);
+        list.forEach((wp, k) => {
+          const uu = Ease.inOut(stagger(prog, k / Math.max(1, list.length), 0.6));
+          if (uu <= 0) return;
+          const steps = 40, end = Math.max(2, Math.round(steps * uu));
+          const pt = (j) => {
+            const a = wp.a0 + (j / steps) * wp.turns * Math.PI * 2;
+            return [(wp.cx + Math.cos(a) * wp.rx * (1 - j / steps * 0.35)) * w, (wp.cy + Math.sin(a) * wp.ry) * h + (j / steps) * h * 0.04];
+          };
+          for (const [lw, al] of [[w * 0.13, 0.35], [w * 0.09, 1]]) {
+            g.globalAlpha = al; g.lineWidth = lw;
+            g.beginPath();
+            const p0 = pt(0); g.moveTo(p0[0], p0[1]);
+            for (let j = 1; j <= end; j++) { const p = pt(j); g.lineTo(p[0], p[1]); }
+            g.stroke();
+          }
+        });
+      });
+      g.globalAlpha = 1;
+      g.globalCompositeOperation = 'source-over';
+      const fade = seg(t, S - 1, S);
+      ctx.save();
+      ctx.globalAlpha = 1 - fade;
+      ctx.drawImage(st.layer, 0, 0);
+      // 물방울 맺힘
+      for (const d of st.drops) {
+        const x = d.x * w, y = d.y * h + fade * h * 0.15 * (d.r * 60), r = d.r * w;
+        ctx.fillStyle = 'rgba(255,255,255,0.28)';
+        ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = 'rgba(255,255,255,0.7)';
+        ctx.beginPath(); ctx.arc(x - r * 0.35, y - r * 0.35, r * 0.3, 0, Math.PI * 2); ctx.fill();
+      }
+      ctx.restore();
+    },
+  });
+
+  // 18) 물방울 ── 깊은 물속, 떠오르는 물방울 안에서만 표지가 또렷
+  register('bubbles', {
+    label: '물방울',
+    desc: '깊은 물속에서 물방울이 천천히 떠올라요. 물방울 속을 들여다보세요!',
+    fit: ['mid'],
+    stages: (o) => (o.count || []).length || 3,
+    defaults: { count: [8, 12, 16], radius: [0.075, 0.09, 0.11], speed: 0.035, tint: '#0b3554' },
+    animated: (t, o, S) => t < S,
+    init({ rand }) {
+      const list = [];
+      for (let k = 0; k < 20; k++) list.push({ x: 0.08 + rand() * 0.84, y: rand(), sp: 0.7 + rand() * 0.6, ph: rand() * 6.28, rk: 0.8 + rand() * 0.4 });
+      return { list };
+    },
+    render(ctx, s) {
+      const { w, h, t, src, state: st, time } = s;
+      const S = s.stages, C = s.opts.count, Rr = s.opts.radius;
+      const i = Math.min(Math.floor(t), S - 1), u = t - i;
+      const fade = seg(t, S - 1, S);
+      const n = lerp(C[i], i + 1 >= S ? C[i] : C[i + 1], u);
+      const rad = lerp(Rr[i], i + 1 >= S ? Rr[i] * 3 : Rr[i + 1], i + 1 >= S ? fade : u) * w;
+      if (!st.deep || st.deep.width !== w || st.deep.height !== h) {
+        st.deep = makeCanvas(w, h);
+        const g = st.deep.getContext('2d');
+        const r = w * 0.025;
+        if (FILTER_OK) { g.filter = 'blur(' + r + 'px)'; g.drawImage(src, -r * 2, -r * 2, w + r * 4, h + r * 4); g.filter = 'none'; }
+        else g.drawImage(src, 0, 0);
+        g.globalCompositeOperation = 'multiply'; g.fillStyle = s.opts.tint; g.fillRect(0, 0, w, h);
+        g.globalCompositeOperation = 'source-over';
+        g.fillStyle = 'rgba(4,18,32,0.45)'; g.fillRect(0, 0, w, h);
+      }
+      ctx.drawImage(src, 0, 0);
+      ctx.save(); ctx.globalAlpha = 1 - fade; ctx.drawImage(st.deep, 0, 0); ctx.restore();
+      for (let k = 0; k < st.list.length; k++) {
+        const vis = clamp(n - k, 0, 1);
+        if (vis <= 0) continue;
+        const b = st.list[k];
+        const y = ((((b.y - time * s.opts.speed * b.sp) % 1.25) + 1.25) % 1.25) * (h + rad * 4) - rad * 2;
+        const x = (b.x + 0.015 * Math.sin(time * 0.6 + b.ph)) * w;
+        const r = rad * b.rk * vis;
+        ctx.save();
+        ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.clip();
+        ctx.translate(x, y); ctx.scale(1.12, 1.12); ctx.translate(-x, -y);
+        ctx.drawImage(src, 0, 0);
+        ctx.restore();
+        ctx.save();
+        ctx.globalAlpha = 1 - fade;
+        ctx.strokeStyle = 'rgba(220,240,255,0.75)'; ctx.lineWidth = Math.max(1, r * 0.06);
+        ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.stroke();
+        const hl = ctx.createRadialGradient(x - r * 0.4, y - r * 0.45, 0, x - r * 0.4, y - r * 0.45, r * 0.5);
+        hl.addColorStop(0, 'rgba(255,255,255,0.6)'); hl.addColorStop(1, 'rgba(255,255,255,0)');
+        ctx.fillStyle = hl; ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill();
+        ctx.restore();
+      }
+    },
+  });
+
   // 15) 단계별 조합 ── 힌트 단계마다 다른 효과, 책장 넘기듯 전환
   function mixPlan(opts) {
     const steps = (opts.steps || []).filter((n) => EFFECTS[n] && n !== 'mix');
