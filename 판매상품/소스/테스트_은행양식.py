@@ -1,9 +1,9 @@
 """Stress tests for 음식점매출장부 PRO: inject bank exports of many shapes, recalc with LibreOffice, compare."""
 import openpyxl, random, datetime, subprocess, os, shutil, time, sys
-BASE = "v3/empty.xlsx"; OUT = "v3/tests"
+BASE = "v4/empty.xlsx"; OUT = "v4/tests"
 shutil.rmtree(OUT, ignore_errors=True); os.makedirs(OUT + "/in"); os.makedirs(OUT + "/out")
 random.seed(5)
-POOL_IN = [("우아한형제들", "배민"), ("쿠팡이츠정산", "쿠팡이츠"), ("위대한상상", "요기요"), ("KB국민카드 매출대금", "홀매출")]
+POOL_IN = [("우아한형제들", "배민"), ("쿠팡이츠정산", "쿠팡이츠"), ("위대한상상", "요기요"), ("KB국민카드 매출대금", "카드매출")]
 POOL_OUT = [("바로고 배달대행", "배달대행비"), ("한국전력공사", "공과금"), ("월세 자동이체", "임대료"), ("직원 급여", "인건비"),
             ("배민 수수료 정산", "배달앱수수료"), ("네이버 광고", "광고비"), ("알수없음상회", "미분류")]
 

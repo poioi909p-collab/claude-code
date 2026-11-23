@@ -1,4 +1,4 @@
-"""배달·홀 음식점 매출장부 v2. usage: build_v2.py OUT.xlsx [lite]"""
+"""자영업 매출장부 v4. usage: build_v4.py OUT.xlsx [pro|lite|empty] [업종]"""
 from openpyxl import Workbook
 from openpyxl.styles import Font, PatternFill, Alignment, Border, Side, Protection
 from openpyxl.worksheet.protection import SheetProtection
@@ -7,17 +7,23 @@ from openpyxl.formatting.rule import CellIsRule, FormulaRule
 from openpyxl.chart import BarChart, PieChart, LineChart, Reference
 from openpyxl.chart.label import DataLabelList
 import datetime, random, sys
+from presets import PRESETS, NAMES, PAYS, rules_for, validate
+validate()
 
 OUT = sys.argv[1]
 MODE = sys.argv[2] if len(sys.argv) > 2 else "pro"
 PRO = MODE != "lite"
 EMPTY = MODE == "empty"
+IND = sys.argv[3] if len(sys.argv) > 3 else NAMES[0]
+PS = PRESETS[IND]
 YEAR = 2026
 NT = 2000   # 거래내역 rows
 NP = 3000   # 붙여넣기 rows
 PC = 12      # paste columns B..M
 CAT0, CATN = 12, 26  # category rows in 설정
-RULE0, RULEN = 12, 71
+RULE0, RULEN = 12, 91   # 12..71 업종 기본 규칙(60), 72..91 직접 추가(20)
+RULEP = 71
+NI = len(NAMES)
 
 NAVY = "1F3A5F"; BLUE = "2E6BD6"; LIGHT = "EEF3FB"; GRAY = "F5F6F8"; GREEN = "1E8E5A"; RED = "C0392B"; YEL = "FFF8E1"; WARN = "FFE08A"
 FN = "맑은 고딕"
@@ -55,27 +61,51 @@ rep_ws = wb.create_sheet("월간리포트") if PRO else None
 ana = wb.create_sheet("손익·부가세") if PRO else None
 st = wb.create_sheet("설정")
 
+# ================= _업종 (hidden preset table) =================
+up = wb.create_sheet("_업종"); up.sheet_state = "hidden"
+UPR = dict(name=1, inc=2, incf=17, exp=32, fix=47, ded=62, plat=77, kw=92, kc=152, tax=212, rate=213, shop=214, target=215)
+for j, nm in enumerate(NAMES):
+    c = 2 + j; P = PRESETS[nm]; up.cell(row=1, column=c, value=nm)
+    for i, (a, b) in enumerate(P["income"]):
+        up.cell(row=UPR["inc"] + i, column=c, value=a); up.cell(row=UPR["incf"] + i, column=c, value=b)
+    for i, (a, b, d, e) in enumerate(P["expense"]):
+        for key, v in (("exp", a), ("fix", b), ("ded", d), ("plat", e)): up.cell(row=UPR[key] + i, column=c, value=v)
+    for i, (k, v) in enumerate(rules_for(P)):
+        up.cell(row=UPR["kw"] + i, column=c, value=k); up.cell(row=UPR["kc"] + i, column=c, value=v)
+    for key in ("tax", "rate", "shop", "target"): up.cell(row=UPR[key], column=c, value=P[key])
+LASTC = chr(ord("B") + NI - 1)
+IDX = "설정!$D$9"
+def pv(row):  # preset value for current 업종
+    rng = f"_업종!$B${row}:${LASTC}${row}"
+    return f'IF(INDEX({rng},{IDX})="","",INDEX({rng},{IDX}))'
+
 # ================= 설정 =================
-title(st, "설정", "노란 칸은 자유롭게 바꿔도 됩니다.")
-widths(st, {"B": 16, "C": 12, "D": 3, "E": 16, "F": 9, "G": 10, "H": 9, "I": 3, "J": 14, "K": 3, "L": 18, "M": 16})
-basic = [("연도", YEAR), ("상호명", "우리식당"), ("과세유형", "일반과세자"), ("월 목표 매출", 30000000)]
+title(st, "설정", "업종을 고르면 카테고리와 자동 분류 규칙이 바뀝니다. 노란 칸은 직접 고쳐 써도 됩니다.")
+widths(st, {"B": 16, "C": 14, "D": 3, "E": 18, "F": 9, "G": 10, "H": 9, "I": 3, "J": 14, "K": 3, "L": 18, "M": 18})
+basic = [("연도", YEAR), ("상호명", "=" + pv(UPR["shop"])), ("과세유형", "=" + pv(UPR["tax"])), ("월 목표 매출", "=" + pv(UPR["target"]))]
 for i, (k, v) in enumerate(basic):
     r = 5 + i
     st.cell(row=r, column=2, value=k).font = f(10, True); st.cell(row=r, column=2).fill = fill(LIGHT); st.cell(row=r, column=2).border = border
     c = st.cell(row=r, column=3, value=v); c.font = f(11, True, BLUE); c.fill = fill(YEL); c.border = border
     if k == "월 목표 매출": c.number_format = '#,##0"원"'
-    if not PRO and k in ("과세유형", "월 목표 매출"): st.cell(row=r, column=2).value = None; c.value = None; c.fill = PatternFill(); c.border = Border(); st.cell(row=r, column=2).fill = PatternFill(); st.cell(row=r, column=2).border = Border()
-st.merge_cells("C6:G6") if False else None
+    if not PRO and k in ("과세유형", "월 목표 매출"):
+        for cc in (st.cell(row=r, column=2), c): cc.value = None; cc.fill = PatternFill(); cc.border = Border()
+st["B9"] = "업종"; st["B9"].font = f(11, True, "FFFFFF"); st["B9"].fill = fill(NAVY); st["B9"].border = border
+st["C9"] = IND; st["C9"].font = f(12, True, NAVY); st["C9"].fill = fill(YEL); st["C9"].border = border
+st.merge_cells("C9:E9") if False else None
+st["D9"] = f'=IFERROR(MATCH($C$9,_업종!$B$1:${LASTC}$1,0),1)'; st["D9"].font = f(8, False, "FFFFFF")
+dvi = DataValidation(type="list", formula1=f"_업종!$B$1:${LASTC}$1", error="목록에서 업종을 고르세요.", errorTitle="업종", showErrorMessage=True)
+st.add_data_validation(dvi); dvi.add("C9")
+st["E9"] = "◀ 업종을 고르세요 (바꾸면 아래 카테고리·규칙이 바뀝니다)"; st["E9"].font = f(10, True, BLUE)
 if PRO:
-    dv = DataValidation(type="list", formula1='"일반과세자,간이과세자"'); st.add_data_validation(dv); dv.add("C7")
+    dv = DataValidation(type="list", formula1='"일반과세자,간이과세자,면세사업자"'); st.add_data_validation(dv); dv.add("C7")
+    st["E5"] = "간이 부가가치율"; st["E5"].font = f(10, True); st["E5"].fill = fill(LIGHT); st["E5"].border = border
+    st["F5"] = "=" + pv(UPR["rate"]); st["F5"].number_format = "0%"; st["F5"].font = f(11, True, BLUE); st["F5"].fill = fill(YEL); st["F5"].border = border
+    st["G5"] = "소매·음식점 15% / 제조 20% / 숙박 25% / 개인서비스·정보통신 30% / 전문서비스·임대 40%"; st["G5"].font = f(8, False, "6B7280")
+    st["E6"] = "※ 간이과세자일 때만 쓰입니다. 학원 등 면세사업자는 과세유형을 '면세사업자'로 두세요."; st["E6"].font = f(8, False, "6B7280")
 
-income = [("홀매출", "N"), ("포장매출", "N"), ("배민", "Y"), ("쿠팡이츠", "Y"), ("요기요", "Y"), ("기타수입", "N")]
-expense = [("식자재", "N", "N", "N"), ("인건비", "Y", "N", "N"), ("임대료", "Y", "Y", "N"), ("공과금", "Y", "Y", "N"),
-           ("배달앱수수료", "N", "Y", "Y"), ("배달대행비", "N", "Y", "Y"), ("카드수수료", "N", "N", "N"),
-           ("광고비", "N", "Y", "N"), ("포장용기·소모품", "N", "Y", "N"), ("세금", "N", "N", "N"), ("기타지출", "N", "N", "N")]
-pays = ["카드", "현금", "계좌이체", "배달앱정산", "간편결제"]
-st.cell(row=11, column=2, value="수입 카테고리"); st.cell(row=11, column=3, value="배달앱\n매출")
-st.cell(row=11, column=5, value="지출 카테고리"); st.cell(row=11, column=6, value="고정비"); st.cell(row=11, column=7, value="부가세\n공제"); st.cell(row=11, column=8, value="배달\n비용")
+st.cell(row=11, column=2, value="수입 카테고리"); st.cell(row=11, column=3, value="플랫폼\n매출")
+st.cell(row=11, column=5, value="지출 카테고리"); st.cell(row=11, column=6, value="고정비"); st.cell(row=11, column=7, value="부가세\n공제"); st.cell(row=11, column=8, value="플랫폼\n비용")
 st.cell(row=11, column=10, value="결제수단")
 hcols = [2, 3, 5, 6, 7, 8, 10] if PRO else [2, 5, 10]
 if not PRO:
@@ -84,38 +114,31 @@ header(st, 11, hcols); st.row_dimensions[11].height = 30
 yn = DataValidation(type="list", formula1='"Y,N"'); st.add_data_validation(yn)
 for i in range(CATN - CAT0 + 1):
     r = CAT0 + i
-    vals = [(2, income[i][0] if i < len(income) else None), (5, expense[i][0] if i < len(expense) else None), (10, pays[i] if i < len(pays) else None)]
+    vals = [(2, "=" + pv(UPR["inc"] + i)), (5, "=" + pv(UPR["exp"] + i)), (10, PAYS[i] if i < len(PAYS) else None)]
     if PRO:
-        vals += [(3, income[i][1] if i < len(income) else None)]
-        if i < len(expense): vals += [(6, expense[i][1]), (7, expense[i][2]), (8, expense[i][3])]
-        else: vals += [(6, None), (7, None), (8, None)]
+        vals += [(3, "=" + pv(UPR["incf"] + i)), (6, "=" + pv(UPR["fix"] + i)), (7, "=" + pv(UPR["ded"] + i)), (8, "=" + pv(UPR["plat"] + i))]
     for c, v in vals:
         x = st.cell(row=r, column=c, value=v); x.font = f(); x.border = border; x.fill = fill(YEL)
         if c in (3, 6, 7, 8): x.alignment = Alignment(horizontal="center")
 if PRO:
     yn.add(f"C{CAT0}:C{CATN}"); yn.add(f"F{CAT0}:H{CATN}")
 st.cell(row=CATN + 2, column=2, value="※ 카테고리는 각각 최대 15개. 이미 쓴 카테고리 이름을 바꾸면 기존 내역과 분류 규칙의 이름도 함께 바꾸세요. (대시보드 '카테고리 불일치'가 알려줍니다)").font = f(9, False, "6B7280")
+st.cell(row=CATN + 3, column=2, value="※ 칸을 고쳐 쓰면 그 칸은 업종을 바꿔도 그대로 남습니다. 원래대로 돌리려면 '빈 양식' 파일의 같은 칸을 복사해 오세요.").font = f(9, False, "6B7280")
 if PRO:
     notes = ["고정비 Y: 손익분기점 계산에 고정비로 들어갑니다.", "부가세 공제 Y: 세금계산서·카드영수증으로 매입세액을 공제받는 지출입니다.",
-             "배달 비용 Y: 배달 수수료율 계산에 들어갑니다.", "배달앱 매출 Y: 배달 수수료율의 분모가 됩니다."]
+             "플랫폼 비용 Y: 플랫폼 수수료율 계산에 들어갑니다. (배달앱·마켓·예약 수수료 등)", "플랫폼 매출 Y: 플랫폼 수수료율의 분모가 됩니다. (배민·스마트스토어·네이버예약 등)"]
     for i, n in enumerate(notes):
-        st.cell(row=CATN + 3 + i, column=2, value="※ " + n).font = f(9, False, "6B7280")
+        st.cell(row=CATN + 4 + i, column=2, value="※ " + n).font = f(9, False, "6B7280")
     # keyword rules
     st.cell(row=11, column=12, value="통장 내용에 이 글자가 있으면"); st.cell(row=11, column=13, value="→ 이 카테고리로")
     header(st, 11, [12, 13], BLUE)
-    rules = [("카드", "홀매출"), ("수수료", "배달앱수수료"), ("배민", "배민"), ("KB국민카드", "홀매출"), ("신한카드", "홀매출"), ("삼성카드", "홀매출"), ("현대카드", "홀매출"), ("BC카드", "홀매출"),
-             ("우아한", "배민"), ("배달의민족", "배민"), ("쿠팡이츠", "쿠팡이츠"), ("위대한상상", "요기요"), ("요기요", "요기요"),
-             ("마트", "식자재"), ("농협", "식자재"), ("식자재", "식자재"), ("정육", "식자재"), ("수산", "식자재"),
-             ("급여", "인건비"), ("월급", "인건비"), ("국민연금", "인건비"), ("건강보험", "인건비"), ("고용보험", "인건비"),
-             ("임대료", "임대료"), ("월세", "임대료"), ("한국전력", "공과금"), ("한전", "공과금"), ("도시가스", "공과금"), ("수도", "공과금"), ("통신", "공과금"),
-             ("바로고", "배달대행비"), ("생각대로", "배달대행비"), ("부릉", "배달대행비"), ("배민광고", "광고비"), ("네이버", "광고비"), ("광고", "광고비"),
-             ("용기", "포장용기·소모품"), ("세무서", "세금"), ("국세", "세금"), ("지방세", "세금"), ("카드수수료", "카드수수료"),
-             ("본인이체", "제외"), ("내계좌", "제외")]
     for i in range(RULEN - RULE0 + 1):
         r = RULE0 + i
-        k, v = rules[i] if i < len(rules) else (None, None)
-        for c, val in ((12, k), (13, v)):
-            x = st.cell(row=r, column=c, value=val); x.font = f(); x.border = border; x.fill = fill(YEL)
+        for c, key in ((12, "kw"), (13, "kc")):
+            v = "=" + pv(UPR[key] + i) if r <= RULEP else None
+            x = st.cell(row=r, column=c, value=v); x.font = f(); x.border = border
+            x.fill = fill(YEL if r <= RULEP else "E8F5E9")
+    st.cell(row=RULEP + 1, column=14, value="◀ 여기부터 직접 추가 (업종 규칙보다 우선)").font = f(9, True, GREEN)
     st.cell(row=RULEN + 2, column=12, value="※ 여러 규칙이 맞으면 아래쪽 규칙이 이깁니다. 구체적인 규칙을 아래에 두세요.").font = f(9, False, "6B7280")
     st.cell(row=RULEN + 3, column=12, value="※ '제외'로 분류된 내역은 합계에 들어가지 않습니다. (본인 계좌 이동 등)").font = f(9, False, "6B7280")
     st.freeze_panes = "A12"
@@ -178,42 +201,41 @@ def days(m):
     return [d for d in range(1, last + 1) if datetime.date(YEAR, m, d) <= today]
 seasonal = {1: .9, 2: .85, 3: .95, 4: 1, 5: 1.05, 6: 1.0, 7: 1.1, 8: 1.12, 9: 1.0, 10: 1.02, 11: 1.05, 12: 1.15}
 txrows, bankrows = [], []
+def spread(ds, n):
+    if n >= 1:
+        k = int(round(n)); step = max(1, len(ds) // k)
+        return ds[random.randrange(step)::step][:k]
+    return [random.choice(ds)] if random.random() < n else []
 for m in range(1, 13):
     ds = days(m)
     if not ds: continue
     s = seasonal[m]
-    for d in ds[::3]:  # 홀/포장 매출 3일마다 정산 입력
-        txrows.append((datetime.date(YEAR, m, d), "수입", "홀매출", "3일치 홀매출(카드)", "카드", round(random.randrange(900, 1300) * s) * 1000))
-        txrows.append((datetime.date(YEAR, m, d), "수입", "포장매출", "3일치 포장매출", random.choice(["카드", "현금"]), round(random.randrange(200, 400) * s) * 1000))
-    for d in ds[::7]:
-        txrows.append((datetime.date(YEAR, m, d), "지출", "식자재", "식자재 구매", random.choice(["카드", "현금"]), random.randrange(1500, 2300) * 1000))
-        txrows.append((datetime.date(YEAR, m, d), "지출", "포장용기·소모품", "용기·비닐", "카드", random.randrange(150, 300) * 1000))
-    txrows.append((datetime.date(YEAR, m, min(ds[-1], 20)), "지출", "카드수수료", "카드사 수수료", "계좌이체", random.randrange(150, 230) * 1000))
-    # 통장 내역 (배달앱 정산, 고정비)
-    for d in ds[::7]:
-        bankrows.append((f"{YEAR}.{m:02d}.{d:02d} 10:12", "우아한형제들", round(random.randrange(2300, 3100) * s) * 1000, ""))
-        bankrows.append((f"{YEAR}.{m:02d}.{d:02d} 11:40", "쿠팡이츠정산", round(random.randrange(900, 1400) * s) * 1000, ""))
-        bankrows.append((f"{YEAR}.{m:02d}.{d:02d} 18:05", "바로고 배달대행", "", random.randrange(450, 650) * 1000))
-    for d in ds[3::14]:
-        bankrows.append((f"{YEAR}.{m:02d}.{d:02d} 09:30", "위대한상상", random.randrange(500, 800) * 1000, ""))
-    pick = lambda dd: min(dd, ds[-1])
-    bankrows += [
-        (f"{YEAR}.{m:02d}.{pick(5):02d} 09:00", "월세 자동이체", "", 2500000),
-        (f"{YEAR}.{m:02d}.{pick(10):02d} 09:00", "직원 급여", "", random.randrange(5800, 6300) * 1000),
-        (f"{YEAR}.{m:02d}.{pick(18):02d} 09:00", "한국전력공사", "", random.randrange(450, 750) * 1000),
-        (f"{YEAR}.{m:02d}.{pick(18):02d} 09:05", "도시가스", "", random.randrange(250, 480) * 1000),
-        (f"{YEAR}.{m:02d}.{pick(25):02d} 09:00", "배민 수수료 정산", "", random.randrange(1900, 2500) * 1000),
-        (f"{YEAR}.{m:02d}.{pick(25):02d} 09:10", "쿠팡이츠 수수료", "", random.randrange(700, 1000) * 1000),
-        (f"{YEAR}.{m:02d}.{pick(15):02d} 14:00", "네이버 플레이스 광고", "", random.randrange(150, 300) * 1000),
-    ]
-    if m in (1, 7):
-        bankrows.append((f"{YEAR}.{m:02d}.{pick(24):02d} 10:00", "세무서 부가세납부", "", random.randrange(2500, 4000) * 1000))
+    for (kind, cat, memo, pay, n, lo, hi) in PS["manual"]:
+        for d in spread(ds, n):
+            amt = random.randrange(lo, hi + 1) * 1000
+            if kind == "수입": amt = round(amt * s, -3)
+            txrows.append((datetime.date(YEAR, m, d), kind, cat, memo, pay, amt))
+    for (txt, cat, n, lo, hi) in PS["bank_in"]:
+        for d in spread(ds, n):
+            bankrows.append((f"{YEAR}.{m:02d}.{d:02d} {random.randint(9, 18):02d}:{random.randint(0, 59):02d}", txt, round(random.randrange(lo, hi + 1) * s) * 1000, ""))
+    for (txt, cat, n, lo, hi) in PS["bank_out"]:
+        for d in spread(ds, n):
+            bankrows.append((f"{YEAR}.{m:02d}.{d:02d} {random.randint(9, 18):02d}:{random.randint(0, 59):02d}", txt, "", random.randrange(lo, hi + 1) * 1000))
+    if m in (1, 7) and PS["tax"] != "면세사업자":
+        bankrows.append((f"{YEAR}.{m:02d}.{min(24, ds[-1]):02d} 10:00", "세무서 부가세납부", "", random.randrange(800, 2500) * 1000))
     if m == 3:
-        bankrows.append((f"{YEAR}.{m:02d}.{pick(12):02d} 16:00", "본인이체 적금", "", 1000000))
+        bankrows.append((f"{YEAR}.{m:02d}.{min(12, ds[-1]):02d} 16:00", "본인이체 적금", "", 1000000))
 bankrows.append((f"{YEAR}.11.20 15:00", "한빛상회", "", 380000))
+if not PRO:  # LITE has no bank sheet: show the same money as manual entries
+    BCAT = {t: c for (t, c, *_r) in PS["bank_in"] + PS["bank_out"]}
+    BCAT.update({"세무서 부가세납부": "세금", "한빛상회": PS["expense"][0][0]})
+    for d, t, i_, o_ in bankrows:
+        if t not in BCAT: continue
+        dd = datetime.date(int(d[:4]), int(d[5:7]), int(d[8:10]))
+        txrows.append((dd, "수입" if i_ else "지출", BCAT[t], t, "계좌이체", i_ or o_))
 txrows.sort(key=lambda x: x[0]); bankrows.sort(key=lambda x: x[0])
 if not PRO:
-    txrows = [r for r in txrows if r[0].month <= 3][:60]
+    txrows = sorted([r for r in txrows if r[0].month <= 3], key=lambda x: x[0])[:200]
 if EMPTY:
     txrows, bankrows = [], []
 for i, row in enumerate(txrows):
@@ -268,14 +290,14 @@ if PRO:
         bal = 12000000
         def jeokyo(c, i, o):
             if i: return "타행입금"
-            for k, v in (("월세", "자동이체"), ("급여", "인터넷뱅킹"), ("한국전력", "지로"), ("가스", "지로"), ("바로고", "CMS"), ("수수료", "CMS"), ("세무서", "국세납부")):
+            for k, v in (("월세", "자동이체"), ("급여", "인터넷뱅킹"), ("한국전력", "지로"), ("가스", "지로"), ("수수료", "CMS"), ("세무서", "국세납부")):
                 if k in c: return v
             return "인터넷뱅킹"
         for i, (d, c, inn, out) in enumerate(bankrows):
             inn = inn or 0; out = out or 0; bal += inn - out
             vals = [d, jeokyo(c, inn, out), c, out if out else 0, inn if inn else 0, bal, "인터넷"]
             for j, v in enumerate(vals): bank.cell(row=8 + i, column=2 + j, value=v)
-            if c == "한빛상회": bank.cell(row=8 + i, column=20, value="식자재")
+            if c == "한빛상회": bank.cell(row=8 + i, column=20, value=PS["expense"][0][0])
     K = f"설정!$L${RULE0}:$L${RULEN}"; V = f"설정!$M${RULE0}:$M${RULEN}"
     S_ = lambda c: f"설정!$R${c}"
     dcol, tcol, icol, ocol, acol, kcol, bcol, mode, hdr = (S_(x) for x in (13, 14, 15, 16, 17, 18, 19, 20, 21))
@@ -412,7 +434,7 @@ IM = lambda m: chr(ord("K") + m - 1)  # month column letter in matrices
 
 # ================= 손익·부가세 =================
 if PRO:
-    title(ana, "손익분기점 · 배달 수수료 · 부가세 예상")
+    title(ana, "손익분기점 · 플랫폼 수수료 · 부가세 예상")
     ana["B3"] = '=설정!C6&" · "&설정!C5&"년 · "&설정!C7'; ana["B3"].font = f(10, False, "6B7280")
     widths(ana, {"B": 9, "C": 14, "D": 14, "E": 14, "F": 10, "G": 15, "H": 14, "I": 3, "J": 9, "K": 14, "L": 14, "M": 11})
     ana["B5"] = "① 손익분기점: 한 달에 최소 이만큼 팔아야 적자가 아닙니다"; ana["B5"].font = f(12, True, NAVY)
@@ -435,8 +457,8 @@ if PRO:
     ana.conditional_formatting.add("H7:H18", CellIsRule(operator="greaterThanOrEqual", formula=["0"], font=Font(color=GREEN, bold=True)))
     ana["B19"] = "고정비 = 설정에서 '고정비 Y'인 지출 / 변동비율 = 변동비 ÷ 매출 / 손익분기 매출 = 고정비 ÷ (1 − 변동비율)"; ana["B19"].font = f(9, False, "6B7280")
 
-    ana["J5"] = "② 배달 수수료율"; ana["J5"].font = f(12, True, NAVY)
-    for i, h in enumerate(["월", "배달앱 매출", "배달 비용", "수수료율"]): ana.cell(row=6, column=10 + i, value=h)
+    ana["J5"] = "② 플랫폼 수수료율"; ana["J5"].font = f(12, True, NAVY)
+    for i, h in enumerate(["월", "플랫폼 매출", "플랫폼 비용", "수수료율"]): ana.cell(row=6, column=10 + i, value=h)
     header(ana, 6, range(10, 14))
     for m in range(1, 13):
         r = 6 + m; mc = IM(m)
@@ -447,7 +469,7 @@ if PRO:
         for c in range(10, 14):
             x = ana.cell(row=r, column=c); x.border = border; x.font = f(10, c == 13); x.number_format = PCT if c == 13 else WON0
         ana.cell(row=r, column=10).alignment = Alignment(horizontal="center")
-    ana["J19"] = "배달앱 매출 100원 중 수수료·배달대행비로 나가는 비율"; ana["J19"].font = f(9, False, "6B7280")
+    ana["J19"] = "배민·스마트스토어·예약앱 등 플랫폼 매출 100원 중 수수료로 나가는 비율"; ana["J19"].font = f(9, False, "6B7280")
     ana.conditional_formatting.add("M7:M18", CellIsRule(operator="greaterThan", formula=["0.3"], font=Font(color=RED, bold=True)))
 
     ana["B22"] = "③ 부가세 예상 (참고용)"; ana["B22"].font = f(12, True, NAVY)
@@ -463,19 +485,19 @@ if PRO:
         ana.cell(row=r, column=4, value=f'=SUMPRODUCT((설정!$G${CAT0}:$G${CATN}="Y")*월별요약!{IM(a)}{ef}:{IM(b)}{el})')
         ana.cell(row=r, column=5, value=f"=MAX(0,ROUND(C{r}/11-D{r}/11,-1))")
         if lab == "연간":
-            ana.cell(row=r, column=6, value=f'=IF(C{r}<48000000,0,MAX(0,ROUND(C{r}*0.15*0.1-D{r}*0.005,-1)))')
-            ana.cell(row=r, column=7, value=f'=IF(설정!$C$7="간이과세자",F{r},E{r})')
+            ana.cell(row=r, column=6, value=f'=IF(C{r}<48000000,0,MAX(0,ROUND(C{r}*N(설정!$F$5)*0.1-D{r}*0.005,-1)))')
+            ana.cell(row=r, column=7, value=f'=IF(설정!$C$7="면세사업자",0,IF(설정!$C$7="간이과세자",F{r},E{r}))')
         else:
-            ana.cell(row=r, column=6, value="-"); ana.cell(row=r, column=7, value=f'=IF(설정!$C$7="간이과세자","-",E{r})')
+            ana.cell(row=r, column=6, value="-"); ana.cell(row=r, column=7, value=f'=IF(설정!$C$7="면세사업자",0,IF(설정!$C$7="간이과세자","-",E{r}))')
         for c in range(2, 8):
             x = ana.cell(row=r, column=c); x.border = border; x.font = f(10, c == 7 or lab == "연간"); x.number_format = WON0
             if lab == "연간": x.fill = fill(LIGHT)
         ana.cell(row=r, column=7).font = f(11, True, BLUE)
         ana.cell(row=r, column=6).alignment = Alignment(horizontal="right")
     notes = ["일반과세자: (매출 − 공제 매입) ÷ 11. 1기는 7월, 2기는 다음 해 1월에 신고합니다.",
-             "간이과세자(음식점): 매출 × 업종 부가가치율 15% × 10% − 공제 매입 × 0.5%. 연 매출 4,800만 원 미만이면 납부 면제. 1월에 1년치를 신고합니다.",
-             "의제매입세액공제(면세 식자재), 신용카드매출전표 발행세액공제는 넣지 않았습니다. 실제 납부액은 보통 이보다 적습니다.",
-             "정확한 금액은 홈택스나 세무사를 통해 확인하세요. 이 표는 미리 돈을 떼어 두기 위한 참고용입니다."]
+             "간이과세자: 매출 × 업종 부가가치율([설정]에서 변경) × 10% − 공제 매입 × 0.5%. 연 매출 4,800만 원 미만이면 납부 면제. 1월에 1년치를 신고합니다.",
+             "면세사업자(학원 등): 부가세가 없습니다. 대신 다음 해 2월 10일까지 사업장현황신고를 합니다.",
+             "의제매입세액공제, 신용카드매출전표 발행세액공제 등은 넣지 않았습니다. 정확한 금액은 홈택스나 세무사를 통해 확인하세요. 이 표는 미리 돈을 떼어 두기 위한 참고용입니다."]
     for i, n in enumerate(notes):
         ana.cell(row=28 + i, column=2, value="※ " + n).font = f(9, False, "6B7280")
     ana["B33"] = '=IF(AND(설정!$C$7="간이과세자",C26>=104000000),"⚠ 연 매출이 1억 400만 원 이상이면 다음 해부터 일반과세자로 바뀔 수 있습니다. 세무서 안내를 확인하세요.","")'
@@ -484,13 +506,13 @@ if PRO:
 # ================= 대시보드 =================
 if PRO:
     title(dash, "대시보드")
-    dash["B3"] = '=설정!C6&" · "&설정!C5&"년"'; dash["B3"].font = f(10, False, "6B7280")
+    dash["B3"] = '=설정!C6&" · "&설정!C9&" · "&설정!C5&"년"'; dash["B3"].font = f(10, False, "6B7280")
     for i in range(2, 16): dash.column_dimensions[chr(64 + i)].width = 10.5
     dash["P2"] = f'=IF(YEAR(TODAY())={Y},MONTH(TODAY()),12)'; dash["P2"].font = f(8, False, "FFFFFF")
     tiles = [("B", "연 매출", "=월별요약!C18", '#,##0"원"', GREEN),
              ("E", "순이익 (이익률)", '=TEXT(월별요약!E18,"#,##0")&"원 ("&IFERROR(TEXT(월별요약!F18,"0%"),"-")&")"', "@", NAVY),
              ("H", "이번 달 목표 달성률", '=IFERROR(INDEX(월별요약!H6:H17,$P$2),"-")', PCT, BLUE),
-             ("K", "부가세 예상 (현재 기수)", "=IF($P$2<=6,'손익·부가세'!G24,IF(설정!C7=\"간이과세자\",'손익·부가세'!G26,'손익·부가세'!G25))", '#,##0"원"', RED)]
+             ("K", "부가세 예상 (현재 기수)", "=IF(설정!C7=\"면세사업자\",0,IF($P$2<=6,'손익·부가세'!G24,IF(설정!C7=\"간이과세자\",'손익·부가세'!G26,'손익·부가세'!G25)))", '#,##0"원"', RED)]
     for col, lab, fm, nf, color in tiles:
         n2 = chr(ord(col) + 2)
         dash[f"{col}5"] = lab; dash[f"{col}5"].font = f(9, True, "6B7280")
@@ -499,6 +521,7 @@ if PRO:
         for r in (5, 6):
             for c in range(ord(col), ord(n2) + 1): dash[f"{chr(c)}{r}"].fill = fill(GRAY)
     dash["H5"] = '=$P$2&"월 목표 달성률"'
+    dash["K5"] = '=IF(설정!C7="면세사업자","부가세 (면세사업자)","부가세 예상 (현재 기수)")'
     dash.row_dimensions[6].height = 30
     TT_, TC_, TD_, TA_ = TT, TC, TD, TA
     checks = [
@@ -583,7 +606,7 @@ if PRO:
     header(R_, 7, range(2, 7))
     items = [("매출", "월별요약!$C$6:$C$17", "m"), ("지출", "월별요약!$D$6:$D$17", "m"), ("순이익", "월별요약!$E$6:$E$17", "m"),
              ("이익률", "월별요약!$F$6:$F$17", "p"), ("목표 달성률", "월별요약!$H$6:$H$17", "p"),
-             ("손익분기 매출", "'손익·부가세'!$G$7:$G$18", "m"), ("배달 수수료율", "'손익·부가세'!$M$7:$M$18", "p")]
+             ("손익분기 매출", "'손익·부가세'!$G$7:$G$18", "m"), ("플랫폼 수수료율", "'손익·부가세'!$M$7:$M$18", "p")]
     for i, (lab, rng, kind) in enumerate(items):
         r = 8 + i
         R_.cell(row=r, column=2, value=lab)
@@ -633,16 +656,16 @@ if PRO:
     R_.add_chart(hb, "H7")
 
 # ================= 사용법 =================
-title(guide, "배달·홀 음식점 매출장부" + (" PRO" if PRO else " LITE (무료 체험판)"),
+title(guide, "자영업 매출장부" + (" PRO" if PRO else " LITE (무료 체험판)"),
       "입력하거나 붙여넣기만 하면 손익과 차트가 자동으로 계산됩니다.")
 widths(guide, {"B": 7, "C": 92})
-steps = [("1", "[설정] 연도, 상호명" + (", 과세유형, 월 목표 매출" if PRO else "") + "을 입력하세요. 카테고리 이름도 가게에 맞게 바꿀 수 있습니다.")]
+steps = [("1", "[설정]에서 업종을 고르세요 (음식점, 카페, 소매, 온라인 쇼핑몰, 미용, 학원, 프리랜서, 기타 서비스). 카테고리" + ("·자동 분류 규칙·과세유형" if PRO else "") + "이 업종에 맞게 바뀝니다. 연도와 상호명도 입력하세요.")]
 if PRO:
     steps += [("2", "[통장붙여넣기] 인터넷뱅킹에서 거래내역을 엑셀로 내려받아 제목 줄째로 복사해 B6칸에 붙여넣으세요. 은행마다 열 순서가 달라도 날짜·입금·출금·잔액 열을 자동으로 찾고, '우아한형제들' → 배민, '한국전력' → 공과금처럼 분류합니다."),
               ("2+", "다음 달 내역은 기존 내역 바로 아래 빈 칸에 이어 붙이세요. 기간이 겹쳐도 잔액 열이 있으면 같은 거래는 자동으로 한 번만 계산됩니다. 은행 파일 맨 아래 '합계' 줄도 자동으로 빠집니다."),
-              ("3", "[거래내역] 통장에 안 찍히는 것(현금 매출, 카드로 산 식자재 등)만 직접 입력하세요."),
-              ("4", "[대시보드]·[월별요약]·[손익·부가세]에서 결과를 확인하세요. 손익분기점, 배달 수수료율, 부가세 예상액이 자동 계산됩니다."),
-              ("!", "같은 돈을 두 번 넣지 마세요. 카드 매출 정산 입금이 통장에 찍힌다면 [거래내역]에 카드 매출을 따로 입력하지 않습니다. 본인 계좌 간 이동은 '제외'로 분류하세요."),
+              ("3", "[거래내역] 통장에 안 찍히는 것(현금 매출, 개인카드로 산 재료 등)만 직접 입력하세요."),
+              ("4", "[대시보드]·[월별요약]·[손익·부가세]에서 결과를 확인하세요. 손익분기점, 플랫폼 수수료율, 부가세 예상액이 자동 계산됩니다."),
+              ("!", "같은 돈을 두 번 넣지 마세요. 카드사 정산금이 통장에 들어온다면 [거래내역]에 카드 매출을 따로 입력하지 않습니다. 본인 계좌 간 이동은 '제외'로 분류하세요."),
               ("TIP", "노란색으로 표시된 '미분류' 내역은 [직접 고르기] 칸에서 카테고리를 고르세요. 자주 나오는 내용은 [설정]의 자동 분류 규칙에 추가하면 다음부터 자동입니다."),
               ("✓", "[대시보드] 오른쪽 '데이터 점검' 표가 모두 ✓이면 숫자를 믿어도 됩니다. '확인'이 뜨면 해당 시트의 노란 칸을 보세요."),
               ("5", "[월간리포트]에서 월을 고르면 전월 대비 증감과 카테고리별 비중이 한 장으로 정리됩니다. 동업자·세무사에게 보낼 때 쓰세요."),
@@ -652,7 +675,7 @@ if PRO:
 else:
     steps += [("2", "[거래내역]에 날짜 / 구분 / 카테고리 / 금액을 입력하세요."),
               ("3", "[월별요약]에서 월별 매출, 지출, 순이익, 이익률과 카테고리별 합계를 확인하세요."),
-              ("PRO", "PRO 버전에는 통장 내역 붙여넣기 자동 분류, 손익분기점, 배달 수수료율, 부가세 예상, 차트 대시보드가 추가됩니다.")]
+              ("PRO", "PRO 버전에는 통장 내역 붙여넣기 자동 분류, 데이터 점검, 월간 리포트, 손익분기점, 플랫폼 수수료율, 부가세 예상, 차트 대시보드가 추가됩니다.")]
 steps += [("TIP", "엑셀 2016 이상, 엑셀 365, 맥용 엑셀에서 작동합니다. 구글 스프레드시트에서도 계산은 모두 작동하지만 일부 드롭다운 목록은 엑셀에서만 보입니다.")]
 r = 5
 for k, v in steps:
@@ -665,7 +688,7 @@ for k, v in steps:
 tabs = {"사용법": GREEN, "대시보드": NAVY, "거래내역": BLUE, "통장붙여넣기": BLUE, "월간리포트": NAVY}
 for ws in wb.worksheets:
     ws.sheet_properties.tabColor = tabs.get(ws.title, "9AA5B1")
-    if ws.title == "_차트": continue
+    if ws.title in ("_차트", "_업종"): continue
     ws.page_setup.orientation = "landscape"; ws.page_setup.paperSize = 9
     ws.sheet_properties.pageSetUpPr.fitToPage = True; ws.page_setup.fitToWidth = 1; ws.page_setup.fitToHeight = 0
 def unlock(ws, rng):
@@ -673,11 +696,11 @@ def unlock(ws, rng):
         for c in row: c.protection = Protection(locked=False)
 for r in range(T0, TN + 1):
     for c in range(2, 9): tx.cell(row=r, column=c).protection = Protection(locked=False)
-unlock(st, "C5:C8"); unlock(st, f"B{CAT0}:C{CATN}"); unlock(st, f"E{CAT0}:H{CATN}"); unlock(st, f"J{CAT0}:J{CATN}")
+unlock(st, "C5:C9"); unlock(st, f"B{CAT0}:C{CATN}"); unlock(st, f"E{CAT0}:H{CATN}"); unlock(st, f"J{CAT0}:J{CATN}")
 if PRO:
-    unlock(st, f"L{RULE0}:M{RULEN}"); unlock(st, "Q12:Q19")
+    unlock(st, f"L{RULE0}:M{RULEN}"); unlock(st, "Q12:Q19"); unlock(st, "F5:F5")
 for ws in wb.worksheets:
-    if ws.title == "_차트": continue
+    if ws.title in ("_차트", "_업종"): continue
     ws.protection = SheetProtection(sheet=True, formatCells=False, formatColumns=False, formatRows=False, autoFilter=False, sort=False)
 if PRO:
     rep_ws.page_setup.orientation = "portrait"; rep_ws.page_setup.fitToHeight = 1; rep_ws.print_area = "A1:N58"
