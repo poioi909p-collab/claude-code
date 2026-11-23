@@ -246,17 +246,8 @@ label.sbtn input { display:none; }
 .rec small { display:block; font-size:11.5px; color:var(--muted); margin-top:3px; line-height:1.45; }
 .rec:hover { border-color:var(--gold); }
 .rec.on { border-color:var(--gold); background:rgba(214,178,110,.12); }
-.mixbox { border:1px solid var(--line); border-radius:4px; padding:12px; background:rgba(214,178,110,.05); }
-.mhead2 { display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:10px; }
-.mhead2 select { width:auto; margin-left:6px; }
-.msteps { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
-.mstep { flex:1; min-width:170px; display:flex; flex-direction:column; gap:6px; }
-.mstep .mk { font-size:12px; color:var(--muted); }
-.mstep .mk b { font-family:var(--latin); font-style:italic; color:var(--gold); font-size:15px; margin-right:4px; }
-.mrec { font-size:11.5px; }
-.mrec .ok { color:var(--gold); }
-.mrec .warn { color:var(--wine-hi); }
-.marrow { color:var(--gold); font-size:18px; }
+.rec.star { border-color:var(--gold-lo); }
+.rec b em { font-style:normal; font-family:var(--sans); font-size:10.5px; color:var(--ink); background:var(--gold); border-radius:2px; padding:1px 5px; margin-left:6px; vertical-align:2px; }
 .fx-name.swap { animation:fadeUp .7s cubic-bezier(.2,.8,.2,1) both; }
 .note b { color:var(--text); }
 .mfoot { display:flex; gap:8px; flex-wrap:wrap; }
@@ -416,30 +407,32 @@ const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&':
 // ═════════════════════ 기본 설정 ═════════════════════
 const STORE_KEY = 'bookCoverQuiz.config.v1';
 const DEFAULT_MIX = ['zoom', 'tiles', 'chosung'];
-// 표지 4개가 고정이라, 표지마다 어울리는 효과와 단계별 조합을 미리 골라 둔다
+// 표지 4개 고정, 라운드마다 효과 하나 (★ 지정 효과) + 바꿔 볼 만한 대안
 const COVER_REC = {
   r1: {
-    effects: [['spotlight', '공포 분위기라 어둠 속 손전등이 잘 어울려요'], ['door', '삐걱 열리는 문틈, 무서운 이야기 느낌'], ['titlemask', '노란 달과 캐릭터 그림이 강렬해서 제목만 가려도 충분해요']],
-    mix: ['door', 'silhouette', 'titlemask'],
+    pick: ['titlemask', '노란 달과 캐릭터 그림이 강렬해서 제목만 가려도 충분해요'],
+    alts: [['spotlight', '공포 분위기라 어둠 속 손전등도 어울려요'], ['door', '삐걱 열리는 문틈, 무서운 이야기 느낌']],
     opts: { zoom: { focus: { x: 0.5, y: 0.72 }, drift: 0.02 } },
   },
   r2: {
-    effects: [['shuffle', '그림이 상징적이라 조각 맞추기에 좋아요'], ['zoom', '해리 얼굴과 안경부터 확대해서 시작해요'], ['tiles', '아치와 빗자루가 한 칸씩 드러나요']],
-    mix: ['zoom', 'shuffle', 'chosung'],
-    opts: { zoom: { focus: { x: 0.67, y: 0.5 }, drift: 0.012, rotate: 12 } },
+    pick: ['tiles', '바깥 배경부터 한 칸씩 열리고, 해리 얼굴과 제목은 맨 마지막에 열려요'],
+    alts: [['shuffle', '그림이 상징적이라 조각 맞추기도 좋아요'], ['zoom', '아주 가까이에서 시작해 멀어져요']],
+    opts: {
+      tiles: { key: [{ x: 0.67, y: 0.5, r: 0.5 }], open: [0.14, 0.28, 0.44, 0.6] },
+      zoom: { focus: { x: 0.67, y: 0.5 }, drift: 0.012, rotate: 12 },
+    },
   },
   r3: {
-    effects: [['invert', '분홍·청록 대비가 뒤집혀도 특징적이에요'], ['steam', '온실 유리에 김이 서린 느낌'], ['silhouette', '유리 돔 모양이 실루엣으로도 또렷해요']],
-    mix: ['invert', 'steam', 'chosung'],
+    pick: ['invert', '제목 쪽 절반을 가리고 색과 방향을 뒤집어요'],
+    alts: [['steam', '온실 유리에 김이 서린 느낌'], ['silhouette', '유리 돔 모양이 실루엣으로도 또렷해요']],
     opts: { zoom: { focus: { x: 0.5, y: 0.45 }, drift: 0.02 } },
   },
   r4: {
-    effects: [['spotlight', '깊은 바닷속을 손전등으로 비추는 느낌'], ['bubbles', '물고기 떼 사이로 물방울이 떠올라요'], ['palette', '초록·파랑·분홍 색 조합이 독특해요']],
-    mix: ['palette', 'bubbles', 'chosung'],
+    pick: ['zoom', '물고기 떼 한 귀퉁이부터 시작해 점점 멀어지며 큰 물고기가 드러나요'],
+    alts: [['spotlight', '깊은 바닷속을 손전등으로 비추는 느낌'], ['bubbles', '물고기 떼 사이로 물방울이 떠올라요']],
     opts: { zoom: { focus: { x: 0.6, y: 0.45 }, drift: 0.02 } },
   },
 };
-const POS_SHORT = { early: '첫', mid: '중간', late: '마지막' };
 const SPINES = ['#7a2b3a', '#24493d', '#22345a', '#8c6a27', '#4a2c4c', '#5a3a24'];
 function roman(n) {
   const t = [[1000, 'M'], [900, 'CM'], [500, 'D'], [400, 'CD'], [100, 'C'], [90, 'XC'], [50, 'L'], [40, 'XL'], [10, 'X'], [9, 'IX'], [5, 'V'], [4, 'IV'], [1, 'I']];
@@ -448,16 +441,17 @@ function roman(n) {
 const DEFAULTS = {
   title: '표지 보고 책 제목 맞히기',
   subtitle: '2026 송년회',
+  schema: 2,
   timer: 30, timerAuto: true, maxPts: 30, minPts: 10, sound: true,
   teams: [],
   rounds: [
     { id: 'r1', answer: '무서운 게 딱! 좋아!', sub: '이구성 · 딱이야 시리즈 1 (ILB, 2002)', effect: 'titlemask', protect: true,
       img: { path: 'covers/1.jpg' }, regions: [{ x: 0.15, y: 0.245, w: 0.7, h: 0.37 }] },
-    { id: 'r2', answer: '해리 포터와 마법사의 돌', sub: 'J.K. 롤링 · 문학수첩 1999년판 1권 (구표지)', effect: 'shuffle', protect: true,
+    { id: 'r2', answer: '해리 포터와 마법사의 돌', sub: 'J.K. 롤링 · 문학수첩 1999년판 1권 (구표지)', effect: 'tiles', protect: true,
       img: { path: 'covers/2.jpg' }, regions: [{ x: 0.1, y: 0, w: 0.82, h: 0.25 }, { x: 0.27, y: 0.26, w: 0.52, h: 0.13 }, { x: 0.25, y: 0.845, w: 0.5, h: 0.045 }] },
     { id: 'r3', answer: '지구 끝의 온실', sub: '김초엽 · 자이언트북스 (2021)', effect: 'invert', protect: true,
       img: { path: 'covers/3.jpg' }, regions: [{ x: 0.2, y: 0.07, w: 0.6, h: 0.165 }, { x: 0.3, y: 0.79, w: 0.4, h: 0.05 }] },
-    { id: 'r4', answer: '물고기는 존재하지 않는다', sub: '룰루 밀러 · 곰출판 (2021)', effect: 'spotlight', protect: true,
+    { id: 'r4', answer: '물고기는 존재하지 않는다', sub: '룰루 밀러 · 곰출판 (2021)', effect: 'zoom', protect: true,
       img: { path: 'covers/4.jpg' }, regions: [{ x: 0.17, y: 0.05, w: 0.66, h: 0.27 }, { x: 0.28, y: 0.64, w: 0.44, h: 0.075 }, { x: 0.9, y: 0.45, w: 0.08, h: 0.17 }] },
   ],
 };
@@ -470,9 +464,12 @@ function normalizeCfg(data) {
   c.rounds = DEFAULTS.rounds.map((def, i) => {
     const r = clone(def);
     const from = saved.find((x) => x && x.id === def.id) || saved[i];
-    if (from) ROUND_KEYS.forEach((k) => { if (from[k] !== undefined) r[k] = clone(from[k]); });
+    // 예전 형식(schema 1)의 효과 선택은 버리고 라운드별 지정 효과로 맞춘다
+    const keys = data && data.schema === 2 ? ROUND_KEYS : ROUND_KEYS.filter((k) => k !== 'effect' && k !== 'mix');
+    if (from) keys.forEach((k) => { if (from[k] !== undefined) r[k] = clone(from[k]); });
     return r;
   });
+  c.schema = 2;
   return c;
 }
 function loadCfg() {
@@ -738,7 +735,7 @@ async function setupRound(i, opt) {
   if (cfg.rounds[i + 1]) roundImage(cfg.rounds[i + 1]);
 }
 
-function mixOf(r) { return r.mix && r.mix.length ? r.mix : ((COVER_REC[r.id] || {}).mix || DEFAULT_MIX); }
+function mixOf(r) { return r.mix && r.mix.length ? r.mix : DEFAULT_MIX; }
 function effectOpts(r) {
   const per = (COVER_REC[r.id] || {}).opts || {};
   if (r.effect === 'mix') { const steps = mixOf(r); return { steps, stepOpts: steps.map((n) => per[n] || {}) }; }
@@ -1086,47 +1083,24 @@ $$('[data-g]').forEach((el) => {
   });
 });
 
+function effectOptions(r) {
+  const rec = COVER_REC[r.id];
+  const pick = rec ? rec.pick[0] : null;
+  const all = CoverFX.effects().filter((f) => f.name !== 'mix');
+  const stagesOf = (f) => {
+    const def = CoverFX.get(f.name), o = rec && rec.opts[f.name];
+    return o && typeof def.stages === 'function' ? def.stages(Object.assign({}, def.defaults, o)) : f.stages;
+  };
+  const opt = (f, star) => `<option value="${f.name}" ${f.name === r.effect ? 'selected' : ''}>${star ? '★ ' : ''}${esc(f.label)} · ${stagesOf(f)}단계${star ? ' (이 라운드 지정)' : ''}</option>`;
+  return all.filter((f) => f.name === pick).map((f) => opt(f, true)).join('') + all.filter((f) => f.name !== pick).map((f) => opt(f, false)).join('');
+}
 function coverRecBox(r) {
   const rec = COVER_REC[r.id];
   if (!rec) return '';
   const lab = (n) => esc((CoverFX.get(n) || {}).label || n);
-  return `<div class="all recbox"><span class="lbl">이 표지 추천 효과 (누르면 적용)</span>
-    <div class="recs">${rec.effects.map(([n, why]) => `<button class="rec ${r.effect === n ? 'on' : ''}" data-act="useRec" data-fx="${n}"><b>${lab(n)}</b><small>${esc(why)}</small></button>`).join('')}
-      <button class="rec ${r.effect === 'mix' && mixOf(r).join() === rec.mix.join() ? 'on' : ''}" data-act="useRecMix"><b>추천 조합</b><small>${rec.mix.map(lab).join(' → ')}</small></button>
-    </div></div>`;
-}
-function mixBuilder(r) {
-  const steps = mixOf(r).slice();
-  const coverRec = (COVER_REC[r.id] || { effects: [], mix: [] });
-  const coverSet = new Set(coverRec.effects.map((e) => e[0]).concat(coverRec.mix));
-  const n = steps.length;
-  const all = CoverFX.effects().filter((f) => f.name !== 'mix');
-  const cells = steps.map((cur, k) => {
-    const pos = CoverFX.positionOf(k, n), rec = CoverFX.recommend(k, n);
-    const opt = (f) => `<option value="${f.name}" ${f.name === cur ? 'selected' : ''}>${esc(f.label)}${coverSet.has(f.name) ? ' ◆ 이 표지 추천' : ''}</option>`;
-    return `<div class="mstep">
-      <div class="mk"><b>${roman(k + 1)}</b> ${CoverFX.positions[pos]}${k === 0 ? ' · 가장 어렵게' : k === n - 1 ? ' · 가장 쉽게' : ''}</div>
-      <select data-k="mixstep" data-s="${k}">
-        <optgroup label="★ 이 단계 추천">${all.filter((f) => rec.includes(f.name)).map(opt).join('')}</optgroup>
-        <optgroup label="그 밖의 효과">${all.filter((f) => !rec.includes(f.name)).map(opt).join('')}</optgroup>
-      </select>
-      <div class="mrec">${rec.includes(cur) ? '<span class="ok">★ 추천 효과</span>' : '<span class="warn">이 단계 추천은 아님</span>'}</div>
-    </div>`;
-  }).join('<span class="marrow">→</span>');
-  return `<div class="all mixbox">
-    <div class="mhead2"><span class="lbl">단계별 조합: 힌트마다 다른 효과로 바뀝니다. ★ 묶음은 그 단계 추천, ◆는 이 표지 추천입니다.</span>
-      <label class="lbl">단계 수 <select data-k="mixn">${[2, 3, 4].map((v) => `<option ${v === n ? 'selected' : ''}>${v}</option>`).join('')}</select></label></div>
-    <div class="msteps">${cells}</div>
-  </div>`;
-}
-function resizeMix(steps, n) {
-  const out = [];
-  for (let k = 0; k < n; k++) {
-    const rec = CoverFX.recommend(k, n);
-    const keep = steps[k] && rec.includes(steps[k]) ? steps[k] : null;
-    out.push(keep || rec.find((x) => !out.includes(x)) || rec[0] || 'mosaic');
-  }
-  return out;
+  const btn = ([n, why], star) => `<button class="rec ${star ? 'star' : ''} ${r.effect === n ? 'on' : ''}" data-act="useRec" data-fx="${n}"><b>${star ? '★ ' : ''}${lab(n)}${star ? '<em>지정 효과</em>' : ''}</b><small>${esc(why)}</small></button>`;
+  return `<div class="all recbox"><span class="lbl">이 라운드 효과 (누르면 적용)</span>
+    <div class="recs">${btn(rec.pick, true)}${rec.alts.map((a) => btn(a, false)).join('')}</div></div>`;
 }
 function renderSettings() {
   $$('[data-g]').forEach((el) => {
@@ -1143,14 +1117,12 @@ function renderSettings() {
       <div class="rf">
         <div class="rtop"><b>Round ${roman(i + 1)}</b><span class="note">표지 ${i + 1}</span></div>
         <div class="wide"><span class="lbl">정답</span><input type="text" data-k="answer" value="${esc(r.answer)}"></div>
-        <div><span class="lbl">효과</span><select data-k="effect">${fxs.filter((f) => f.name !== 'mix').map((f) => `<option value="${f.name}" ${f.name === r.effect ? 'selected' : ''}>${esc(f.label)} · ${f.stages}단계${f.fit.length ? ' · ' + f.fit.map((p) => POS_SHORT[p]).join('/') + ' 단계 추천' : ''}</option>`).join('')}
-          <option value="mix" ${r.effect === 'mix' ? 'selected' : ''}>✦ 단계별 조합 (힌트마다 다른 효과)</option></select></div>
+        <div><span class="lbl">효과</span><select data-k="effect">${effectOptions(r)}</select></div>
         <div class="wide"><span class="lbl">보조 문구 (저자 · 출판사 등, 정답 카드에 표시)</span><input type="text" data-k="sub" value="${esc(r.sub || '')}"></div>
         <div>${(CoverFX.get(r.effect) || {}).protect === false
           ? '<span class="note">이 효과는 제목을 직접 가립니다</span>'
           : `<label class="chk"><input type="checkbox" data-k="protect" ${r.protect !== false ? 'checked' : ''}> 제목 보호</label>`}</div>
         ${coverRecBox(r)}
-        ${r.effect === 'mix' ? mixBuilder(r) : ''}
         <div class="all"><span class="lbl">표지 이미지 ${r.img && r.img.key ? '— <b style="color:#7ee2a8">업로드한 이미지 사용 중</b>' : ''}</span>
           <div class="imgrow">
             <input type="text" data-k="path" placeholder="경로 예: covers/${i + 1}.jpg" value="${esc((r.img && r.img.path) || '')}">
@@ -1191,13 +1163,7 @@ $('#rlist').addEventListener('input', (e) => {
 });
 $('#rlist').addEventListener('change', async (e) => {
   const t = e.target, r = rOf(t);
-  if (t.dataset.k === 'effect') {
-    r.effect = t.value;
-    if (r.effect === 'mix' && !(r.mix && r.mix.length)) r.mix = mixOf(r).slice();
-    changed(); renderSettings(); return;
-  }
-  if (t.dataset.k === 'mixn') { r.mix = resizeMix(mixOf(r), +t.value); changed(); renderSettings(); return; }
-  if (t.dataset.k === 'mixstep') { r.mix = mixOf(r).slice(); r.mix[+t.dataset.s] = t.value; changed(); renderSettings(); return; }
+  if (t.dataset.k === 'effect') { r.effect = t.value; changed(); renderSettings(); return; }
   if (t.dataset.k === 'protect') { r.protect = t.checked; changed(); return; }
   if (t.dataset.k === 'answer') { renderThumb(rowOf(t)); return; }
   if (t.dataset.act === 'file' && t.files[0]) {
@@ -1217,7 +1183,6 @@ $('#rlist').addEventListener('click', (e) => {
   const i = +rowOf(b).dataset.i, r = cfg.rounds[i];
   const act = b.dataset.act;
   if (act === 'useRec') { r.effect = b.dataset.fx; }
-  else if (act === 'useRecMix') { r.effect = 'mix'; r.mix = COVER_REC[r.id].mix.slice(); }
   else if (act === 'unfile') { if (r.img && r.img.key) IDB.del(r.img.key).catch(() => {}); r.img = { path: (r.img && r.img.path) || '' }; }
   else if (act === 'regions') { openRegionEd(i); return; }
   else return;

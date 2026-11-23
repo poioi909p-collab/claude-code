@@ -1052,7 +1052,8 @@
     const st = s.state;
     const cols = Math.max(2, s.opts.cols | 0);
     const rows = Math.max(2, Math.round((cols * s.h) / s.w));
-    const key = s.w + 'x' + s.h + ':' + s.regions.map((g) => [g.x, g.y, g.w, g.h].join(',')).join('|');
+    const keys = (s.opts.key ? [].concat(s.opts.key) : []).filter(Boolean);
+    const key = s.w + 'x' + s.h + ':' + s.regions.map((g) => [g.x, g.y, g.w, g.h].join(',')).join('|') + ':' + JSON.stringify(keys) + ':' + s.opts.open.join(',');
     if (st.key === key) return st;
     const N = cols * rows, tw = s.w / cols, th = s.h / rows;
     const pr = [];
@@ -1064,7 +1065,14 @@
         const oy = Math.min(y + th, g.y + g.h) - Math.max(y, g.y);
         if (ox > 0 && oy > 0 && ox * oy > tw * th * 0.12) title = 1;
       }
-      pr.push({ i, p: rng(st.seed + i * 7919)() + title * 2 });
+      // 결정적인 곳(key 지점)에 가까울수록, 제목 칸일수록 늦게 뒤집힌다
+      let near = 0;
+      if (keys.length) {
+        const cx = (x + tw / 2) / s.w, cy = (y + th / 2) / s.h;
+        for (const k of keys) near = Math.max(near, 1 - clamp(Math.hypot(cx - k.x, (cy - k.y) * (s.h / s.w)) / (k.r || 0.55), 0, 1));
+      }
+      const jitter = rng(st.seed + i * 7919)() * (keys.length ? 0.35 : 1);
+      pr.push({ i, p: jitter + near * 1.2 + title * 3 });
     }
     pr.sort((a, b) => a.p - b.p);
     const S = s.stages, open = s.opts.open;
@@ -1082,10 +1090,10 @@
   }
   register('tiles', {
     label: '타일 뒤집기',
-    desc: '번호판이 하나씩 뒤집히며 표지가 드러나요. 제목 칸은 맨 마지막에!',
+    desc: '번호판이 하나씩 뒤집히며 표지가 조금씩 드러나요. 결정적인 곳은 맨 마지막에!',
     fit: ['mid'],
     stages: (o) => (o.open || []).length || 3,
-    defaults: { cols: 5, open: [0.22, 0.42, 0.65] },
+    defaults: { cols: 5, open: [0.22, 0.42, 0.65], key: null },
     init({ rand }) { return { seed: (rand() * 1e9) | 0 }; },
     render(ctx, s) {
       const st = tileLayout(s);
