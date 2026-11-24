@@ -1,0 +1,941 @@
+[
+ {
+  "key": "root",
+  "page_id": "42156dd3-dc58-8193-880e-c848041180e2",
+  "ops": [
+   {
+    "md": "<callout icon=\"👉\" color=\"yellow_bg\">\n**처음이면 여기부터** — <mention url=\"https://app.notion.com/p/42156dd3dc5881d0a718c8a4affa1252\" /> 를 위에서부터 따라 하면 1시간 안에 내 만다라트가 굴러가기 시작해요.\n</callout>\n\n<h1 color=\"gray\">써두고 안 보는 만다라트 말고, **매일 굴러가는 만다라트**</h1>\n\n핵심목표 1 → 세부목표 8 → 실천항목 64 → 분기·월·주 목표 → 오늘의 행동 → 회고 → 다시 계획. 노션 무료 플랜만으로 끝까지 돌아가요.\n\n---\n\n<columns>\n<column>\n<callout icon=\"🏠\" color=\"blue_bg\">\n**매일**\n\n<mention url=\"https://app.notion.com/p/42156dd3dc5881a4a465e91c84822478\" />\n\n오늘의 3가지 · 오늘의 행동 · ✅ 원탭 기록\n</callout>\n\n<callout icon=\"🗺️\" color=\"purple_bg\">\n**한눈에**\n\n<mention url=\"https://app.notion.com/p/42156dd3dc588109b7ecf3522240f900\" />\n\n9×9 보드 · 히트맵 🟩🟨⬜💤\n</callout>\n\n<callout icon=\"📱\" color=\"purple_bg\">\n**폰에서**\n\n<mention url=\"https://app.notion.com/p/42156dd3dc58817e86d3ed493a6f64a1\" />\n\n한 칸씩 넘겨 보며 체크\n</callout>\n</column>\n\n<column>\n<callout icon=\"📅\" color=\"green_bg\">\n**계획**\n\n<mention url=\"https://app.notion.com/p/42156dd3dc588127bc88f0ceb0e645ba\" />\n\n1년 · 6개월 → 분기 · 월 · 주\n</callout>\n\n<callout icon=\"✅\" color=\"orange_bg\">\n**할 일**\n\n<mention url=\"https://app.notion.com/p/42156dd3dc5881fe9ea6f865a4f76f0f\" />\n\n오늘 · 이번 주 · 지연 · 캘린더\n</callout>\n\n<callout icon=\"🔁\" color=\"green_bg\">\n**습관**\n\n<mention url=\"https://app.notion.com/p/42156dd3dc58819991bad88fbcd7d10f\" />\n\n스트릭 · 30일 캘린더\n</callout>\n</column>\n\n<column>\n<callout icon=\"📝\" color=\"brown_bg\">\n**돌아보기**\n\n<mention url=\"https://app.notion.com/p/42156dd3dc5881a08998eb23db77a3f3\" />\n\n주간 · 월간 · 분기 · 중간 · 최종\n</callout>\n\n<callout icon=\"📊\" color=\"blue_bg\">\n**비교**\n\n<mention url=\"https://app.notion.com/p/42156dd3dc5881ae8a92f4b7c52840de\" />\n\n작년 이맘때 vs 지금\n</callout>\n\n<callout icon=\"💡\" color=\"yellow_bg\">\n**추천**\n\n<mention url=\"https://app.notion.com/p/42156dd3dc588128b066c0e0a2e33c01\" />\n\n0원 실천 768개 · 프리셋 12개\n</callout>\n</column>\n</columns>\n\n<columns>\n<column>\n<callout icon=\"🔍\" color=\"red_bg\">\n**작년에 왜 무너졌을까** — <mention url=\"https://app.notion.com/p/42156dd3dc5881168a73de707b72add5\" />\n\n실패 원인을 설계·실행·환경으로 나눠 보고, 교훈을 올해 칸에 연결해요.\n</callout>\n</column>\n\n<column>\n<callout icon=\"🔄\" color=\"pink_bg\">\n**계획이 깨졌다면** — <mention url=\"https://app.notion.com/p/42156dd3dc5881eeb496d997f6d0dfd1\" />\n\n멈춘 칸을 찾아 줄이고, 다시 시작한 날부터 새로 세요.\n</callout>\n</column>\n</columns>\n\n---\n\n## 🧭 이 템플릿이 다른 점\n\n<columns>\n<column>\n**🟩 표에 쓰면 보드가 그려져요**\n\n실천항목 표에 입력하면 9×9 보드·히트맵·진행 바가 수식으로 자동 반영돼요.\n\n**⚡ 오늘 할 것만 보여요**\n\n기간 목표 횟수를 월 → 주 → 오늘로 자동으로 쪼개서 \"🔥 오늘 꼭\"만 띄워 줘요.\n</column>\n\n<column>\n**🌱 최소 행동도 기록이에요**\n\n안 되는 날엔 최소 버전만 해도 ✅. 끊기지 않는 게 먼저예요.\n\n**🚀 페이스를 알려 줘요**\n\n시간이 흐른 만큼 달성했는지 — 앞서가는 중 / 페이스 유지 / 뒤처짐.\n</column>\n\n<column>\n**🔄 무너져도 다시**\n\n🔄 다시 시작을 누르면 그날부터 달성률을 새로 세요. 실패가 계속 발목 잡지 않게.\n\n**💸 0원으로 끝까지**\n\n무료 플랜 · Notion AI 없음 · 자동화 없음 · 헬스장·유료 강의 없는 추천.\n</column>\n</columns>\n\n---\n\n<toggle>\n🗄️ 원본 데이터베이스는 어디 있나요?\n\n<mention url=\"https://app.notion.com/p/42156dd3dc58819a85eee21c9e1b4bf6\" /> 아래에 모여 있어요. 평소엔 열 필요 없고, 다른 페이지에는 링크된 뷰로만 보여요. 속성 이름을 바꾸면 수식이 깨질 수 있으니 이름은 그대로 두세요.\n</toggle>\n\n<toggle>\n🧾 버전 · 만든 원칙\n\n- 노션 무료 플랜 100% 동작 (DB 자동화·Notion AI·외부 위젯 미사용, 차트 뷰는 선택 1개)\n- 반복 작업은 전부 버튼, 계산은 전부 수식(Formula 2.0)\n- 모든 추천 실천항목은 0원으로 할 수 있는 행동\n</toggle>"
+   }
+  ]
+ },
+ {
+  "key": "home",
+  "page_id": "42156dd3-dc58-81a4-a465-e91c84822478",
+  "ops": [
+   {
+    "md": "<span color=\"gray\"><mention url=\"https://app.notion.com/p/42156dd3dc588109b7ecf3522240f900\" /> · <mention url=\"https://app.notion.com/p/42156dd3dc588127bc88f0ceb0e645ba\" /> · <mention url=\"https://app.notion.com/p/42156dd3dc5881fe9ea6f865a4f76f0f\" /> · <mention url=\"https://app.notion.com/p/42156dd3dc58819991bad88fbcd7d10f\" /> · <mention url=\"https://app.notion.com/p/42156dd3dc5881a08998eb23db77a3f3\" /> · <mention url=\"https://app.notion.com/p/42156dd3dc5881ae8a92f4b7c52840de\" /> · <mention url=\"https://app.notion.com/p/42156dd3dc5881eeb496d997f6d0dfd1\" /></span>\n\n<callout icon=\"☀️\" color=\"blue_bg\">\n**매일 1분 루틴** — ① ⭐ 오늘의 3가지 고르기 → ② 한 일에 ✅ 누르기 → 끝. 안 되는 날엔 🌱 최소만 했음도 기록이에요.\n</callout>"
+   },
+   {
+    "view": {
+     "key": "home.mandalart",
+     "type": "gallery",
+     "name": "지금 만다라트",
+     "data_source_id": "42156dd3-dc58-813e-b08c-000bcf4b4517",
+     "configure": "FILTER \"필터용\" CONTAINS \"현재\"; SHOW \"진행 바\", \"페이스\", \"D-day\", \"작년 이맘때 비교\"; CARD SIZE large"
+    }
+   },
+   {
+    "md": "<callout icon=\"🔘\" color=\"gray_bg\">\n버튼 자리 (노션에서 /버튼 으로 추가): **➕ 할 일** · **➕ 이번 주 목표** · **📝 주간 회고 시작** · **🗺️ 만다라트 보기**\n</callout>\n\n<h2 color=\"blue\">⭐ 오늘의 3가지</h2>"
+   },
+   {
+    "view": {
+     "key": "home.top3",
+     "type": "list",
+     "name": "⭐ 오늘의 3가지",
+     "data_source_id": "42156dd3-dc58-8138-a643-000b47ef2e6b",
+     "configure": "FILTER \"오늘의 3가지\" = TRUE AND \"날짜\" = \"today\"; SORT BY \"완료\" ASC; SHOW \"완료\", \"세부목표\", \"예상 시간\""
+    }
+   },
+   {
+    "md": "<h2 color=\"blue\">🔥 오늘의 행동</h2>\n\n<span color=\"gray\">기간 목표 횟수를 이번 주 남은 날로 나눠서 자동으로 골라 줘요. 🔥 오늘 꼭 → 🙂 여유 → 🧘 마음가짐 → ✅ 완료 순.</span>"
+   },
+   {
+    "view": {
+     "key": "home.actions",
+     "type": "table",
+     "name": "🔥 오늘의 행동",
+     "data_source_id": "42156dd3-dc58-818c-afa5-000b89fb678c",
+     "configure": "FILTER \"필터용\" CONTAINS \"현재\" AND \"필터용\" CONTAINS \"활성\" AND \"필터용\" CONTAINS \"오늘\"; SORT BY \"오늘 순서\" ASC, \"위치\" ASC; SHOW \"오늘 할 차례\", \"최소 행동\", \"연속 기록\", \"세부목표 색\""
+    }
+   },
+   {
+    "md": "<h2 color=\"blue\">📋 오늘 할 일</h2>"
+   },
+   {
+    "view": {
+     "key": "home.today",
+     "type": "table",
+     "name": "📋 오늘 할 일",
+     "data_source_id": "42156dd3-dc58-8138-a643-000b47ef2e6b",
+     "configure": "FILTER \"날짜\" = \"today\" AND \"오늘의 3가지\" = FALSE; SORT BY \"완료\" ASC; SHOW \"완료\", \"세부목표\", \"실천항목\", \"예상 시간\""
+    }
+   },
+   {
+    "view": {
+     "key": "home.overdue",
+     "type": "list",
+     "name": "🔴 지연",
+     "data_source_id": "42156dd3-dc58-8138-a643-000b47ef2e6b",
+     "configure": "FILTER \"지연\" IS NOT EMPTY; SORT BY \"날짜\" ASC; SHOW \"지연\", \"세부목표\""
+    }
+   },
+   {
+    "md": "---\n\n### 🗓️ 이번 주 목표"
+   },
+   {
+    "view": {
+     "key": "home.week",
+     "type": "list",
+     "name": "이번 주 목표",
+     "data_source_id": "42156dd3-dc58-8187-a18f-000bd16dc303",
+     "configure": "FILTER \"단위\" = \"주\" AND \"시점\" = \"🟢 지금\"; SHOW \"진행 바\", \"남은 일수\", \"자동 분해\""
+    }
+   },
+   {
+    "md": "### 📆 이번 달·분기 목표"
+   },
+   {
+    "view": {
+     "key": "home.month",
+     "type": "list",
+     "name": "이번 달·분기 목표",
+     "data_source_id": "42156dd3-dc58-8187-a18f-000bd16dc303",
+     "configure": "FILTER \"단위\" IN (\"월\", \"분기\", \"12주 스프린트\", \"반기\") AND \"시점\" = \"🟢 지금\"; SORT BY \"단위 순서\" ASC; SHOW \"단위\", \"진행 바\", \"남은 일수\", \"자동 분해\""
+    }
+   },
+   {
+    "md": "### 🧩 세부목표 8"
+   },
+   {
+    "view": {
+     "key": "home.goals",
+     "type": "gallery",
+     "name": "세부목표 8",
+     "data_source_id": "42156dd3-dc58-811a-bbc7-000b3ce53ab6",
+     "configure": "FILTER \"필터용\" CONTAINS \"현재\" AND \"구분\" = \"세부목표\"; SORT BY \"위치\" ASC; SHOW \"진행 바\", \"이번 주\", \"방치 경고\", \"도장\"; CARD SIZE small"
+    }
+   },
+   {
+    "md": "<toggle>\n<span color=\"gray\">표시가 궁금해요</span>\n\n- **페이스**: 전체 달성률 − 시간 경과율. +5%p 이상 🚀, ±5%p 👍, −5%p 이하 ⚠️\n- **히트맵**: 🟩 최근 7일에 주간 목표의 80% 이상 (월 n회 습관은 최근 30일 기준) · 🟨 조금 했음 · ⬜ 아직 · 💤 오래 멈춤 (주 1회 이상 습관은 14일, 월 1회는 46일) · ✅ 미션 완료 · 🔴 기한 지남 · ⏸️ 쉬는 칸\n- **도장**: 세부목표 80% 🔥 · 100% 🏅\n</toggle>"
+   }
+  ]
+ },
+ {
+  "key": "board",
+  "page_id": "42156dd3-dc58-8109-b7ec-f3522240f900",
+  "ops": [
+   {
+    "md": "<span color=\"gray\"><mention url=\"https://app.notion.com/p/42156dd3dc5881a4a465e91c84822478\" /> · <mention url=\"https://app.notion.com/p/42156dd3dc58817e86d3ed493a6f64a1\" /> · <mention url=\"https://app.notion.com/p/42156dd3dc588128b066c0e0a2e33c01\" /></span>\n\n<callout icon=\"🗺️\" color=\"purple_bg\">\n**9칸 × 9칸이 한 화면에.** 가운데 카드 = 핵심목표와 세부목표 8개, 바깥 카드 8장 = 각 세부목표의 실천항목 8개. 아래 **입력 표**에 쓰면 보드가 자동으로 바뀌어요.\n</callout>"
+   },
+   {
+    "view": {
+     "key": "board.r1c1",
+     "type": "gallery",
+     "name": "1",
+     "data_source_id": "42156dd3-dc58-811a-bbc7-000b3ce53ab6",
+     "configure": "FILTER \"필터용\" CONTAINS \"현재\" AND \"위치\" = 1; SHOW \"미니 그리드\", \"진행 바\", \"도장\", \"방치 경고\"; CARD SIZE medium; WRAP PROPERTIES true"
+    }
+   },
+   {
+    "view": {
+     "key": "board.r1c2",
+     "type": "gallery",
+     "name": "1",
+     "data_source_id": "42156dd3-dc58-811a-bbc7-000b3ce53ab6",
+     "configure": "FILTER \"필터용\" CONTAINS \"현재\" AND \"위치\" = 2; SHOW \"미니 그리드\", \"진행 바\", \"도장\", \"방치 경고\"; CARD SIZE medium; WRAP PROPERTIES true"
+    }
+   },
+   {
+    "view": {
+     "key": "board.r1c3",
+     "type": "gallery",
+     "name": "1",
+     "data_source_id": "42156dd3-dc58-811a-bbc7-000b3ce53ab6",
+     "configure": "FILTER \"필터용\" CONTAINS \"현재\" AND \"위치\" = 3; SHOW \"미니 그리드\", \"진행 바\", \"도장\", \"방치 경고\"; CARD SIZE medium; WRAP PROPERTIES true"
+    }
+   },
+   {
+    "view": {
+     "key": "board.r2c1",
+     "type": "gallery",
+     "name": "1",
+     "data_source_id": "42156dd3-dc58-811a-bbc7-000b3ce53ab6",
+     "configure": "FILTER \"필터용\" CONTAINS \"현재\" AND \"위치\" = 4; SHOW \"미니 그리드\", \"진행 바\", \"도장\", \"방치 경고\"; CARD SIZE medium; WRAP PROPERTIES true"
+    }
+   },
+   {
+    "view": {
+     "key": "board.r2c2",
+     "type": "gallery",
+     "name": "1",
+     "data_source_id": "42156dd3-dc58-811a-bbc7-000b3ce53ab6",
+     "configure": "FILTER \"필터용\" CONTAINS \"현재\" AND \"위치\" = 5; SHOW \"미니 그리드\", \"진행 바\"; CARD SIZE medium; WRAP PROPERTIES true"
+    }
+   },
+   {
+    "view": {
+     "key": "board.r2c3",
+     "type": "gallery",
+     "name": "1",
+     "data_source_id": "42156dd3-dc58-811a-bbc7-000b3ce53ab6",
+     "configure": "FILTER \"필터용\" CONTAINS \"현재\" AND \"위치\" = 6; SHOW \"미니 그리드\", \"진행 바\", \"도장\", \"방치 경고\"; CARD SIZE medium; WRAP PROPERTIES true"
+    }
+   },
+   {
+    "view": {
+     "key": "board.r3c1",
+     "type": "gallery",
+     "name": "1",
+     "data_source_id": "42156dd3-dc58-811a-bbc7-000b3ce53ab6",
+     "configure": "FILTER \"필터용\" CONTAINS \"현재\" AND \"위치\" = 7; SHOW \"미니 그리드\", \"진행 바\", \"도장\", \"방치 경고\"; CARD SIZE medium; WRAP PROPERTIES true"
+    }
+   },
+   {
+    "view": {
+     "key": "board.r3c2",
+     "type": "gallery",
+     "name": "1",
+     "data_source_id": "42156dd3-dc58-811a-bbc7-000b3ce53ab6",
+     "configure": "FILTER \"필터용\" CONTAINS \"현재\" AND \"위치\" = 8; SHOW \"미니 그리드\", \"진행 바\", \"도장\", \"방치 경고\"; CARD SIZE medium; WRAP PROPERTIES true"
+    }
+   },
+   {
+    "view": {
+     "key": "board.r3c3",
+     "type": "gallery",
+     "name": "1",
+     "data_source_id": "42156dd3-dc58-811a-bbc7-000b3ce53ab6",
+     "configure": "FILTER \"필터용\" CONTAINS \"현재\" AND \"위치\" = 9; SHOW \"미니 그리드\", \"진행 바\", \"도장\", \"방치 경고\"; CARD SIZE medium; WRAP PROPERTIES true"
+    }
+   },
+   {
+    "md": "<span color=\"gray\">🟩 충분 · 🟨 조금 · ⬜ 아직 · 💤 오래 멈춤 · ✅ 미션 완료 · 🔴 기한 지남 · ⏸️ 쉬는 칸 · 🏅 세부 100% · 🔥 80%+</span>\n\n---\n\n<h2 color=\"purple\">✏️ 입력 표</h2>\n\n<callout icon=\"✍️\" color=\"gray_bg\">\n**세부목표 표**에서 위치(1~9, 5 = 가운데)·짧은 이름·색을 정하고, **실천항목 표**에서 위치(1~8)·유형·빈도·최소 행동을 채우세요. 빈 칸이 필요하면 세부목표 행의 🧩 8칸 만들기를 누르세요.\n</callout>"
+   },
+   {
+    "view": {
+     "key": "board.goals_input",
+     "type": "table",
+     "name": "✏️ 세부목표 입력",
+     "data_source_id": "42156dd3-dc58-811a-bbc7-000b3ce53ab6",
+     "configure": "FILTER \"필터용\" CONTAINS \"현재\"; SORT BY \"위치\" ASC; SHOW \"위치\", \"구분\", \"짧은 이름\", \"분야\", \"색상 라벨\", \"목표치\", \"단위\", \"진행 바\", \"자동 분해\""
+    }
+   },
+   {
+    "view": {
+     "key": "board.actions_input",
+     "type": "table",
+     "name": "✏️ 실천항목 입력",
+     "data_source_id": "42156dd3-dc58-818c-afa5-000b89fb678c",
+     "configure": "FILTER \"필터용\" CONTAINS \"현재\"; SORT BY \"위치\" ASC; GROUP BY \"세부목표 색\"; SHOW \"위치\", \"짧은 이름\", \"유형\", \"빈도\", \"주간 목표 횟수\", \"월간 목표 횟수\", \"최소 행동\", \"기한\", \"완료\", \"활성 상태\", \"칸\", \"자동 분해\""
+    }
+   },
+   {
+    "md": "<toggle>\n격자 위치 규칙\n\n<table header-row=\"false\">\n<tr><td>1</td><td>2</td><td>3</td></tr>\n<tr><td>4</td><td>**5 = 가운데**</td><td>6</td></tr>\n<tr><td>7</td><td>8</td><td>9</td></tr>\n</table>\n\n- 세부목표는 위 번호를 써요(5는 가운데 카드 전용).\n- 실천항목은 1~8을 쓰고, 카드 안에서는 1·2·3 / 4·◆·5 / 6·7·8 순서로 놓여요.\n</toggle>\n\n<toggle>\n보드가 3열로 안 맞아 보이면\n\n- 페이지 오른쪽 위 ••• → **전체 너비** 켜기.\n- 그래도 어긋나면 아래 대안 뷰(한 뷰 보드)를 쓰세요. 카드 크기 '중간', 정렬 '위치 오름차순'이면 대부분 화면에서 3열로 놓여요."
+   },
+   {
+    "view": {
+     "key": "board.single",
+     "type": "gallery",
+     "name": "한 뷰 보드 (대안)",
+     "data_source_id": "42156dd3-dc58-811a-bbc7-000b3ce53ab6",
+     "configure": "FILTER \"필터용\" CONTAINS \"현재\"; SORT BY \"위치\" ASC; SHOW \"미니 그리드\", \"진행 바\", \"도장\", \"방치 경고\"; CARD SIZE medium; WRAP PROPERTIES true"
+    }
+   },
+   {
+    "md": "</toggle>"
+   }
+  ]
+ },
+ {
+  "key": "mobile",
+  "page_id": "42156dd3-dc58-817e-86d3-ed493a6f64a1",
+  "ops": [
+   {
+    "md": "<callout icon=\"📱\" color=\"purple_bg\">\n폰에서 9×9는 너무 작아요. 여기서는 **한 칸씩 크게** 보고, 아래에서 바로 ✅ 체크하세요. 노션 앱에서 이 페이지를 **즐겨찾기**에 넣어 두면 1초 만에 열려요.\n</callout>\n\n<h2 color=\"purple\">오늘 체크</h2>"
+   },
+   {
+    "view": {
+     "key": "mobile.actions",
+     "type": "list",
+     "name": "오늘 체크",
+     "data_source_id": "42156dd3-dc58-818c-afa5-000b89fb678c",
+     "configure": "FILTER \"필터용\" CONTAINS \"현재\" AND \"필터용\" CONTAINS \"활성\" AND \"유형\" != \"미션\"; SORT BY \"오늘 순서\" ASC; GROUP BY \"세부목표 색\"; SHOW \"칸\", \"오늘 할 차례\""
+    }
+   },
+   {
+    "md": "<h2 color=\"purple\">한 칸씩 보기</h2>"
+   },
+   {
+    "view": {
+     "key": "mobile.goals",
+     "type": "gallery",
+     "name": "한 칸씩 보기",
+     "data_source_id": "42156dd3-dc58-811a-bbc7-000b3ce53ab6",
+     "configure": "FILTER \"필터용\" CONTAINS \"현재\"; SORT BY \"위치\" ASC; SHOW \"미니 그리드\", \"진행 바\", \"이번 주\", \"방치 경고\"; CARD SIZE large; WRAP PROPERTIES true"
+    }
+   },
+   {
+    "md": "<span color=\"gray\"><mention url=\"https://app.notion.com/p/42156dd3dc5881a4a465e91c84822478\" /> · <mention url=\"https://app.notion.com/p/42156dd3dc588109b7ecf3522240f900\" /></span>"
+   }
+  ]
+ },
+ {
+  "key": "period",
+  "page_id": "42156dd3-dc58-8127-bc88-f0ceb0e645ba",
+  "ops": [
+   {
+    "md": "<span color=\"gray\"><mention url=\"https://app.notion.com/p/42156dd3dc5881a4a465e91c84822478\" /> · <mention url=\"https://app.notion.com/p/42156dd3dc588109b7ecf3522240f900\" /> · <mention url=\"https://app.notion.com/p/42156dd3dc58817b94a4f7462083604b\" /></span>\n\n<columns>\n<column>\n<callout icon=\"🗓️\" color=\"blue_bg\">\n**1년 모드**\n\n반기 2 → 분기 4 → 월 12 → 주(그 주에만 만들기)\n\n- 분기 말: 분기 점검\n- 6개월 시점: 중간 점검\n- 12개월: 최종 회고\n</callout>\n</column>\n\n<column>\n<callout icon=\"⚡\" color=\"purple_bg\">\n**6개월 모드 = 12주 스프린트 ×2**\n\n스프린트 1 (12주) → 정비 주간 (2주) → 스프린트 2 (12주) → 주\n\n- 6주 차: 스프린트 중간 점검\n- 12주 차: 스프린트 회고\n- 26주: 최종 회고\n</callout>\n</column>\n</columns>\n\n<callout icon=\"🔘\" color=\"gray_bg\">\n버튼 자리 (노션에서 /버튼 으로 추가): **➕ 이번 분기 목표** · **➕ 12주 스프린트** · **➕ 이번 달 목표** · **➕ 이번 주 목표**\n</callout>\n\n<span color=\"gray\">버튼을 누르면 단위와 기간 시작(오늘)이 채워진 페이지가 열려요. **상위 기간 목표**만 골라 주면 계층이 이어져요. 기간 끝은 단위에 맞춰 자동 계산돼요.</span>\n\n<h2 color=\"green\">🗓️ 타임라인</h2>"
+   },
+   {
+    "view": {
+     "key": "period.timeline",
+     "type": "timeline",
+     "name": "🗓️ 타임라인",
+     "data_source_id": "42156dd3-dc58-8187-a18f-000bd16dc303",
+     "configure": "GROUP BY \"단위\"; TIMELINE BY \"기간 시작\" TO \"기간 끝\"; SHOW \"진행 바\""
+    }
+   },
+   {
+    "md": "<h2 color=\"green\">🌳 계층</h2>\n\n<span color=\"gray\">행 왼쪽 ▶를 펼치면 분기 → 월 → 주가 차례로 보여요.</span>"
+   },
+   {
+    "view": {
+     "key": "period.tree",
+     "type": "table",
+     "name": "🌳 계층 (분기 → 월 → 주)",
+     "data_source_id": "42156dd3-dc58-8187-a18f-000bd16dc303",
+     "configure": "SORT BY \"기간 시작\" ASC; SHOW \"단위\", \"기간 시작\", \"기간 끝\", \"상태\", \"진행 바\", \"남은 일수\", \"자동 분해\""
+    }
+   },
+   {
+    "md": "<h2 color=\"green\">단위별</h2>"
+   },
+   {
+    "view": {
+     "key": "period.big",
+     "type": "table",
+     "name": "반기·분기·스프린트",
+     "data_source_id": "42156dd3-dc58-8187-a18f-000bd16dc303",
+     "configure": "FILTER \"단위\" IN (\"반기\", \"분기\", \"12주 스프린트\", \"정비 주간\"); SORT BY \"기간 시작\" ASC; SHOW \"단위\", \"기간 시작\", \"기간 끝\", \"상태\", \"진행 바\", \"세부목표\", \"자동 분해\""
+    }
+   },
+   {
+    "view": {
+     "key": "period.month",
+     "type": "table",
+     "name": "월",
+     "data_source_id": "42156dd3-dc58-8187-a18f-000bd16dc303",
+     "configure": "FILTER \"단위\" = \"월\"; SORT BY \"기간 시작\" ASC; GROUP BY \"상위\"; SHOW \"기간 시작\", \"상태\", \"진행 바\", \"남은 일수\", \"자동 분해\""
+    }
+   },
+   {
+    "view": {
+     "key": "period.week",
+     "type": "board",
+     "name": "주",
+     "data_source_id": "42156dd3-dc58-8187-a18f-000bd16dc303",
+     "configure": "FILTER \"단위\" = \"주\"; SORT BY \"기간 시작\" DESC; GROUP BY \"상태\"; SHOW \"상위\", \"진행 바\", \"남은 일수\""
+    }
+   },
+   {
+    "md": "<toggle>\n📏 숫자로 확인 가능한 마일스톤 쓰는 법\n\n- ❌ \"1분기: 운동 열심히\" → ✅ \"1분기: 5km 쉬지 않고 달리기\"\n- ❌ \"3월: 영어 공부\" → ✅ \"3월: 섀도잉 영상 12개 완료\"\n- 수치형이면 **목표치·현재치·수치 단위**를 채우세요. **자동 분해** 칸이 \"남은 30쪽 → 주 7.5쪽 · 하루 1.1쪽\"처럼 남은 기간에 맞춰 쪼개 줘요.\n</toggle>"
+   }
+  ]
+ },
+ {
+  "key": "todo",
+  "page_id": "42156dd3-dc58-81fe-9ea6-f865a4f76f0f",
+  "ops": [
+   {
+    "md": "<span color=\"gray\"><mention url=\"https://app.notion.com/p/42156dd3dc5881a4a465e91c84822478\" /> · <mention url=\"https://app.notion.com/p/42156dd3dc588127bc88f0ceb0e645ba\" /></span>\n\n<callout icon=\"✅\" color=\"orange_bg\">\n할 일은 **실천항목**이나 **기간 목표**에 연결하면 세부목표 색이 붙고, 미션 달성률·기간 목표 달성률에 자동으로 반영돼요. 하루 핵심 3개에는 ⭐ 오늘의 3가지를 체크하세요.\n</callout>\n\n<callout icon=\"🔘\" color=\"gray_bg\">\n버튼 자리 (노션에서 /버튼 으로 추가): **➕ 할 일**\n</callout>"
+   },
+   {
+    "view": {
+     "key": "todo.today",
+     "type": "table",
+     "name": "오늘",
+     "data_source_id": "42156dd3-dc58-8138-a643-000b47ef2e6b",
+     "configure": "FILTER \"날짜\" = \"today\"; SORT BY \"오늘의 3가지\" DESC, \"완료\" ASC; SHOW \"완료\", \"오늘의 3가지\", \"세부목표\", \"실천항목\", \"예상 시간\""
+    }
+   },
+   {
+    "view": {
+     "key": "todo.week",
+     "type": "board",
+     "name": "이번 주",
+     "data_source_id": "42156dd3-dc58-8138-a643-000b47ef2e6b",
+     "configure": "FILTER \"필터용\" = \"이번 주\"; GROUP BY \"요일\"; SHOW \"완료\", \"세부목표\", \"지연\""
+    }
+   },
+   {
+    "view": {
+     "key": "todo.overdue",
+     "type": "table",
+     "name": "🔴 지연",
+     "data_source_id": "42156dd3-dc58-8138-a643-000b47ef2e6b",
+     "configure": "FILTER \"지연\" IS NOT EMPTY; SORT BY \"날짜\" ASC; SHOW \"날짜\", \"지연\", \"세부목표\", \"기간 목표\""
+    }
+   },
+   {
+    "view": {
+     "key": "todo.calendar",
+     "type": "calendar",
+     "name": "캘린더",
+     "data_source_id": "42156dd3-dc58-8138-a643-000b47ef2e6b",
+     "configure": "CALENDAR BY \"날짜\"; SHOW \"완료\", \"세부목표\""
+    }
+   },
+   {
+    "view": {
+     "key": "todo.by_goal",
+     "type": "table",
+     "name": "세부목표별",
+     "data_source_id": "42156dd3-dc58-8138-a643-000b47ef2e6b",
+     "configure": "FILTER \"완료\" = FALSE; SORT BY \"날짜\" ASC; GROUP BY \"세부목표\"; SHOW \"날짜\", \"완료\", \"실천항목\", \"기간 목표\""
+    }
+   },
+   {
+    "view": {
+     "key": "todo.inbox",
+     "type": "list",
+     "name": "📥 날짜 미정",
+     "data_source_id": "42156dd3-dc58-8138-a643-000b47ef2e6b",
+     "configure": "FILTER \"날짜\" IS EMPTY AND \"완료\" = FALSE; SHOW \"세부목표\""
+    }
+   },
+   {
+    "view": {
+     "key": "todo.done",
+     "type": "table",
+     "name": "완료 보관",
+     "data_source_id": "42156dd3-dc58-8138-a643-000b47ef2e6b",
+     "configure": "FILTER \"완료\" = TRUE; SORT BY \"날짜\" DESC; SHOW \"날짜\", \"세부목표\", \"라벨\""
+    }
+   },
+   {
+    "md": "<span color=\"gray\">팁: 위 뷰들은 하나의 링크된 DB에 탭으로 묶어도 돼요(뷰 이름 옆 ＋).</span>"
+   }
+  ]
+ },
+ {
+  "key": "habit",
+  "page_id": "42156dd3-dc58-8199-91ba-d88fbcd7d10f",
+  "ops": [
+   {
+    "md": "<span color=\"gray\"><mention url=\"https://app.notion.com/p/42156dd3dc5881a4a465e91c84822478\" /> · <mention url=\"https://app.notion.com/p/42156dd3dc58817e86d3ed493a6f64a1\" /> · <mention url=\"https://app.notion.com/p/42156dd3dc5881eeb496d997f6d0dfd1\" /></span>\n\n<callout icon=\"🔁\" color=\"green_bg\">\n**✅ 오늘 했음** 한 번 = 실행 기록 한 줄. 그 기록이 히트맵·스트릭·달성률을 전부 계산해요. 안 되는 날엔 **🌱 최소만 했음** — 최소 행동도 똑같이 1회로 세요.\n</callout>\n\n<h2 color=\"green\">실천항목 히트맵</h2>"
+   },
+   {
+    "view": {
+     "key": "habit.status",
+     "type": "table",
+     "name": "실천항목 히트맵",
+     "data_source_id": "42156dd3-dc58-818c-afa5-000b89fb678c",
+     "configure": "FILTER \"필터용\" CONTAINS \"현재\" AND \"필터용\" CONTAINS \"활성\" AND \"유형\" != \"미션\"; SORT BY \"위치\" ASC; GROUP BY \"세부목표 색\"; SHOW \"칸\", \"최근 7일 횟수\", \"이번 주 횟수\", \"연속 기록\", \"기록 공백(일)\", \"진행 바\""
+    }
+   },
+   {
+    "md": "<h2 color=\"green\">이번 주 실행 기록</h2>"
+   },
+   {
+    "view": {
+     "key": "habit.week_logs",
+     "type": "table",
+     "name": "이번 주 실행 기록",
+     "data_source_id": "42156dd3-dc58-81c0-9f3d-000bd50cb3b2",
+     "configure": "FILTER \"필터용\" = \"이번주\"; SORT BY \"날짜\" DESC; GROUP BY \"세부목표\"; SHOW \"날짜\", \"실천항목\", \"강도\", \"수행량\", \"메모\""
+    }
+   },
+   {
+    "md": "### 📅 최근 30일"
+   },
+   {
+    "view": {
+     "key": "habit.calendar",
+     "type": "calendar",
+     "name": "최근 30일 캘린더",
+     "data_source_id": "42156dd3-dc58-81c0-9f3d-000bd50cb3b2",
+     "configure": "FILTER \"날짜\" >= \"one_month_ago\"; CALENDAR BY \"날짜\"; SHOW \"강도\""
+    }
+   },
+   {
+    "md": "### 📸 인증 사진"
+   },
+   {
+    "view": {
+     "key": "habit.photos",
+     "type": "gallery",
+     "name": "인증 사진",
+     "data_source_id": "42156dd3-dc58-81c0-9f3d-000bd50cb3b2",
+     "configure": "FILTER \"인증 사진\" IS NOT EMPTY; SORT BY \"날짜\" DESC; SHOW \"날짜\", \"실천항목\"; CARD SIZE small; COVER \"인증 사진\""
+    }
+   },
+   {
+    "md": "<toggle>\n지난 날짜를 깜빡했어요\n\n✅를 누른 뒤 생긴 기록의 **날짜**만 어제로 바꾸면 돼요. 실행 기록 표에서 직접 한 줄 추가해도 똑같이 계산돼요.\n</toggle>"
+   }
+  ]
+ },
+ {
+  "key": "retro",
+  "page_id": "42156dd3-dc58-81a0-8998-eb23db77a3f3",
+  "ops": [
+   {
+    "md": "<span color=\"gray\"><mention url=\"https://app.notion.com/p/42156dd3dc5881a4a465e91c84822478\" /> · <mention url=\"https://app.notion.com/p/42156dd3dc5881ae8a92f4b7c52840de\" /> · <mention url=\"https://app.notion.com/p/42156dd3dc5881eeb496d997f6d0dfd1\" /></span>\n\n<callout icon=\"📝\" color=\"brown_bg\">\n회고는 길 필요 없어요. **주간 15분**이면 충분하고, 월간 회고 때 적는 **누적 달성률**은 내년의 내가 \"작년 이맘때\"와 비교하는 기준점이 돼요.\n</callout>\n\n<callout icon=\"🔘\" color=\"gray_bg\">\n버튼 자리 (노션에서 /버튼 으로 추가): **📝 주간 회고 시작** · **📅 월간 회고** · **🏁 분기·스프린트 회고** · **⏸️ 중간 점검** · **🏆 최종 회고** · **🔄 재설계 회고**\n</callout>"
+   },
+   {
+    "view": {
+     "key": "retro.all",
+     "type": "table",
+     "name": "최신순",
+     "data_source_id": "42156dd3-dc58-81a4-84c2-000b9a7ad0f6",
+     "configure": "SORT BY \"기간\" DESC; SHOW \"유형\", \"기간\", \"기분\", \"이번 기간 실행률\", \"누적 달성률\", \"만다라트\""
+    }
+   },
+   {
+    "view": {
+     "key": "retro.weekly",
+     "type": "list",
+     "name": "주간",
+     "data_source_id": "42156dd3-dc58-81a4-84c2-000b9a7ad0f6",
+     "configure": "FILTER \"유형\" = \"주간\"; SORT BY \"기간\" DESC; SHOW \"기간\", \"기분\", \"이번 기간 실행률\""
+    }
+   },
+   {
+    "view": {
+     "key": "retro.monthly",
+     "type": "table",
+     "name": "월간 (스냅샷)",
+     "data_source_id": "42156dd3-dc58-81a4-84c2-000b9a7ad0f6",
+     "configure": "FILTER \"유형\" = \"월간\"; SORT BY \"기간\" DESC; SHOW \"만다라트\", \"경과 월\", \"누적 달성률\", \"스냅샷 확인\", \"기분\""
+    }
+   },
+   {
+    "view": {
+     "key": "retro.big",
+     "type": "list",
+     "name": "분기·중간·최종",
+     "data_source_id": "42156dd3-dc58-81a4-84c2-000b9a7ad0f6",
+     "configure": "FILTER \"유형\" IN (\"분기·스프린트\", \"중간 점검\", \"최종\"); SORT BY \"기간\" DESC; SHOW \"유형\", \"기간\", \"기분\""
+    }
+   },
+   {
+    "view": {
+     "key": "retro.redesign",
+     "type": "list",
+     "name": "재설계",
+     "data_source_id": "42156dd3-dc58-81a4-84c2-000b9a7ad0f6",
+     "configure": "FILTER \"유형\" = \"재설계\"; SORT BY \"기간\" DESC; SHOW \"기간\", \"변경한 실천항목\""
+    }
+   },
+   {
+    "view": {
+     "key": "retro.mood",
+     "type": "board",
+     "name": "기분 보드",
+     "data_source_id": "42156dd3-dc58-81a4-84c2-000b9a7ad0f6",
+     "configure": "GROUP BY \"기분\"; SHOW \"유형\", \"기간\""
+    }
+   },
+   {
+    "md": "<toggle>\n언제 어떤 회고를 하나요?\n\n<table header-row=\"true\">\n<tr><td>유형</td><td>언제</td><td>시간</td><td>핵심 질문</td></tr>\n<tr><td>주간</td><td>매주 일요일</td><td>15분</td><td>잘한 것 · 막힌 것 · 💤 원인 · 다음 주 3가지</td></tr>\n<tr><td>월간</td><td>매달 마지막 날</td><td>20분</td><td>페이스 · 📸 누적 달성률 스냅샷 · 이월/삭제</td></tr>\n<tr><td>분기·스프린트</td><td>분기 말 / 12주 차</td><td>30분</td><td>마일스톤 달성 · 칸 교체</td></tr>\n<tr><td>중간 점검</td><td>6개월 / 6주 차</td><td>30분</td><td>목표 재설정</td></tr>\n<tr><td>최종</td><td>기간 끝</td><td>45분</td><td>성적표 · 다음 만다라트</td></tr>\n<tr><td>재설계</td><td>💤·📉 신호가 뜰 때</td><td>10분</td><td>무엇을 얼마나 줄일까</td></tr>\n</table>\n</toggle>"
+   }
+  ]
+ },
+ {
+  "key": "compare",
+  "page_id": "42156dd3-dc58-81ae-8a92-f4b7c52840de",
+  "ops": [
+   {
+    "md": "<span color=\"gray\"><mention url=\"https://app.notion.com/p/42156dd3dc5881a4a465e91c84822478\" /> · <mention url=\"https://app.notion.com/p/42156dd3dc5881168a73de707b72add5\" /> · <mention url=\"https://app.notion.com/p/42156dd3dc5881a08998eb23db77a3f3\" /></span>\n\n<callout icon=\"📊\" color=\"blue_bg\">\n**지난번의 나 vs 지금의 나.** 끝난 만다라트도 지우지 말고 **상태 = 보관**으로 두세요. 새 만다라트의 **이전 만다라트**에 연결하면 \"같은 시점(n개월 차) 31% → 지금 38% ▲7%p\"처럼 비교돼요.\n</callout>\n\n<callout icon=\"🔘\" color=\"gray_bg\">\n버튼 자리 (노션에서 /버튼 으로 추가): **🌱 새 만다라트 시작** · **➕ 지난 목표 옮겨 오기**\n</callout>\n\n<h2 color=\"blue\">🏆 만다라트 성적표</h2>"
+   },
+   {
+    "view": {
+     "key": "compare.cards",
+     "type": "gallery",
+     "name": "만다라트 성적표",
+     "data_source_id": "42156dd3-dc58-813e-b08c-000bcf4b4517",
+     "configure": "SORT BY \"시작일\" DESC; SHOW \"상태\", \"기간 모드\", \"진행 바\", \"성적표\", \"작년 이맘때 비교\"; CARD SIZE large; WRAP PROPERTIES true"
+    }
+   },
+   {
+    "md": "<h2 color=\"blue\">⚖️ 나란히 비교</h2>\n\n<span color=\"gray\">📈 전체 달성률 · 🔁 습관 유지율(지금까지 해야 했던 횟수 대비 실제) · 💤 방치 칸 · 🔄 재시작 · 📝 회고 수</span>"
+   },
+   {
+    "view": {
+     "key": "compare.table",
+     "type": "table",
+     "name": "나란히 비교",
+     "data_source_id": "42156dd3-dc58-813e-b08c-000bcf4b4517",
+     "configure": "SORT BY \"시작일\" DESC; SHOW \"상태\", \"시작일\", \"종료일\", \"전체 달성률\", \"시간 경과율\", \"습관 유지율\", \"방치 칸\", \"재시작 합계\", \"회고 수\", \"이전 최종\", \"작년 이맘때 비교\""
+    }
+   },
+   {
+    "md": "### 📸 월별 스냅샷\n\n<span color=\"gray\">월간 회고의 누적 달성률. 같은 '경과 월'끼리 비교돼요.</span>"
+   },
+   {
+    "view": {
+     "key": "compare.snapshots",
+     "type": "table",
+     "name": "월별 스냅샷",
+     "data_source_id": "42156dd3-dc58-81a4-84c2-000b9a7ad0f6",
+     "configure": "FILTER \"유형\" = \"월간\"; SORT BY \"경과 월\" ASC; GROUP BY \"만다라트\"; SHOW \"경과 월\", \"누적 달성률\", \"스냅샷 확인\""
+    }
+   },
+   {
+    "md": "### 🔍 작년의 교훈 → 올해"
+   },
+   {
+    "view": {
+     "key": "compare.lessons",
+     "type": "list",
+     "name": "작년의 교훈 → 올해 반영",
+     "data_source_id": "42156dd3-dc58-81a3-acf4-000bfbd0e5a6",
+     "configure": "SHOW \"주원인\", \"교훈 한 줄\", \"반영\""
+    }
+   },
+   {
+    "md": "### 🧩 분야별 지난번 vs 지금"
+   },
+   {
+    "view": {
+     "key": "compare.fields",
+     "type": "table",
+     "name": "분야별 지난번 vs 지금",
+     "data_source_id": "42156dd3-dc58-811a-bbc7-000b3ce53ab6",
+     "configure": "FILTER \"구분\" = \"세부목표\"; SORT BY \"만다라트\" DESC; GROUP BY \"분야\"; SHOW \"만다라트\", \"진행 바\", \"방치 칸 수\""
+    }
+   },
+   {
+    "md": "<toggle>\n📈 차트로 보고 싶다면 (선택)\n\n무료 플랜은 워크스페이스 전체에서 **차트 뷰 1개**만 보여요. 이 템플릿은 차트 없이도 모든 숫자가 보이게 만들었어요. 차트를 쓰고 싶으면 여기에 하나만 두세요."
+   },
+   {
+    "view": {
+     "key": "compare.chart",
+     "type": "chart",
+     "name": "달성률 막대 (선택, 무료 플랜 차트 1개)",
+     "data_source_id": "42156dd3-dc58-813e-b08c-000bcf4b4517",
+     "configure": "GROUP BY \"핵심목표\"; CHART bar AGGREGATE sum ON \"전체 달성률\" COLOR colorful"
+    }
+   },
+   {
+    "md": "</toggle>\n\n<toggle>\n시스템 밖에서 했던 작년 목표도 비교하고 싶어요\n\n1. ➕ 지난 목표 옮겨 오기 → 핵심목표·기간 모드·시작일을 적고 **기록된 달성률**에 대략의 숫자(0~100)를 넣어요.\n2. 월별 기억이 있으면 회고 DB에 유형=월간, 만다라트=그 행, 기간=그 달, 누적 달성률=그때 숫자로 몇 줄 넣어 두면 같은 시점 비교까지 돼요.\n3. 지금 만다라트의 **이전 만다라트**에 그 행을 연결하세요.\n</toggle>"
+   }
+  ]
+ },
+ {
+  "key": "lastyear",
+  "page_id": "42156dd3-dc58-8116-8a73-de707b72add5",
+  "ops": [
+   {
+    "md": "<span color=\"gray\"><mention url=\"https://app.notion.com/p/42156dd3dc5881eda36be6cfe20cad8b\" /> · <mention url=\"https://app.notion.com/p/42156dd3dc5881ae8a92f4b7c52840de\" /> · <mention url=\"https://app.notion.com/p/42156dd3dc588109b7ecf3522240f900\" /></span>\n\n<callout icon=\"🔍\" color=\"red_bg\">\n**자책 말고 해부.** 작년 목표가 무너진 건 의지 문제가 아니라 대부분 **설계**·**실행**·**환경** 셋 중 하나예요. 원인을 체크하면 주원인과 처방이 자동으로 나오고, 교훈을 올해 세부목표에 연결하면 ✅ 반영됨으로 바뀌어요.\n</callout>\n\n<callout icon=\"🔘\" color=\"gray_bg\">\n버튼 자리 (노션에서 /버튼 으로 추가): **➕ 지난 목표 하나 해부하기**\n</callout>\n\n<columns>\n<column>\n<callout icon=\"🧩\" color=\"purple_bg\">\n**설계 문제**\n\n모호했다 · 측정 불가 · 너무 컸다 · 너무 많았다 · 최소 행동 없음\n\n→ 숫자로 바꾸고 최소 행동 넣기\n</callout>\n</column>\n\n<column>\n<callout icon=\"🏃\" color=\"orange_bg\">\n**실행 문제**\n\n기록 안 함 · 한 번 빠지고 무너짐 · 동기 사라짐 · 회고 안 함\n\n→ 원탭 기록 + 주간 회고 고정\n</callout>\n</column>\n\n<column>\n<callout icon=\"🌦\" color=\"blue_bg\">\n**환경 문제**\n\n시간 · 체력 · 환경 · 주변 · 돈 · 예상 못 한 사건\n\n→ 시간 블록 · 0원 대안 · 재시작 규칙\n</callout>\n</column>\n</columns>\n\n<h2 color=\"red\">해부 목록</h2>"
+   },
+   {
+    "view": {
+     "key": "lastyear.table",
+     "type": "table",
+     "name": "해부 목록",
+     "data_source_id": "42156dd3-dc58-81a3-acf4-000bfbd0e5a6",
+     "configure": "SORT BY \"실제 달성률\" ASC; SHOW \"언제\", \"분야\", \"실제 달성률\", \"멈춘 시점\", \"실패 원인\", \"원인 분포\", \"주원인\", \"처방\", \"다음 결정\", \"반영\""
+    }
+   },
+   {
+    "md": "### 원인 유형별"
+   },
+   {
+    "view": {
+     "key": "lastyear.cause",
+     "type": "board",
+     "name": "원인 유형별",
+     "data_source_id": "42156dd3-dc58-81a3-acf4-000bfbd0e5a6",
+     "configure": "GROUP BY \"주원인\"; SHOW \"원인 분포\", \"처방\", \"교훈 한 줄\""
+    }
+   },
+   {
+    "md": "### 언제 멈췄나"
+   },
+   {
+    "view": {
+     "key": "lastyear.when",
+     "type": "board",
+     "name": "언제 멈췄나",
+     "data_source_id": "42156dd3-dc58-81a3-acf4-000bfbd0e5a6",
+     "configure": "GROUP BY \"멈춘 시점\"; SHOW \"분야\", \"실패 원인\""
+    }
+   },
+   {
+    "md": "<h2 color=\"red\">💌 교훈 카드</h2>"
+   },
+   {
+    "view": {
+     "key": "lastyear.lessons",
+     "type": "gallery",
+     "name": "교훈 카드",
+     "data_source_id": "42156dd3-dc58-81a3-acf4-000bfbd0e5a6",
+     "configure": "SHOW \"교훈 한 줄\", \"재발 방지 규칙\", \"다음 결정\", \"반영\"; CARD SIZE medium; WRAP PROPERTIES true"
+    }
+   },
+   {
+    "md": "<toggle>\n해부한 다음엔?\n\n1. **다음 결정**을 고르세요: 다시 도전 / 줄여서 다시 / 방식 바꿔 다시 / 내려놓기.\n2. 다시 할 거라면 올해 만다라트의 세부목표를 **반영한 세부목표**에 연결하세요.\n3. **재발 방지 규칙**(만약 ~하면 → ~한다)을 그 세부목표 실천항목의 **최소 행동**에 녹이세요.\n4. 작년 목표를 만다라트 DB에 보관해 두었다면 <mention url=\"https://app.notion.com/p/42156dd3dc5881ae8a92f4b7c52840de\" /> 에서 숫자로 비교돼요.\n</toggle>"
+   }
+  ]
+ },
+ {
+  "key": "restart",
+  "page_id": "42156dd3-dc58-81ee-b496-d997f6d0dfd1",
+  "ops": [
+   {
+    "md": "<span color=\"gray\"><mention url=\"https://app.notion.com/p/42156dd3dc58812ea66fe2773a6da9c8\" /> · <mention url=\"https://app.notion.com/p/42156dd3dc58819991bad88fbcd7d10f\" /> · <mention url=\"https://app.notion.com/p/42156dd3dc5881a08998eb23db77a3f3\" /></span>\n\n<callout icon=\"🔄\" color=\"pink_bg\">\n**계획은 원래 깨져요. 중요한 건 다시 시작하는 속도.** 아래 🚨 목록에 뜬 칸은 수식이 찾아낸 '멈춘 칸'이에요. 지우지 말고 **줄여서 다시** 시작하세요.\n</callout>\n\n<callout icon=\"🧯\" color=\"gray_bg\">\n**3분 재시작 루틴**\n\n1. 🚨 목록에서 칸 1개 고르기\n2. 문장 줄이기 — 빈도 ↓ 시간 ↓ 최소 행동 더 작게 (원래 문장은 **이전 버전**에 복사)\n3. **🔄 다시 시작** 누르기 → 오늘부터 달성률을 새로 셈\n4. 바꾼 이유를 🔄 재설계 회고에 한 줄\n</callout>\n\n<callout icon=\"🔘\" color=\"gray_bg\">\n버튼 자리 (노션에서 /버튼 으로 추가): **🔄 재설계 회고**\n</callout>\n\n<h2 color=\"pink\">🚨 재설계 신호</h2>\n\n<span color=\"gray\">💤 오래 멈춤(주 1회 이상 습관 14일, 월 1회 습관 46일) · 📉 지금까지 해야 했던 횟수의 40% 미만</span>"
+   },
+   {
+    "view": {
+     "key": "restart.signal",
+     "type": "table",
+     "name": "🚨 재설계 신호",
+     "data_source_id": "42156dd3-dc58-818c-afa5-000b89fb678c",
+     "configure": "FILTER \"필터용\" CONTAINS \"현재\" AND \"재설계 신호\" IS NOT EMPTY; SORT BY \"기록 공백(일)\" DESC; SHOW \"칸\", \"재설계 신호\", \"기록 공백(일)\", \"최소 행동\", \"주간 목표 횟수\", \"빈도\""
+    }
+   },
+   {
+    "md": "<h2 color=\"pink\">🚀 페이스 점검</h2>"
+   },
+   {
+    "view": {
+     "key": "restart.pace",
+     "type": "list",
+     "name": "페이스 점검",
+     "data_source_id": "42156dd3-dc58-813e-b08c-000bcf4b4517",
+     "configure": "FILTER \"필터용\" CONTAINS \"현재\"; SHOW \"페이스\", \"진행 바\", \"D-day\""
+    }
+   },
+   {
+    "md": "### ⏸️ 쉬는 칸 (교체 후보)"
+   },
+   {
+    "view": {
+     "key": "restart.paused",
+     "type": "table",
+     "name": "⏸️ 쉬는 칸 (교체 후보)",
+     "data_source_id": "42156dd3-dc58-818c-afa5-000b89fb678c",
+     "configure": "FILTER \"필터용\" CONTAINS \"현재\" AND \"활성 상태\" = \"쉬는 중\"; GROUP BY \"세부목표 색\"; SHOW \"위치\", \"최소 행동\", \"빈도\", \"활성 상태\""
+    }
+   },
+   {
+    "md": "### 🔁 다시 시작한 칸"
+   },
+   {
+    "view": {
+     "key": "restart.history",
+     "type": "table",
+     "name": "🔁 다시 시작한 칸",
+     "data_source_id": "42156dd3-dc58-818c-afa5-000b89fb678c",
+     "configure": "FILTER \"재시작 횟수\" > 0; SORT BY \"재시작일\" DESC; SHOW \"이전 버전\", \"재시작일\", \"재시작 횟수\", \"칸\", \"진행 바\""
+    }
+   },
+   {
+    "md": "### 📜 재설계 기록"
+   },
+   {
+    "view": {
+     "key": "restart.retros",
+     "type": "list",
+     "name": "재설계 기록",
+     "data_source_id": "42156dd3-dc58-81a4-84c2-000b9a7ad0f6",
+     "configure": "FILTER \"유형\" = \"재설계\"; SORT BY \"기간\" DESC; SHOW \"변경한 실천항목\", \"기간\""
+    }
+   },
+   {
+    "md": "<toggle>\n줄이는 법 예시\n\n<table header-row=\"true\">\n<tr><td>멈춘 문장</td><td>줄인 문장</td><td>최소 행동</td></tr>\n<tr><td>매일 1시간 운동</td><td>주 3회 20분 홈트</td><td>스쿼트 5개</td></tr>\n<tr><td>매일 영어 단어 50개</td><td>매일 단어 15개</td><td>5개</td></tr>\n<tr><td>매주 블로그 2편</td><td>주 1회 짧은 글 1편</td><td>제목 3개 메모</td></tr>\n<tr><td>매일 가계부 꼼꼼히</td><td>매일 지출 금액만</td><td>결제 알림 보기</td></tr>\n</table>\n\n- 2번 연속 재시작한 칸은 **활성 상태 = 쉬는 중**으로 돌리고, 같은 세부목표의 쉬는 칸 중 쉬운 것을 켜세요.\n- 칸 교체는 **월간·분기 점검 때만**. 매일 바꾸면 아무것도 쌓이지 않아요.\n- 만다라트 전체가 ⚠️ 뒤처짐이면 <mention url=\"https://app.notion.com/p/42156dd3dc5881fea9b2ce56071a6f72\" /> 의 '이월·삭제·교체' 표로 판단하세요.\n</toggle>"
+   }
+  ]
+ },
+ {
+  "key": "library",
+  "page_id": "42156dd3-dc58-8128-b066-c0e0a2e33c01",
+  "ops": [
+   {
+    "md": "<span color=\"gray\"><mention url=\"https://app.notion.com/p/42156dd3dc588109b7ecf3522240f900\" /> · <mention url=\"https://app.notion.com/p/42156dd3dc5881379089d0e184bc2de3\" /></span>\n\n<callout icon=\"💡\" color=\"yellow_bg\">\n**0원 추천 엔진.** 12개 분야 · 세부목표 후보 96개 · 실천항목 후보 768개 · 완성 프리셋 12개. 전부 헬스장·유료 강의·구독 없이 할 수 있는 행동이고, 모두 **최소 행동**이 붙어 있어요.\n</callout>\n\n<h2 color=\"yellow\">🎁 핵심목표 프리셋</h2>\n\n<span color=\"gray\">카드를 열면 세부목표 8개와 실천항목 64개가 보여요. 마음에 드는 칸만 ➕ 내 만다라트로 가져오세요.</span>"
+   },
+   {
+    "view": {
+     "key": "library.presets",
+     "type": "gallery",
+     "name": "🎁 핵심목표 프리셋",
+     "data_source_id": "42156dd3-dc58-8145-8592-000b10aa9e37",
+     "configure": "FILTER \"종류\" = \"핵심목표 예시\"; SORT BY \"순서\" ASC; SHOW \"추천 기간\", \"요약\", \"설명\"; CARD SIZE medium; WRAP PROPERTIES true"
+    }
+   },
+   {
+    "md": "<h2 color=\"yellow\">🧩 분야별 세부목표 후보</h2>"
+   },
+   {
+    "view": {
+     "key": "library.goals",
+     "type": "gallery",
+     "name": "분야별 세부목표",
+     "data_source_id": "42156dd3-dc58-8145-8592-000b10aa9e37",
+     "configure": "FILTER \"종류\" = \"세부목표 후보\"; SORT BY \"순서\" ASC; GROUP BY \"분야\"; SHOW \"난이도\", \"요약\", \"설명\"; CARD SIZE small; WRAP PROPERTIES true"
+    }
+   },
+   {
+    "md": "<h2 color=\"yellow\">✅ 0원 실천항목</h2>"
+   },
+   {
+    "view": {
+     "key": "library.actions",
+     "type": "table",
+     "name": "0원 실천항목",
+     "data_source_id": "42156dd3-dc58-8145-8592-000b10aa9e37",
+     "configure": "FILTER \"종류\" = \"실천항목 후보\" AND \"비용\" = \"0원\"; SORT BY \"순서\" ASC; GROUP BY \"분야\"; SHOW \"상위 항목\", \"유형\", \"권장 빈도\", \"최소 행동\", \"난이도\", \"소요 시간\""
+    }
+   },
+   {
+    "view": {
+     "key": "library.easy",
+     "type": "table",
+     "name": "입문 · 15분 이하",
+     "data_source_id": "42156dd3-dc58-8145-8592-000b10aa9e37",
+     "configure": "FILTER \"종류\" = \"실천항목 후보\" AND \"비용\" = \"0원\" AND \"난이도\" = \"입문\" AND \"소요 시간\" IN (\"5분\", \"15분\"); SORT BY \"순서\" ASC; SHOW \"상위 항목\", \"권장 빈도\", \"최소 행동\""
+    }
+   },
+   {
+    "md": "<toggle>\n가져오는 법\n\n1. 마음에 드는 실천항목 행에서 **➕ 내 만다라트로** 누르기 → 실천항목 DB에 문장·최소 행동·유형이 복사돼요.\n2. 보드의 ✏️ 실천항목 입력 표에서 새 행의 **세부목표**와 **위치**만 골라 주세요.\n3. 한꺼번에 많이 가져오려면 <mention url=\"https://app.notion.com/p/42156dd3dc5881379089d0e184bc2de3\" /> 의 CSV 방법이 더 빨라요.\n</toggle>\n\n<toggle>\n전체 보기 (유료 태그 포함)\n\n기본 데이터는 전부 0원이에요. 직접 유료 항목을 추가할 땐 **비용 = 유료**로 표시하면 기본 뷰에서 숨겨져요."
+   },
+   {
+    "view": {
+     "key": "library.all",
+     "type": "table",
+     "name": "전체 (유료 포함)",
+     "data_source_id": "42156dd3-dc58-8145-8592-000b10aa9e37",
+     "configure": "SORT BY \"순서\" ASC; SHOW \"종류\", \"분야\", \"상위 항목\", \"비용\""
+    }
+   },
+   {
+    "md": "</toggle>"
+   }
+  ]
+ },
+ {
+  "key": "guide",
+  "page_id": "42156dd3-dc58-81d0-a718-c8a4affa1252",
+  "ops": [
+   {
+    "md": "<callout icon=\"📖\" color=\"gray_bg\">\n위에서부터 순서대로. 처음 세팅은 **약 1시간 30분**, 그 뒤로는 **매일 1분 + 주 15분**이면 굴러가요.\n</callout>\n\n<table header-row=\"true\">\n<tr><td>단계</td><td>할 일</td><td>시간</td></tr>\n<tr><td><mention url=\"https://app.notion.com/p/42156dd3dc5881eda36be6cfe20cad8b\" /></td><td>작년 목표가 왜 멈췄는지 원인 체크 (선택)</td><td>15분</td></tr>\n<tr><td><mention url=\"https://app.notion.com/p/42156dd3dc5881d28259d6213878573b\" /></td><td>1년 vs 6개월</td><td>5분</td></tr>\n<tr><td><mention url=\"https://app.notion.com/p/42156dd3dc5881b1b8eee1df9c763e99\" /></td><td>한 문장, 끝에 판단 가능하게</td><td>10분</td></tr>\n<tr><td><mention url=\"https://app.notion.com/p/42156dd3dc5881bdbe55d9158928ae96\" /></td><td>분야 균형 + 비기술 영역 1~2칸</td><td>20분</td></tr>\n<tr><td><mention url=\"https://app.notion.com/p/42156dd3dc5881c79b99c1ba22f4a8a1\" /></td><td>동사+숫자+빈도, 최소 행동</td><td>30분~</td></tr>\n<tr><td><mention url=\"https://app.notion.com/p/42156dd3dc58817b94a4f7462083604b\" /></td><td>분기·스프린트 → 이번 달·주</td><td>20분</td></tr>\n<tr><td><mention url=\"https://app.notion.com/p/42156dd3dc588198acf7eb6bffd3bae4\" /></td><td>⭐ 3가지 → ✅</td><td>매일 1분</td></tr>\n<tr><td><mention url=\"https://app.notion.com/p/42156dd3dc58813b9081e093675f8fe8\" /></td><td>5가지 질문</td><td>매주 15분</td></tr>\n<tr><td><mention url=\"https://app.notion.com/p/42156dd3dc5881fea9b2ce56071a6f72\" /></td><td>페이스 · 이월/삭제/교체 · 📸 스냅샷</td><td>매달 20분</td></tr>\n<tr><td><mention url=\"https://app.notion.com/p/42156dd3dc588117a26df87b13244c98\" /></td><td>재설정 · 다음 만다라트</td><td>30~45분</td></tr>\n</table>\n\n<columns>\n<column>\n<callout icon=\"🔄\" color=\"pink_bg\">\n**무너졌을 때** — <mention url=\"https://app.notion.com/p/42156dd3dc58812ea66fe2773a6da9c8\" />\n</callout>\n</column>\n\n<column>\n<callout icon=\"🤖\" color=\"green_bg\">\n**AI로 64칸 채우기** — <mention url=\"https://app.notion.com/p/42156dd3dc5881379089d0e184bc2de3\" />\n</callout>\n</column>\n\n<column>\n<callout icon=\"🙋\" color=\"blue_bg\">\n**노션이 처음이라면** — <mention url=\"https://app.notion.com/p/42156dd3dc5881c7bc21fcc48b2a499f\" />\n</callout>\n</column>\n</columns>"
+   }
+  ]
+ },
+ {
+  "key": "g_lastyear",
+  "page_id": "42156dd3-dc58-81ed-a36b-e6cfe20cad8b",
+  "ops": [
+   {
+    "md": "<callout icon=\"🎯\" color=\"red_bg\">\n**목적** — 작년 목표가 왜 멈췄는지 알면, 올해 같은 자리에서 넘어지지 않아요. · ⏱ 15분 · 선택 단계\n</callout>\n\n## ✅ 할 일\n\n- [ ] <mention url=\"https://app.notion.com/p/42156dd3dc5881168a73de707b72add5\" /> 에서 **➕ 지난 목표 하나 해부하기**\n- [ ] 목표했던 것 / 실제 결과 / 실제 달성률(대략) 적기\n- [ ] **멈춘 시점** 고르기 (1주 안 · 1개월 안 · 3개월 안 · 6개월 안 · 끝까지 했지만 미달)\n- [ ] **실패 원인**을 해당하는 것 모두 체크 → 주원인·처방이 자동으로 떠요\n- [ ] 템플릿 본문의 \"왜? 5번\" 채우기\n- [ ] **교훈 한 줄**과 **재발 방지 규칙**(만약 ~하면 → ~한다) 쓰기\n- [ ] **다음 결정** 고르기 — 다시 도전 / 줄여서 다시 / 방식 바꿔 다시 / 내려놓기\n- [ ] 목표 2~3개 반복. 세부목표를 다 만든 뒤(Step 3) **반영한 세부목표**에 연결\n\n## 👍 좋은 예 · 👎 나쁜 예\n\n<columns>\n<column>\n<callout icon=\"👍\" color=\"green_bg\">\n**원인**: 너무 컸다 · 최소 행동이 없었다 · 한 번 빠지고 무너졌다\n\n**교훈**: 작게 시작하고, 빠진 다음 날이 진짜 승부\n\n**규칙**: 만약 하루 빠지면 → 다음 날은 스쿼트 5개만 한다\n</callout>\n</column>\n\n<column>\n<callout icon=\"👎\" color=\"gray_bg\">\n**원인**: 의지가 약했다\n\n**교훈**: 올해는 진짜 열심히\n\n**규칙**: (없음)\n\n→ 의지는 원인이 아니라 결과예요. 설계·실행·환경 중 무엇이었는지 골라 보세요.\n</callout>\n</column>\n</columns>\n\n## 📍 어디에 입력하나요\n\n<mention url=\"https://app.notion.com/p/42156dd3dc5881168a73de707b72add5\" /> → 해부 목록. 작년 목표를 숫자로도 비교하고 싶다면 <mention url=\"https://app.notion.com/p/42156dd3dc5881ae8a92f4b7c52840de\" /> 의 **➕ 지난 목표 옮겨 오기**."
+   }
+  ]
+ },
+ {
+  "key": "g0",
+  "page_id": "42156dd3-dc58-81d2-8259-d6213878573b",
+  "ops": [
+   {
+    "md": "<callout icon=\"🎯\" color=\"gray_bg\">\n**목적** — 내 상황에 맞는 기간을 골라 끝까지 갈 수 있는 길이로 시작하기. · ⏱ 5분\n</callout>\n\n## ✅ 할 일\n\n- [ ] 아래 표로 1년 / 6개월 중 하나 고르기\n- [ ] <mention url=\"https://app.notion.com/p/42156dd3dc5881ae8a92f4b7c52840de\" /> 의 **🌱 새 만다라트 시작** 누르기 (또는 샘플 만다라트를 고쳐 쓰기)\n- [ ] **기간 모드**와 **시작일** 입력 → 종료일·D-day·시간 경과율이 자동 계산돼요\n- [ ] **상태 = 진행 중**으로 바꾸기 (진행 중인 만다라트만 홈·보드에 보여요)\n\n<table header-row=\"true\">\n<tr><td></td><td>⚡ 6개월 (12주 × 2)</td><td>🗓️ 1년</td></tr>\n<tr><td>이런 분께</td><td>처음 해 봄 · 작년에 중간에 포기 · 빨리 결과를 보고 싶음</td><td>자격증·저축·외국어처럼 길게 쌓이는 목표</td></tr>\n<tr><td>계획 단위</td><td>12주 스프린트 → 주</td><td>반기 → 분기 → 월 → 주</td></tr>\n<tr><td>점검</td><td>6주 차 중간 점검 · 12주 차 스프린트 회고</td><td>분기 점검 · 6개월 중간 점검</td></tr>\n<tr><td>장점</td><td>마감이 가까워서 덜 미뤄요</td><td>여유 있게 큰 변화를 만들어요</td></tr>\n</table>\n\n<callout icon=\"💡\" color=\"yellow_bg\">\n고민되면 **6개월**. 끝나고 다음 6개월 만다라트를 새로 만들면 1년이 돼요. 이전 만다라트에 연결하면 성적도 비교돼요.\n</callout>\n\n## 📍 어디에 입력하나요\n\n🗄️ 만다라트 DB의 새 행 (홈 상단 카드에 바로 보여요)"
+   }
+  ]
+ },
+ {
+  "key": "g1",
+  "page_id": "42156dd3-dc58-81b1-b8ee-e1df9c763e99",
+  "ops": [
+   {
+    "md": "<callout icon=\"🎯\" color=\"gray_bg\">\n**목적** — 기간이 끝났을 때 \"됐다 / 안 됐다\"를 판단할 수 있는 한 문장 만들기. · ⏱ 10분\n</callout>\n\n## ✅ 할 일\n\n- [ ] 한 문장으로 쓰기 — **기간 + 되고 싶은 모습 + (가능하면) 숫자**\n- [ ] 끝났을 때 판단 가능한지 스스로 묻기: \"6개월 뒤 이걸 보고 O/X를 매길 수 있나?\"\n- [ ] 막막하면 <mention url=\"https://app.notion.com/p/42156dd3dc588128b066c0e0a2e33c01\" /> 의 🎁 프리셋에서 고르고 내 말로 고치기\n- [ ] 보드 가운데 카드(위치 5)의 이름과 **짧은 이름**(6자 이내)도 같은 내용으로\n\n## 👍 좋은 예 · 👎 나쁜 예\n\n<columns>\n<column>\n<callout icon=\"👍\" color=\"green_bg\">\n- 2027년, 5km를 쉬지 않고 뛰는 몸\n\n- 6개월 안에 정보처리기사 합격\n- 1년 동안 1,000만 원 모으기\n- 6개월 갓생: 12시 전 취침 80%\n</callout>\n</column>\n\n<column>\n<callout icon=\"👎\" color=\"gray_bg\">\n- 건강해지기 → 언제 됐다고 할 수 있나요?\n\n- 열심히 살기 → 판단 불가\n- 모든 면에서 성장 → 너무 넓어요\n- 살 빼고 영어하고 이직하기 → 셋 중 하나만\n</callout>\n</column>\n</columns>\n\n## 📍 어디에 입력하나요\n\n만다라트 DB의 **핵심목표**(제목) · 보드 가운데 카드"
+   }
+  ]
+ },
+ {
+  "key": "g2",
+  "page_id": "42156dd3-dc58-81bd-be55-d9158928ae96",
+  "ops": [
+   {
+    "md": "<callout icon=\"🎯\" color=\"gray_bg\">\n**목적** — 핵심목표를 이루려면 무엇이 필요한지 8칸으로 나누기. · ⏱ 20분\n</callout>\n\n## ✅ 할 일\n\n- [ ] 만다라트 행의 **🧱 9칸 만들기** 누르기 → 세부목표 9행(가운데 포함)이 생겨요\n- [ ] 8칸 이름 쓰기 — 명사형, 짧게 (\"체력 기초\", \"가계부\")\n- [ ] **분야 균형** 체크: 몸 · 마음 · 실력 · 관계 · 돈 · 생활 중 한쪽에 5칸 이상 몰리지 않게\n- [ ] **비기술 영역 1~2칸** 넣기 — 운을 부르는 행동, 인성·태도, 멘탈 회복력, 수면처럼 실력 밖의 것\n- [ ] 각 칸에 **색상 라벨** · **짧은 이름** · **분야** 지정\n- [ ] 8칸을 못 채우면 <mention url=\"https://app.notion.com/p/42156dd3dc588128b066c0e0a2e33c01\" /> 의 분야별 세부목표 후보에서 고르기\n- [ ] 작년 해부를 했다면 관련 칸을 지난 목표 분석의 **반영한 세부목표**에 연결\n\n<callout icon=\"⚾\" color=\"purple_bg\">\n**구성 원리 (오타니 방식에서 배울 점)**: 목표가 '실력'이어도 8칸 중 일부는 몸·멘탈·운·인성처럼 실력을 받쳐 주는 영역으로 채워요. 원문을 베끼지 말고 이 원리만 가져오세요. 🎁 프리셋 \"나의 꿈\"이 예시예요.\n</callout>\n\n## 👍 좋은 예 · 👎 나쁜 예\n\n<columns>\n<column>\n<callout icon=\"👍\" color=\"green_bg\">\n핵심: 6개월 안에 이직 성공\n\n→ 방향 정하기 · 이력서 · 포트폴리오 · 지원 루틴 · 면접 · 네트워킹 · 성과 기록 · **멘탈 회복력**\n</callout>\n</column>\n\n<column>\n<callout icon=\"👎\" color=\"gray_bg\">\n→ 이력서 · 이력서 수정 · 자소서 · 자소서 수정 · 지원 · 지원 · 면접 · 합격\n\n(같은 칸 반복, 버틸 힘을 주는 칸 없음)\n</callout>\n</column>\n</columns>\n\n## 📍 어디에 입력하나요\n\n<mention url=\"https://app.notion.com/p/42156dd3dc588109b7ecf3522240f900\" /> → ✏️ 세부목표 입력 표 (위치 1~9, 5 = 가운데)"
+   }
+  ]
+ },
+ {
+  "key": "g3",
+  "page_id": "42156dd3-dc58-81c7-9b99-c1ba22f4a8a1",
+  "ops": [
+   {
+    "md": "<callout icon=\"🎯\" color=\"gray_bg\">\n**목적** — 세부목표마다 \"내일 바로 할 수 있는 행동\" 8개 만들기. · ⏱ 30분~\n</callout>\n\n## ✅ 할 일\n\n- [ ] 세부목표 행마다 **🧩 8칸 만들기** → 실천항목 8행(위치 1~8)이 생겨요\n- [ ] 문장은 **동사 + 숫자 + 빈도** — \"주 3회 30분 걷기\"\n- [ ] **유형** 고르기: 🔁 습관(반복) · 🎯 미션(기한 있는 1회) · 🧘 마음가짐(태도)\n- [ ] 습관은 **빈도**와 **주간 목표 횟수**(주 n회) 또는 **월간 목표 횟수**(월 n회) 입력\n- [ ] 미션은 **기한** 입력, 필요하면 할 일을 연결\n- [ ] **최소 행동** 꼭 쓰기 — 안 되는 날 할 1분짜리 버전\n- [ ] **짧은 이름**(6자 이내) — 보드 격자에 보일 이름\n- [ ] ⭐ **처음엔 세부목표당 핵심 2~3개만 활성**. 나머지는 활성 상태 = 쉬는 중\n\n<columns>\n<column>\n<callout icon=\"👍\" color=\"green_bg\">\n- 주 3회 30분 빠르게 걷기 · 최소: 10분만 걷기\n\n- 매일 물 1.5L 마시기 · 최소: 물 3컵\n- 1회: 이력서 초안 완성 (기한 3/15) · 최소: 기본 정보만\n- 매일 \"빠진 날보다 다시 한 날을 센다\" 떠올리기\n</callout>\n</column>\n\n<column>\n<callout icon=\"👎\" color=\"gray_bg\">\n- 운동하기 → 언제, 얼마나?\n\n- 물 많이 마시기 → 숫자 없음\n- 이력서 → 행동이 아님\n- 매일 2시간 공부 (최소 행동 없음) → 바쁜 날 0이 됨\n</callout>\n</column>\n</columns>\n\n<callout icon=\"🤖\" color=\"yellow_bg\">\n64칸을 손으로 다 쓰기 힘들면 → <mention url=\"https://app.notion.com/p/42156dd3dc588128b066c0e0a2e33c01\" /> 에서 ➕ 가져오기, 또는 <mention url=\"https://app.notion.com/p/42156dd3dc5881379089d0e184bc2de3\" /> 로 CSV 한 번에 넣기.\n</callout>\n\n## 📍 어디에 입력하나요\n\n<mention url=\"https://app.notion.com/p/42156dd3dc588109b7ecf3522240f900\" /> → ✏️ 실천항목 입력 표 (세부목표별로 묶여 있어요)"
+   }
+  ]
+ },
+ {
+  "key": "g4",
+  "page_id": "42156dd3-dc58-817b-94a4-f7462083604b",
+  "ops": [
+   {
+    "md": "<callout icon=\"🎯\" color=\"gray_bg\">\n**목적** — 1년/6개월 목표를 \"이번 달·이번 주에 어디까지\"로 쪼개기. 오늘 할 행동은 수식이 자동으로 골라 줘요. · ⏱ 20분\n</callout>\n\n## ✅ 할 일\n\n**🗓️ 1년 모드**\n\n- [ ] <mention url=\"https://app.notion.com/p/42156dd3dc588127bc88f0ceb0e645ba\" /> 에서 ➕ 이번 분기 목표 × 4 (분기마다 숫자로 확인 가능한 마일스톤)\n- [ ] ➕ 이번 달 목표 1개 → **상위 기간 목표** = 이번 분기\n- [ ] 반기(6개월) 목표는 선택\n\n**⚡ 6개월 모드**\n\n- [ ] ➕ 12주 스프린트 1개 (스프린트 1 목표)\n- [ ] 이번 주 목표 1개 → 상위 = 스프린트 1\n- [ ] 스프린트 2와 그 사이 **정비 주간(2주)** 은 스프린트 1 회고 때 만들기\n\n**공통**\n\n- [ ] 기간 목표의 **세부목표**에 관련 칸 연결\n- [ ] 수치형이면 **목표치 · 현재치 · 수치 단위** → 자동 분해가 남은 기간에 맞춰 주·하루 필요량을 계산\n- [ ] 세부목표 자체가 수치형(예: 책 1,800쪽)이면 세부목표의 **목표치·단위**를 쓰고, 해당 실천항목에 **수치 집계** 체크 → 실행 기록의 **수행량** 합계가 현재치가 돼요\n\n<callout icon=\"⚙️\" color=\"blue_bg\">\n**자동 분해 흐름** — 실천항목 \"주 3회 30분 걷기\" → 📆 기간 78회 → 월 13회 → 주 3회 → 오늘 🔥/🙂. 이번 주 남은 날보다 남은 횟수가 많거나 같으면 🔥 오늘 꼭으로 바뀌고 홈의 🔥 오늘의 행동 맨 위로 올라와요.\n</callout>\n\n## 👍 좋은 예 · 👎 나쁜 예\n\n<columns>\n<column>\n<callout icon=\"👍\" color=\"green_bg\">\n1분기: 5km 쉬지 않고 달리기\n\n3월: 3km 완주 + 주 3회 12번\n\nW12: 걷뛰 30분 3회\n</callout>\n</column>\n\n<column>\n<callout icon=\"👎\" color=\"gray_bg\">\n1분기: 운동 열심히\n\n3월: 꾸준히\n\nW12: 화이팅\n</callout>\n</column>\n</columns>\n\n## 📍 어디에 입력하나요\n\n<mention url=\"https://app.notion.com/p/42156dd3dc588127bc88f0ceb0e645ba\" /> (버튼 → 열리는 페이지에서 상위 기간 목표만 고르기)"
+   }
+  ]
+ },
+ {
+  "key": "g5",
+  "page_id": "42156dd3-dc58-8198-acf7-eb6bffd3bae4",
+  "ops": [
+   {
+    "md": "<callout icon=\"🎯\" color=\"gray_bg\">\n**목적** — 매일 1분으로 만다라트를 굴리기. · ⏱ 매일 1분\n</callout>\n\n## ✅ 할 일 (아침)\n\n- [ ] <mention url=\"https://app.notion.com/p/42156dd3dc5881a4a465e91c84822478\" /> 열기 (폰이면 <mention url=\"https://app.notion.com/p/42156dd3dc58817e86d3ed493a6f64a1\" />)\n- [ ] 오늘 할 일 중 3개에 ⭐ **오늘의 3가지** 체크 — 없으면 ➕ 할 일\n- [ ] 🔥 오늘의 행동에서 🔥 표시 확인\n\n## ✅ 할 일 (한 다음 / 자기 전)\n\n- [ ] 한 실천항목에 **✅ 오늘 했음**\n- [ ] 다 못 했으면 최소 행동만 하고 **🌱 최소만 했음**\n- [ ] 끝낸 할 일 체크\n\n<callout icon=\"🌱\" color=\"green_bg\">\n**최소 행동도 1회**예요. 스쿼트 5개도, 1쪽 읽기도 기록하면 히트맵에 칠해지고 연속 기록이 안 끊겨요. 0과 1의 차이가 1과 10의 차이보다 커요.\n</callout>\n\n## 👍 좋은 예 · 👎 나쁜 예\n\n<columns>\n<column>\n<callout icon=\"👍\" color=\"green_bg\">\n피곤한 날: 물 3컵 + 1쪽 + 감정 1단어 → 🌱 3번 누르고 끝\n</callout>\n</column>\n\n<column>\n<callout icon=\"👎\" color=\"gray_bg\">\n피곤한 날: \"내일 몰아서 하자\" → 기록 0 → 3일 뒤 💤\n</callout>\n</column>\n</columns>\n\n## 📍 어디에 입력하나요\n\n<mention url=\"https://app.notion.com/p/42156dd3dc5881a4a465e91c84822478\" /> · <mention url=\"https://app.notion.com/p/42156dd3dc58817e86d3ed493a6f64a1\" /> · <mention url=\"https://app.notion.com/p/42156dd3dc58819991bad88fbcd7d10f\" />"
+   }
+  ]
+ },
+ {
+  "key": "g6",
+  "page_id": "42156dd3-dc58-813b-9081-e093675f8fe8",
+  "ops": [
+   {
+    "md": "<callout icon=\"🎯\" color=\"gray_bg\">\n**목적** — 한 주를 15분 만에 돌아보고 다음 주를 가볍게 고치기. · ⏱ 매주 15분 (일요일 추천)\n</callout>\n\n## ✅ 할 일\n\n- [ ] <mention url=\"https://app.notion.com/p/42156dd3dc5881a4a465e91c84822478\" /> 의 **📝 주간 회고 시작** → 질문이 들어 있는 회고 페이지가 열려요\n- [ ] **기간**을 이번 주 월~일로, **이번 기간 실행률**에 대시보드 숫자(세부목표 '이번 주' 합계 비율) 적기\n- [ ] 5가지 질문 답하기\n1. 잘한 것 — 작은 것도\n2. 막힌 것\n3. 💤 방치 칸의 원인 — 시간? 크기? 잊음?\n4. 다음 주 3가지\n5. 실천항목 수정할 것 — 적기만, 실제 교체는 월간 점검 때\n- [ ] 🚨 재설계 신호가 있으면 <mention url=\"https://app.notion.com/p/42156dd3dc5881eeb496d997f6d0dfd1\" /> 에서 3분 재시작\n- [ ] 다음 주 목표 1개 ➕ 이번 주 목표\n\n<columns>\n<column>\n<callout icon=\"👍\" color=\"green_bg\">\n💤 원인: 가계부 합계를 일요일 밤으로 잡아서 피곤해 건너뜀 → 토요일 아침 9시로\n</callout>\n</column>\n\n<column>\n<callout icon=\"👎\" color=\"gray_bg\">\n💤 원인: 게을러서 → 다음 주엔 열심히 (바뀌는 게 없음)\n</callout>\n</column>\n</columns>\n\n## 📍 어디에 입력하나요\n\n<mention url=\"https://app.notion.com/p/42156dd3dc5881a08998eb23db77a3f3\" /> (회고 DB · 주간 템플릿)"
+   }
+  ]
+ },
+ {
+  "key": "g7",
+  "page_id": "42156dd3-dc58-81fe-a9b2-ce56071a6f72",
+  "ops": [
+   {
+    "md": "<callout icon=\"🎯\" color=\"gray_bg\">\n**목적** — 페이스를 확인하고 칸을 이월·삭제·교체하기. 그리고 내년 비교를 위한 스냅샷 남기기. · ⏱ 매달 20분 · 분기(스프린트) 30분\n</callout>\n\n## ✅ 할 일\n\n- [ ] <mention url=\"https://app.notion.com/p/42156dd3dc5881a08998eb23db77a3f3\" /> 의 **📅 월간 회고** (분기 말·12주 차는 🏁 분기·스프린트 회고)\n- [ ] 홈 카드의 **페이스** 확인 — 🚀 / 👍 / ⚠️\n- [ ] 📸 **누적 달성률** 칸에 '현재 달성률(참고)' 숫자 입력 → 스냅샷 확인이 📸 저장됨으로 바뀌면 끝\n- [ ] 아래 표로 칸마다 결정\n- [ ] 교체·삭제한 칸은 회고의 **변경한 실천항목**에 연결 (교체 이력)\n- [ ] 다음 달 목표 ➕ 이번 달 목표\n\n<table header-row=\"true\">\n<tr><td>상태</td><td>결정</td><td>하는 법</td></tr>\n<tr><td>🟩 잘 굴러감</td><td>유지 또는 한 단계 올리기</td><td>주간 목표 횟수 +1 또는 졸업(활성 상태 = 졸업)</td></tr>\n<tr><td>🟨 들쭉날쭉</td><td>유지 + 시간 고정</td><td>최소 행동을 더 작게, 할 시간을 문장에 넣기</td></tr>\n<tr><td>💤 · 📉</td><td>줄여서 다시</td><td><mention url=\"https://app.notion.com/p/42156dd3dc5881eeb496d997f6d0dfd1\" /> 의 🔄 다시 시작</td></tr>\n<tr><td>💤 두 번째</td><td>교체</td><td>활성 상태 = 교체됨, 같은 세부목표의 쉬는 칸 켜기</td></tr>\n<tr><td>🎯 미션 기한 지남</td><td>이월 또는 삭제</td><td>기한 다시 잡기 / 의미 없으면 교체됨</td></tr>\n</table>\n\n<callout icon=\"⚠️\" color=\"orange_bg\">\n**칸 교체는 점검 때만.** 매일 바꾸면 쌓이는 게 없어요. 주간 회고에서는 적어 두기만 하세요.\n</callout>\n\n## 📍 어디에 입력하나요\n\n<mention url=\"https://app.notion.com/p/42156dd3dc5881a08998eb23db77a3f3\" /> · <mention url=\"https://app.notion.com/p/42156dd3dc5881eeb496d997f6d0dfd1\" /> · <mention url=\"https://app.notion.com/p/42156dd3dc588109b7ecf3522240f900\" />"
+   }
+  ]
+ },
+ {
+  "key": "g8",
+  "page_id": "42156dd3-dc58-8117-a26d-f87b13244c98",
+  "ops": [
+   {
+    "md": "<callout icon=\"🎯\" color=\"gray_bg\">\n**목적** — 절반 지점에서 목표를 다시 맞추고, 끝나면 성적표와 함께 다음 만다라트로 넘어가기. · ⏱ 중간 30분 · 최종 45분\n</callout>\n\n## ⏸️ 중간 점검 (1년 모드 6개월 / 6개월 모드는 스프린트마다 6주 차)\n\n- [ ] <mention url=\"https://app.notion.com/p/42156dd3dc5881a08998eb23db77a3f3\" /> 의 **⏸️ 중간 점검**\n- [ ] 페이스 ⚠️면: 핵심목표를 줄일지, 기간 목표를 줄일지 결정\n- [ ] 페이스 🚀면: 남은 기간 목표를 한 단계 올리기\n- [ ] 세부목표 중 💤가 2칸 이상인 곳 → 교체 또는 세부목표 자체 교체\n- [ ] 6개월 모드: 스프린트 2 계획 + 정비 주간 2주 만들기\n\n## 🏆 최종 회고\n\n- [ ] **🏆 최종 회고** → 성적표(전체 달성률 · 습관 유지율 · 방치 칸 · 재시작 · 회고 수) 옮겨 적기\n- [ ] 🏅 받은 세부목표 축하하기\n- [ ] 멈춘 칸은 <mention url=\"https://app.notion.com/p/42156dd3dc5881168a73de707b72add5\" /> 에 해부 1줄씩 (다음 만다라트의 Step 0)\n- [ ] 만다라트 **상태 = 완료**\n- [ ] <mention url=\"https://app.notion.com/p/42156dd3dc5881ae8a92f4b7c52840de\" /> 의 **🌱 새 만다라트 시작** → **이전 만다라트**에 방금 끝낸 것 연결\n- [ ] 잘 굴러간 실천항목은 새 만다라트로 그대로 가져가기 (복제 후 세부목표만 바꾸기)\n\n<callout icon=\"📊\" color=\"blue_bg\">\n이전 만다라트를 연결해 두면 새 만다라트에서 **작년 이맘때 비교**가 자동으로 보여요. 월간 회고 스냅샷을 꾸준히 남겼을수록 정확해요.\n</callout>\n\n## 📍 어디에 입력하나요\n\n<mention url=\"https://app.notion.com/p/42156dd3dc5881a08998eb23db77a3f3\" /> · <mention url=\"https://app.notion.com/p/42156dd3dc5881ae8a92f4b7c52840de\" /> · 만다라트 DB"
+   }
+  ]
+ },
+ {
+  "key": "g_restart",
+  "page_id": "42156dd3-dc58-812e-a66f-e2773a6da9c8",
+  "ops": [
+   {
+    "md": "<callout icon=\"🎯\" color=\"pink_bg\">\n**목적** — 계획이 깨진 날, 자책 대신 3분 안에 다시 굴리기. · ⏱ 3~10분\n</callout>\n\n## 🧯 무너짐의 3단계와 처방\n\n<table header-row=\"true\">\n<tr><td>상황</td><td>신호</td><td>처방</td></tr>\n<tr><td>하루 빠짐</td><td>⬜</td><td>아무것도 고치지 않기. 내일 **최소 행동**만</td></tr>\n<tr><td>1~2주 멈춤</td><td>💤 · 📉 재설계 신호</td><td><mention url=\"https://app.notion.com/p/42156dd3dc5881eeb496d997f6d0dfd1\" /> 3분 재시작 — 줄이고 🔄 다시 시작</td></tr>\n<tr><td>전체가 멈춤</td><td>페이스 ⚠️ 20%p 이상</td><td>🔄 재설계 회고 10분 — 활성 칸을 세부목표당 1~2개로 줄이고 기간 목표 재설정</td></tr>\n</table>\n\n## ✅ 3분 재시작\n\n- [ ] <mention url=\"https://app.notion.com/p/42156dd3dc5881eeb496d997f6d0dfd1\" /> 의 🚨 목록에서 칸 하나 고르기\n- [ ] 지금 문장을 **이전 버전**에 복사\n- [ ] 문장 줄이기 — 빈도 ↓ · 시간 ↓ · 시간대 넣기 (\"월·수·금 저녁 9시\")\n- [ ] 최소 행동을 1분짜리로\n- [ ] **🔄 다시 시작** → 재시작일 = 오늘. 이 칸의 달성률·누적 횟수가 오늘부터 새로 계산돼요\n- [ ] (재시작 횟수가 자동으로 안 오르면 직접 +1)\n\n## 🔄 재설계 회고 (전체가 멈췄을 때, 10분)\n\n- [ ] <mention url=\"https://app.notion.com/p/42156dd3dc5881a08998eb23db77a3f3\" /> 의 **🔄 재설계 회고**\n- [ ] 무엇이 · 왜 멈췄나 (설계 / 실행 / 환경)\n- [ ] 활성 칸을 세부목표당 1~2개로 — 나머지는 쉬는 중\n- [ ] 바꾼 칸을 **변경한 실천항목**에 연결\n- [ ] 이번 주 목표를 아주 작게 다시 ➕\n\n<columns>\n<column>\n<callout icon=\"👍\" color=\"green_bg\">\n\"3주 차에 무너졌다 → 홈트를 매일 30분에서 주 3회 15분으로, 최소 행동은 한 동작 1세트. 월요일부터 다시.\"\n</callout>\n</column>\n\n<column>\n<callout icon=\"👎\" color=\"gray_bg\">\n\"이번 달은 망했으니 다음 달 1일부터 새로 시작\" → 새 시작일을 기다리다 한 달이 더 사라져요. **다시 시작은 오늘.**\n</callout>\n</column>\n</columns>\n\n<callout icon=\"💬\" color=\"gray_bg\">\n\"빠진 날보다 다시 한 날을 센다.\" 재시작 횟수는 실패 횟수가 아니라 **복귀 횟수**예요. 비교 대시보드에도 그렇게 보여요.\n</callout>"
+   }
+  ]
+ },
+ {
+  "key": "g_ai",
+  "page_id": "42156dd3-dc58-8137-9089-d0e184bc2de3",
+  "ops": [
+   {
+    "md": "<callout icon=\"🎯\" color=\"green_bg\">\n**목적** — 유료 Notion AI 없이, 무료 AI(ChatGPT · Claude · Gemini 무료 버전)로 세부목표 8개 × 실천항목 64개를 받아 노션에 한 번에 넣기. · ⏱ 15분\n</callout>\n\n## 1. 프롬프트 복사 → 대괄호 채우기 → 무료 AI에 붙여 넣기\n\n```plain text\n\n너는 목표 설계 코치야. 아래 정보로 만다라트(핵심목표 1, 세부목표 8, 실천항목 64)를 만들어 줘.\n\n[내 정보]\n\n- 핵심목표: [예: 6개월 안에 정보처리기사 합격]\n- 기간: [6개월 / 1년]\n- 나이대·상황: [예: 20대 후반 직장인, 야근 주 2회]\n- 하루에 쓸 수 있는 시간: [예: 평일 1시간, 주말 3시간]\n- 예산: 0원 (헬스장·유료 강의·유료 앱·구독 없이 가능한 행동만)\n- 작년에 실패한 이유(있다면): [예: 계획이 너무 컸고 하루 빠지면 포기함]\n- 꼭 넣고 싶은 것 / 빼고 싶은 것: [자유]\n\n[규칙]\n\n1. 세부목표 8개: 실력 칸 외에 몸·마음·생활·관계 같은 받쳐 주는 영역을 2칸 이상 포함.\n2. 실천항목: \"빈도 + 숫자 + 동사\" 문장 (예: 주 3회 30분 걷기, 매일 기출 20문제 풀기, 1회: 시험 일정 확인하기).\n3. 각 세부목표의 실천항목 8개 = 습관 5~6개 + 미션 1~2개 + 마음가짐 1개.\n4. 모든 실천항목에 \"최소 행동\"(안 되는 날 1분 버전)을 붙여.\n5. 작년 실패 이유가 반복되지 않게 크기를 작게.\n6. 짧은 이름은 공백 포함 6자 이내.\n\n[출력 형식] 설명 없이 CSV 코드블록 2개만. 첫 줄은 열 이름 그대로.\n\nCSV 1 — 세부목표.csv\n\n세부목표,위치,짧은 이름,분야,색상 라벨,구분\n\n(위치는 1,2,3,4,6,7,8,9 — 5는 쓰지 말 것. 분야는 건강·운동/식습관/수면·생활/공부·자격증/외국어/일·커리어/이직·취업/돈·저축/관계·가족/마음·멘탈/독서/취미·창작/기타 중 하나. 색상 라벨은 레드/오렌지/옐로/그린/블루/퍼플/핑크/브라운을 순서대로 하나씩. 구분은 모두 \"세부목표\")\n\nCSV 2 — 실천항목.csv\n\n실천항목,세부목표,위치,짧은 이름,유형,빈도,주간 목표 횟수,월간 목표 횟수,최소 행동,비용,활성 상태\n\n(세부목표는 CSV 1의 이름과 글자 하나까지 똑같이. 위치 1~8. 유형은 습관/미션/마음가짐. 빈도는 매일/주 n회/월 n회/1회. 주 n회면 주간 목표 횟수에 n, 월 n회면 월간 목표 횟수에 n. 비용은 모두 0원. 활성 상태는 세부목표마다 위치 1~3과 마음가짐만 \"활성\", 나머지 \"쉬는 중\")\n\n```\n\n## 2. CSV 파일로 저장\n\n- [ ] AI 답의 코드블록을 각각 복사 → 메모장에 붙여 넣고 `세부목표.csv` · `실천항목.csv` 로 저장 (인코딩 **UTF-8**)\n- [ ] 엑셀로 열어 확인만 하고, 저장은 메모장으로 (엑셀 저장 시 한글이 깨질 수 있어요)\n\n## 3. 노션에 병합 (데스크톱 앱 또는 웹)\n\n- [ ] 먼저 만다라트 행을 만들고 상태 = 진행 중 (<mention url=\"https://app.notion.com/p/42156dd3dc5881d28259d6213878573b\" />)\n- [ ] <mention url=\"https://app.notion.com/p/42156dd3dc58819a85eee21c9e1b4bf6\" /> → **세부목표** DB 열기 → 오른쪽 위 **•••** → **CSV로 병합(Merge with CSV)** → `세부목표.csv`\n- [ ] 같은 방법으로 **실천항목** DB에 `실천항목.csv` 병합\n- [ ] 세부목표 DB에서 방금 들어온 8행 + 가운데 행(위치 5, 구분 = 중심, 이름 = 핵심목표)을 만들고, 9행 모두 **만다라트** 칸에 내 만다라트 연결\n- 9행을 Shift로 한꺼번에 선택 → 만다라트 칸 클릭 → 한 번에 연결돼요\n\n## 4. 세부목표 연결이 비어 있으면\n\nCSV의 \"세부목표\" 열이 관계형으로 자동 연결되지 않을 때가 있어요.\n\n- [ ] 실천항목 입력 표에서 **세부목표 칸이 빈 행**만 보이게 필터\n- [ ] 같은 세부목표 8행을 Shift로 선택 → 세부목표 칸에서 해당 세부목표 고르기 → 8개 동시에 연결\n- [ ] 8번 반복하면 끝 → <mention url=\"https://app.notion.com/p/42156dd3dc588109b7ecf3522240f900\" /> 에 9×9가 그려져요\n\n<callout icon=\"🔒\" color=\"gray_bg\">\n개인정보(실명·회사명·연락처)는 프롬프트에 넣지 마세요. 나이대·상황 정도면 충분해요.\n</callout>"
+   }
+  ]
+ },
+ {
+  "key": "g_faq",
+  "page_id": "42156dd3-dc58-81c7-bc21-fcc48b2a499f",
+  "ops": [
+   {
+    "md": "<toggle>\n📥 템플릿을 내 워크스페이스로 복제하려면?\n\n템플릿 링크를 열고 오른쪽 위 **복제(Duplicate)** → 내 워크스페이스 선택. 복제 후 사이드바에 🎯 굴러가는 만다라트가 생겨요. 샘플 데이터는 이 페이지 맨 아래 '샘플 지우기'를 보세요.\n</toggle>\n\n<toggle>\n🆓 무료 플랜으로 충분한가요?\n\n네. 이 템플릿은 무료 플랜에서 되는 것만 써요: 관계형 · 수식 · 버튼 · DB 템플릿 · 링크된 뷰. **DB 자동화**(조건 트리거)와 **Notion AI**는 쓰지 않아요. 차트 뷰는 무료 플랜에서 1개만 보이기 때문에 진행률은 전부 수식 바(■□)와 이모지로 표시했고, 차트는 비교 대시보드에 선택 사항으로만 있어요.\n</toggle>\n\n<toggle>\n🔗 관계형이 뭐예요?\n\n두 표를 잇는 칸이에요. 실천항목의 '세부목표' 칸에 세부목표를 고르면, 그 세부목표 카드의 달성률·격자에 자동으로 들어가요. 반대편에도 자동으로 연결이 보여요(양방향).\n</toggle>\n\n<toggle>\n🔘 버튼이 뭐예요?\n\n누르면 정해진 일을 대신 해 주는 블록·칸이에요. ✅ 오늘 했음 = \"실행 기록에 오늘 날짜로 한 줄 추가\", ➕ 이번 주 목표 = \"단위·시작일이 채워진 기간 목표 만들기\". 무료 플랜에서 쓸 수 있는 유일한 자동화예요.\n</toggle>\n\n<toggle>\n📱 폰에서는 어떻게 써요?\n\n노션 앱에서 <mention url=\"https://app.notion.com/p/42156dd3dc58817e86d3ed493a6f64a1\" /> 을 열고 ••• → **즐겨찾기 추가**. 9×9 보드는 폰에서 작게 보이니 모바일 보드에서 한 칸씩 보고, '오늘 체크' 목록에서 ✅를 누르세요. 버튼 칸은 표를 옆으로 밀면 보여요.\n</toggle>\n\n<toggle>\n📅 날짜·D-day가 이상해요\n\n- 노션 **설정 → 언어와 지역 → 시간대**가 한국(서울)인지 확인하세요.\n- 만다라트 **시작일**이 비어 있으면 종료일·D-day·페이스가 안 나와요.\n- 실행 기록 날짜에 시간이 들어가 있어도 날짜 기준으로 계산되니 괜찮아요.\n- 수식 값은 페이지를 다시 열면 오늘 기준으로 새로 계산돼요.\n</toggle>\n\n<toggle>\n🧩 보드에 칸이 ⬚ ─ 로 보여요\n\n그 위치에 실천항목이 없거나 **위치** 숫자가 비어 있어요. 실천항목 입력 표에서 위치(1~8)를 채우세요. 세부목표 카드 자체가 안 보이면 세부목표의 위치(1~9)와 만다라트 연결, 그리고 만다라트 **상태 = 진행 중**을 확인하세요.\n</toggle>\n\n<toggle>\n🗂️ 만다라트를 여러 개 쓰고 싶어요\n\n만다라트 DB에 행을 더 만들면 돼요. 홈·보드에는 **상태 = 진행 중**인 것만 보여요. 동시에 2개를 진행하면 보드에 같은 위치 카드가 겹치니, 하나는 '준비'로 두는 걸 추천해요.\n</toggle>\n\n<toggle>\n✏️ 속성 이름을 바꿔도 되나요?\n\n바꾸면 수식이 깨질 수 있어요. 새 속성을 **추가**하는 건 괜찮아요. 깨졌다면 속성 이름을 원래대로 돌리면 고쳐져요.\n</toggle>\n\n<toggle>\n🧹 샘플 데이터 지우기\n\n1. 만다라트 DB에서 \"6개월 갓생 만들기\"와 \"2026 상반기 다시 시작 프로젝트\" 삭제\n2. 세부목표 · 실천항목 · 실행 기록 · 할 일 · 기간 목표 · 회고 · 지난 목표 분석 DB에서 전체 선택(Ctrl/⌘+A) → 삭제\n3. 추천 라이브러리는 지우지 마세요\n\n샘플을 지우기 전에 한 번 둘러보면 어떻게 굴러가는지 감이 와요.\n</toggle>"
+   }
+  ]
+ },
+ {
+  "key": "db",
+  "page_id": "42156dd3-dc58-819a-85ee-e21c9e1b4bf6",
+  "ops": [
+   {
+    "md": "<callout icon=\"🗄️\" color=\"gray_bg\">\n원본 데이터베이스 9개. **속성 이름을 바꾸거나 지우면 수식이 깨져요.** 새 속성 추가는 괜찮아요. 화면은 다른 페이지의 링크된 뷰에서 보세요.\n</callout>\n\n<table header-row=\"true\">\n<tr><td>DB</td><td>한 행은</td><td>주로 보는 곳</td></tr>\n<tr><td>🎯 만다라트</td><td>만다라트 1개 (지난 것도 보관)</td><td>홈 · 비교 대시보드</td></tr>\n<tr><td>🧭 세부목표</td><td>보드 카드 1장 (만다라트당 9행)</td><td>만다라트 보드</td></tr>\n<tr><td>🧩 실천항목</td><td>보드의 작은 칸 1개 (세부목표당 8행)</td><td>홈 · 보드 · 습관 · 재시작</td></tr>\n<tr><td>📅 기간 목표</td><td>반기·분기·스프린트·월·주 목표</td><td>기간 계획</td></tr>\n<tr><td>✅ 할 일</td><td>투두 1개</td><td>홈 · 할 일</td></tr>\n<tr><td>🟩 실행 기록</td><td>✅ 한 번</td><td>습관 체크</td></tr>\n<tr><td>📝 회고</td><td>회고 1편 (월간 = 스냅샷)</td><td>회고 · 비교</td></tr>\n<tr><td>💡 추천 라이브러리</td><td>프리셋 · 세부 후보 · 실천 후보</td><td>추천 라이브러리</td></tr>\n<tr><td>🔍 지난 목표 분석</td><td>해부한 지난 목표 1개</td><td>작년 목표 해부</td></tr>\n</table>\n\n[[DATABASES]]"
+   }
+  ]
+ }
+]

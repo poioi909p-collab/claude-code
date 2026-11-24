@@ -1,0 +1,217 @@
+[
+ {
+  "db": "goals",
+  "ds": "42156dd3-dc58-811a-bbc7-000b3ce53ab6",
+  "s": "DROP COLUMN \"↳시작일\"; DROP COLUMN \"↳종료일\""
+ },
+ {
+  "db": "goals",
+  "ds": "42156dd3-dc58-811a-bbc7-000b3ce53ab6",
+  "s": "ADD COLUMN \"↳시작일\" ROLLUP('만다라트', '시작일', 'earliest_date'); ADD COLUMN \"↳종료일\" ROLLUP('만다라트', '종료일', 'latest_date'); ADD COLUMN \"현재\" FORMULA('format(prop(\"↳만다라트 상태\")).contains(\"진행 중\")'); ADD COLUMN \"표시 이름\" FORMULA('style(\"● \" + prop(\"세부목표\"), \"b\", prop(\"색\"))')"
+ },
+ {
+  "db": "goals",
+  "ds": "42156dd3-dc58-811a-bbc7-000b3ce53ab6",
+  "s": "ADD COLUMN \"만다라트 시작일\" FORMULA('prop(\"↳시작일\")'); ADD COLUMN \"만다라트 종료일\" FORMULA('prop(\"↳종료일\")'); ADD COLUMN \"현재값\" FORMULA('if(prop(\"현재\"), 1, 0)')"
+ },
+ {
+  "db": "actions",
+  "ds": "42156dd3-dc58-818c-afa5-000b89fb678c",
+  "s": "ADD COLUMN \"↳현재\" ROLLUP('세부목표', '현재값', 'sum'); ADD COLUMN \"↳세부목표 표시\" ROLLUP('세부목표', '표시 이름', 'show_original'); ADD COLUMN \"↳시작일\" ROLLUP('세부목표', '만다라트 시작일', 'earliest_date'); ADD COLUMN \"↳종료일\" ROLLUP('세부목표', '만다라트 종료일', 'latest_date'); ADD COLUMN \"↳할 일\" ROLLUP('할 일', '완료', 'percent_checked'); ADD COLUMN \"↳마지막 기록\" ROLLUP('실행 기록', '날짜', 'latest_date'); ADD COLUMN \"활성\" FORMULA('empty(prop(\"활성 상태\")) or prop(\"활성 상태\") == \"활성\"'); ADD COLUMN \"주간 목표(계산)\" FORMULA('ifs(prop(\"빈도\") == \"매일\", 7, prop(\"빈도\") == \"월 n회\", if(empty(prop(\"월간 목표 횟수\")), 1, prop(\"월간 목표 횟수\")) / 4.345, prop(\"유형\") == \"마음가짐\" and empty(prop(\"주간 목표 횟수\")), 3, empty(prop(\"주간 목표 횟수\")), 1, prop(\"주간 목표 횟수\"))')"
+ },
+ {
+  "db": "actions",
+  "ds": "42156dd3-dc58-818c-afa5-000b89fb678c",
+  "s": "ADD COLUMN \"현재\" FORMULA('prop(\"↳현재\") > 0'); ADD COLUMN \"세부목표 색\" FORMULA('prop(\"↳세부목표 표시\")'); ADD COLUMN \"기간 종료일\" FORMULA('prop(\"↳종료일\")'); ADD COLUMN \"기준 시작일\" FORMULA('let(s, prop(\"↳시작일\"), r, prop(\"재시작일\"), if(empty(r), s, if(empty(s), r, if(dateBetween(r, s, \"days\") > 0, r, s))))'); ADD COLUMN \"할 일 진행\" FORMULA('if(prop(\"할 일\").length() == 0, 0, round(prop(\"↳할 일\") * 100))')"
+ },
+ {
+  "db": "actions",
+  "ds": "42156dd3-dc58-818c-afa5-000b89fb678c",
+  "s": "ADD COLUMN \"현재값\" FORMULA('if(prop(\"현재\"), 1, 0)')"
+ },
+ {
+  "db": "logs",
+  "ds": "42156dd3-dc58-81c0-9f3d-000bd50cb3b2",
+  "s": "ADD COLUMN \"↳기준\" ROLLUP('실천항목', '기준 시작일', 'earliest_date'); ADD COLUMN \"최근7\" FORMULA('if(prop(\"경과일\") >= 0 and prop(\"경과일\") < 7, 1, 0)'); ADD COLUMN \"최근30\" FORMULA('if(prop(\"경과일\") >= 0 and prop(\"경과일\") < 30, 1, 0)'); ADD COLUMN \"이번주\" FORMULA('if(prop(\"경과일\") >= 0 and prop(\"경과일\") <= (((dateBetween(today(), parseDate(\"2024-01-01\"), \"days\") % 7) + 7) % 7), 1, 0)'); ADD COLUMN \"이번달\" FORMULA('if(prop(\"경과일\") >= 0 and formatDate(prop(\"날짜\"), \"YYYY-MM\") == formatDate(today(), \"YYYY-MM\"), 1, 0)'); ADD COLUMN \"오늘\" FORMULA('if(prop(\"경과일\") == 0, 1, 0)')"
+ },
+ {
+  "db": "logs",
+  "ds": "42156dd3-dc58-81c0-9f3d-000bd50cb3b2",
+  "s": "ADD COLUMN \"기간 내\" FORMULA('if(prop(\"경과일\") >= 0 and (empty(prop(\"↳기준\")) or dateBetween(parseDate(formatDate(prop(\"날짜\"), \"YYYY-MM-DD\")), prop(\"↳기준\"), \"days\") >= 0), 1, 0)')"
+ },
+ {
+  "db": "logs",
+  "ds": "42156dd3-dc58-81c0-9f3d-000bd50cb3b2",
+  "s": "ADD COLUMN \"기간 내 수행량\" FORMULA('if(prop(\"기간 내\") == 1, prop(\"수행량값\"), 0)')"
+ },
+ {
+  "db": "actions",
+  "ds": "42156dd3-dc58-818c-afa5-000b89fb678c",
+  "s": "ADD COLUMN \"최근 7일 횟수\" ROLLUP('실행 기록', '최근7', 'sum'); ADD COLUMN \"최근 30일 횟수\" ROLLUP('실행 기록', '최근30', 'sum'); ADD COLUMN \"이번 주 횟수\" ROLLUP('실행 기록', '이번주', 'sum'); ADD COLUMN \"이번 달 횟수\" ROLLUP('실행 기록', '이번달', 'sum'); ADD COLUMN \"누적 횟수\" ROLLUP('실행 기록', '기간 내', 'sum'); ADD COLUMN \"누적 수행량\" ROLLUP('실행 기록', '기간 내 수행량', 'sum'); ADD COLUMN \"↳오늘\" ROLLUP('실행 기록', '오늘', 'sum'); ADD COLUMN \"기간 목표 횟수\" FORMULA('let(b, prop(\"기준 시작일\"), e, prop(\"기간 종료일\"), if(empty(b) or empty(e), 0, round(prop(\"주간 목표(계산)\") * (dateBetween(e, b, \"days\") + 1) / 7)))'); ADD COLUMN \"경과 목표 횟수\" FORMULA('let(b, prop(\"기준 시작일\"), e, prop(\"기간 종료일\"), if(empty(b), 0, let(el, dateBetween(today(), b, \"days\") + 1, tot, if(empty(e), el, dateBetween(e, b, \"days\") + 1), round(prop(\"주간 목표(계산)\") * max(min(el, tot), 0) / 7 * 10) / 10)))'); ADD COLUMN \"기록 공백(일)\" FORMULA('let(l, prop(\"↳마지막 기록\"), b, prop(\"기준 시작일\"), ifs(not empty(l), max(dateBetween(today(), parseDate(formatDate(l, \"YYYY-MM-DD\")), \"days\"), 0), empty(b), 0, max(dateBetween(today(), b, \"days\"), 0)))')"
+ },
+ {
+  "db": "actions",
+  "ds": "42156dd3-dc58-818c-afa5-000b89fb678c",
+  "s": "ADD COLUMN \"오늘 기록\" FORMULA('prop(\"↳오늘\") > 0'); ADD COLUMN \"연속 기록\" FORMULA('ifs(prop(\"최근 7일 횟수\") >= 7, \"🔥 일주일 개근\", prop(\"이번 주 횟수\") >= 3, \"🔥 이번 주 \" + format(prop(\"이번 주 횟수\")) + \"일\", \"\")'); ADD COLUMN \"달성률\" FORMULA('ifs(prop(\"유형\") == \"미션\", if(prop(\"완료\"), 100, prop(\"할 일 진행\")), prop(\"유형\") == \"마음가짐\", round(min(prop(\"최근 30일 횟수\") / 12, 1) * 100), prop(\"기간 목표 횟수\") <= 0, 0, round(min(prop(\"누적 횟수\") / prop(\"기간 목표 횟수\"), 1) * 100))')"
+ },
+ {
+  "db": "actions",
+  "ds": "42156dd3-dc58-818c-afa5-000b89fb678c",
+  "s": "ADD COLUMN \"최근 상태\" FORMULA('ifs(prop(\"활성 상태\") == \"쉬는 중\" or prop(\"활성 상태\") == \"교체됨\", \"⏸️\", prop(\"활성 상태\") == \"졸업\", \"🎓\", prop(\"유형\") == \"미션\", ifs(prop(\"완료\"), \"✅\", not empty(prop(\"기한\")) and dateBetween(today(), prop(\"기한\"), \"days\") > 0, \"🔴\", prop(\"달성률\") > 0, \"🟨\", \"⬜\"), prop(\"기록 공백(일)\") >= max(14, ceil(10.5 / prop(\"주간 목표(계산)\"))), \"💤\", prop(\"유형\") == \"마음가짐\", ifs(prop(\"최근 7일 횟수\") >= 3, \"🟩\", prop(\"최근 7일 횟수\") >= 1, \"🟨\", \"⬜\"), prop(\"빈도\") == \"월 n회\", ifs(prop(\"최근 30일 횟수\") >= if(empty(prop(\"월간 목표 횟수\")), 1, prop(\"월간 목표 횟수\")), \"🟩\", prop(\"최근 30일 횟수\") >= 1, \"🟨\", \"⬜\"), prop(\"최근 7일 횟수\") >= ceil(min(prop(\"주간 목표(계산)\"), 7) * 0.8), \"🟩\", prop(\"최근 7일 횟수\") >= 1, \"🟨\", \"⬜\")'); ADD COLUMN \"오늘 할 차례\" FORMULA('let(dw, (((dateBetween(today(), parseDate(\"2024-01-01\"), \"days\") % 7) + 7) % 7), mleft, dateBetween(dateSubtract(dateAdd(parseDate(formatDate(today(), \"YYYY-MM\") + \"-01\"), 1, \"months\"), 1, \"days\"), today(), \"days\") + 1, monthly, prop(\"빈도\") == \"월 n회\", need, if(monthly, if(empty(prop(\"월간 목표 횟수\")), 1, prop(\"월간 목표 횟수\")) - prop(\"이번 달 횟수\"), ceil(prop(\"주간 목표(계산)\")) - prop(\"이번 주 횟수\")), left, if(monthly, mleft, 7 - dw), ifs(not prop(\"활성\"), \"\", prop(\"유형\") == \"미션\", if(prop(\"완료\") or empty(prop(\"기한\")), \"\", let(r, dateBetween(prop(\"기한\"), today(), \"days\"), ifs(r < 0, \"🔴 기한 지남\", r == 0, \"📌 오늘 마감\", r <= 7, \"📌 기한 D-\" + format(r), \"\"))), prop(\"오늘 기록\"), \"✅ 오늘 완료\", prop(\"유형\") == \"마음가짐\", \"🧘 오늘 한 번 떠올리기\", need <= 0, if(monthly, \"😌 이번 달 목표 달성\", \"😌 이번 주 목표 달성\"), need >= left, \"🔥 오늘 꼭\", \"🙂 여유 · \" + format(need) + \"회 남음 / \" + format(left) + \"일\"))'); ADD COLUMN \"진행 바\" FORMULA('let(p, min(max(prop(\"달성률\"), 0), 100), n, floor(p / 10), style(repeat(\"■\", n), \"green\") + style(repeat(\"□\", 10 - n), \"gray\") + \"  \" + style(format(p) + \"%\", \"b\"))'); ADD COLUMN \"활성 달성값\" FORMULA('if(prop(\"활성\"), prop(\"달성률\"), 0)'); ADD COLUMN \"활성수\" FORMULA('if(prop(\"활성\"), 1, 0)'); ADD COLUMN \"집계 수행량\" FORMULA('if(prop(\"수치 집계\"), prop(\"누적 수행량\"), 0)'); ADD COLUMN \"습관 주간 목표\" FORMULA('if((prop(\"유형\") == \"습관\" and prop(\"활성\")), ceil(prop(\"주간 목표(계산)\")), 0)'); ADD COLUMN \"습관 주간 달성\" FORMULA('if((prop(\"유형\") == \"습관\" and prop(\"활성\")), min(prop(\"이번 주 횟수\"), ceil(prop(\"주간 목표(계산)\"))), 0)'); ADD COLUMN \"습관 누적\" FORMULA('if((prop(\"유형\") == \"습관\" and prop(\"활성\")), prop(\"누적 횟수\"), 0)'); ADD COLUMN \"습관 경과 목표\" FORMULA('if((prop(\"유형\") == \"습관\" and prop(\"활성\")), prop(\"경과 목표 횟수\"), 0)'); ADD COLUMN \"재시작값\" FORMULA('if(empty(prop(\"재시작 횟수\")), 0, prop(\"재시작 횟수\"))')"
+ },
+ {
+  "db": "actions",
+  "ds": "42156dd3-dc58-818c-afa5-000b89fb678c",
+  "s": "ADD COLUMN \"칸\" FORMULA('prop(\"최근 상태\") + \" \" + if(empty(prop(\"짧은 이름\")), substring(prop(\"실천항목\"), 0, 6), prop(\"짧은 이름\"))'); ADD COLUMN \"방치\" FORMULA('if(prop(\"최근 상태\") == \"💤\", 1, 0)'); ADD COLUMN \"재설계 신호\" FORMULA('ifs(not prop(\"활성\"), \"\", prop(\"최근 상태\") == \"💤\", style(\"💤 \" + format(prop(\"기록 공백(일)\")) + \"일 멈춤 → 최소 행동으로 다시 시작\", \"b\", \"red\"), prop(\"유형\") == \"습관\" and prop(\"경과 목표 횟수\") >= 4 and prop(\"누적 횟수\") / prop(\"경과 목표 횟수\") < 0.4, style(\"📉 목표 대비 40% 미만 → 빈도 낮추기 검토\", \"b\", \"orange\"), \"\")'); ADD COLUMN \"오늘 순서\" FORMULA('let(t, prop(\"오늘 할 차례\"), ifs(empty(t), 9, t.contains(\"🔴\") or t.contains(\"📌\") or t.contains(\"🔥\"), 1, t.contains(\"🙂\"), 2, t.contains(\"🧘\"), 3, t.contains(\"✅\"), 4, 5))'); ADD COLUMN \"자동 분해\" FORMULA('ifs(prop(\"유형\") == \"미션\", \"🎯 1회 미션 → \" + if(empty(prop(\"기한\")), \"기한 미정\", \"기한 \" + formatDate(prop(\"기한\"), \"M/D\")) + \" → 할 일 \" + format(prop(\"할 일 진행\")) + \"%\", prop(\"유형\") == \"마음가짐\", \"🧘 매일 떠올리기 → 최근 30일 \" + format(prop(\"최근 30일 횟수\")) + \"일 기록\", \"📆 기간 \" + format(prop(\"기간 목표 횟수\")) + \"회 → 월 \" + format(round(prop(\"주간 목표(계산)\") * 4.345)) + \"회 → 주 \" + format(round(prop(\"주간 목표(계산)\") * 10) / 10) + \"회 → 오늘 \" + if(empty(prop(\"오늘 할 차례\")), \"—\", prop(\"오늘 할 차례\")))')"
+ },
+ {
+  "db": "actions",
+  "ds": "42156dd3-dc58-818c-afa5-000b89fb678c",
+  "s": "ADD COLUMN \"칸@1\" FORMULA('if(prop(\"위치\") == 1, prop(\"칸\"), \"\")'); ADD COLUMN \"칸@2\" FORMULA('if(prop(\"위치\") == 2, prop(\"칸\"), \"\")'); ADD COLUMN \"칸@3\" FORMULA('if(prop(\"위치\") == 3, prop(\"칸\"), \"\")'); ADD COLUMN \"칸@4\" FORMULA('if(prop(\"위치\") == 4, prop(\"칸\"), \"\")'); ADD COLUMN \"칸@5\" FORMULA('if(prop(\"위치\") == 5, prop(\"칸\"), \"\")'); ADD COLUMN \"칸@6\" FORMULA('if(prop(\"위치\") == 6, prop(\"칸\"), \"\")'); ADD COLUMN \"칸@7\" FORMULA('if(prop(\"위치\") == 7, prop(\"칸\"), \"\")'); ADD COLUMN \"칸@8\" FORMULA('if(prop(\"위치\") == 8, prop(\"칸\"), \"\")')"
+ },
+ {
+  "db": "goals",
+  "ds": "42156dd3-dc58-811a-bbc7-000b3ce53ab6",
+  "s": "ADD COLUMN \"↳활성 달성합\" ROLLUP('실천항목', '활성 달성값', 'sum'); ADD COLUMN \"↳활성수\" ROLLUP('실천항목', '활성수', 'sum'); ADD COLUMN \"현재치\" ROLLUP('실천항목', '집계 수행량', 'sum'); ADD COLUMN \"방치 칸 수\" ROLLUP('실천항목', '방치', 'sum'); ADD COLUMN \"↳주간 목표\" ROLLUP('실천항목', '습관 주간 목표', 'sum'); ADD COLUMN \"↳주간 달성\" ROLLUP('실천항목', '습관 주간 달성', 'sum'); ADD COLUMN \"습관 누적 합\" ROLLUP('실천항목', '습관 누적', 'sum'); ADD COLUMN \"습관 경과 합\" ROLLUP('실천항목', '습관 경과 목표', 'sum'); ADD COLUMN \"재시작 합\" ROLLUP('실천항목', '재시작값', 'sum'); ADD COLUMN \"↳칸1\" ROLLUP('실천항목', '칸@1', 'show_original'); ADD COLUMN \"↳칸2\" ROLLUP('실천항목', '칸@2', 'show_original'); ADD COLUMN \"↳칸3\" ROLLUP('실천항목', '칸@3', 'show_original'); ADD COLUMN \"↳칸4\" ROLLUP('실천항목', '칸@4', 'show_original'); ADD COLUMN \"↳칸5\" ROLLUP('실천항목', '칸@5', 'show_original'); ADD COLUMN \"↳칸6\" ROLLUP('실천항목', '칸@6', 'show_original'); ADD COLUMN \"↳칸7\" ROLLUP('실천항목', '칸@7', 'show_original'); ADD COLUMN \"↳칸8\" ROLLUP('실천항목', '칸@8', 'show_original')"
+ },
+ {
+  "db": "goals",
+  "ds": "42156dd3-dc58-811a-bbc7-000b3ce53ab6",
+  "s": "ADD COLUMN \"달성률\" FORMULA('ifs(prop(\"구분\") == \"중심\", 0, prop(\"목표치\") > 0, round(min(prop(\"현재치\") / prop(\"목표치\"), 1) * 100), prop(\"↳활성수\") == 0, 0, round(prop(\"↳활성 달성합\") / prop(\"↳활성수\")))'); ADD COLUMN \"이번 주\" FORMULA('if(prop(\"↳주간 목표\") == 0, \"\", \"이번 주 \" + format(prop(\"↳주간 달성\")) + \"/\" + format(prop(\"↳주간 목표\")) + \"회\")'); ADD COLUMN \"방치 경고\" FORMULA('if(prop(\"방치 칸 수\") > 0, style(\"💤 방치 \" + format(prop(\"방치 칸 수\")) + \"칸\", \"b\", \"gray_background\"), \"\")'); ADD COLUMN \"자동 분해\" FORMULA('let(end, prop(\"만다라트 종료일\"), days, dateBetween(end, today(), \"days\") + 1, rem, prop(\"목표치\") - prop(\"현재치\"), u, if(empty(prop(\"단위\")), \"\", prop(\"단위\")), ifs(empty(prop(\"목표치\")) or prop(\"목표치\") <= 0, \"\", rem <= 0, style(\"🏅 목표치 달성\", \"b\", \"green\"), days <= 0, \"⏹ 기간 종료 · \" + format(rem) + u + \" 남음\", \"남은 \" + format(rem) + u + \" → 월 \" + format(round(rem / days * 304) / 10) + u + \" · 주 \" + format(round(rem / days * 70) / 10) + u + \" · 오늘 \" + format(round(rem / days * 10) / 10) + u))')"
+ },
+ {
+  "db": "goals",
+  "ds": "42156dd3-dc58-811a-bbc7-000b3ce53ab6",
+  "s": "ADD COLUMN \"칸\" FORMULA('let(p, prop(\"달성률\"), e, ifs(p >= 100, \"🏅\", p >= 80, \"🔥\", p >= 40, \"🟩\", p > 0, \"🟨\", \"⬜\"), e + \" \" + if(empty(prop(\"짧은 이름\")), substring(prop(\"세부목표\"), 0, 6), prop(\"짧은 이름\")))'); ADD COLUMN \"평균 기여값\" FORMULA('if(prop(\"구분\") == \"중심\", 0, prop(\"달성률\"))'); ADD COLUMN \"세부값\" FORMULA('if(prop(\"구분\") == \"중심\", 0, 1)'); ADD COLUMN \"도장\" FORMULA('ifs(prop(\"구분\") == \"중심\", \"\", prop(\"달성률\") >= 100, style(\"🏅 달성!\", \"b\", \"yellow_background\"), prop(\"달성률\") >= 80, style(\"🔥 거의 다 왔어요\", \"b\", \"orange\"), \"\")')"
+ },
+ {
+  "db": "goals",
+  "ds": "42156dd3-dc58-811a-bbc7-000b3ce53ab6",
+  "s": "ADD COLUMN \"세부칸@1\" FORMULA('if(prop(\"위치\") == 1 and prop(\"구분\") != \"중심\", prop(\"칸\"), \"\")'); ADD COLUMN \"세부칸@2\" FORMULA('if(prop(\"위치\") == 2 and prop(\"구분\") != \"중심\", prop(\"칸\"), \"\")'); ADD COLUMN \"세부칸@3\" FORMULA('if(prop(\"위치\") == 3 and prop(\"구분\") != \"중심\", prop(\"칸\"), \"\")'); ADD COLUMN \"세부칸@4\" FORMULA('if(prop(\"위치\") == 4 and prop(\"구분\") != \"중심\", prop(\"칸\"), \"\")'); ADD COLUMN \"세부칸@6\" FORMULA('if(prop(\"위치\") == 6 and prop(\"구분\") != \"중심\", prop(\"칸\"), \"\")'); ADD COLUMN \"세부칸@7\" FORMULA('if(prop(\"위치\") == 7 and prop(\"구분\") != \"중심\", prop(\"칸\"), \"\")'); ADD COLUMN \"세부칸@8\" FORMULA('if(prop(\"위치\") == 8 and prop(\"구분\") != \"중심\", prop(\"칸\"), \"\")'); ADD COLUMN \"세부칸@9\" FORMULA('if(prop(\"위치\") == 9 and prop(\"구분\") != \"중심\", prop(\"칸\"), \"\")')"
+ },
+ {
+  "db": "mandalart",
+  "ds": "42156dd3-dc58-813e-b08c-000bcf4b4517",
+  "s": "ADD COLUMN \"↳평균합\" ROLLUP('세부목표', '평균 기여값', 'sum'); ADD COLUMN \"↳세부수\" ROLLUP('세부목표', '세부값', 'sum'); ADD COLUMN \"방치 칸\" ROLLUP('세부목표', '방치 칸 수', 'sum'); ADD COLUMN \"↳습관 누적\" ROLLUP('세부목표', '습관 누적 합', 'sum'); ADD COLUMN \"↳습관 경과\" ROLLUP('세부목표', '습관 경과 합', 'sum'); ADD COLUMN \"재시작 합계\" ROLLUP('세부목표', '재시작 합', 'sum'); ADD COLUMN \"D-day\" FORMULA('if(empty(prop(\"시작일\")), \"\", let(r, dateBetween(prop(\"종료일\"), today(), \"days\"), ifs(r > 0, \"D-\" + format(r), r == 0, \"D-DAY\", \"종료 +\" + format(abs(r)) + \"일\")))'); ADD COLUMN \"경과 월\" FORMULA('if(empty(prop(\"시작일\")), 0, let(ref, if(dateBetween(today(), prop(\"종료일\"), \"days\") > 0, prop(\"종료일\"), today()), max(dateBetween(ref, prop(\"시작일\"), \"months\"), 0)))'); ADD COLUMN \"회고 수\" FORMULA('prop(\"회고\").length()'); ADD COLUMN \"↳세부칸1\" ROLLUP('세부목표', '세부칸@1', 'show_original'); ADD COLUMN \"↳세부칸2\" ROLLUP('세부목표', '세부칸@2', 'show_original'); ADD COLUMN \"↳세부칸3\" ROLLUP('세부목표', '세부칸@3', 'show_original'); ADD COLUMN \"↳세부칸4\" ROLLUP('세부목표', '세부칸@4', 'show_original'); ADD COLUMN \"↳세부칸6\" ROLLUP('세부목표', '세부칸@6', 'show_original'); ADD COLUMN \"↳세부칸7\" ROLLUP('세부목표', '세부칸@7', 'show_original'); ADD COLUMN \"↳세부칸8\" ROLLUP('세부목표', '세부칸@8', 'show_original'); ADD COLUMN \"↳세부칸9\" ROLLUP('세부목표', '세부칸@9', 'show_original')"
+ },
+ {
+  "db": "mandalart",
+  "ds": "42156dd3-dc58-813e-b08c-000bcf4b4517",
+  "s": "ADD COLUMN \"전체 달성률\" FORMULA('if(prop(\"기록된 달성률\") > 0, prop(\"기록된 달성률\"), if(prop(\"↳세부수\") == 0, 0, round(prop(\"↳평균합\") / prop(\"↳세부수\"))))'); ADD COLUMN \"습관 유지율\" FORMULA('if(prop(\"↳습관 경과\") <= 0, 0, round(min(prop(\"↳습관 누적\") / prop(\"↳습관 경과\"), 1) * 100))'); ADD COLUMN \"중심 격자\" FORMULA('if(empty(replaceAll(replaceAll(prop(\"↳세부칸1\"), \"^[, ]+|[, ]+$\", \"\"), \",( ,)+\", \",\")), \"⬚ ─\", replaceAll(replaceAll(prop(\"↳세부칸1\"), \"^[, ]+|[, ]+$\", \"\"), \",( ,)+\", \",\")) + \"   \" + if(empty(replaceAll(replaceAll(prop(\"↳세부칸2\"), \"^[, ]+|[, ]+$\", \"\"), \",( ,)+\", \",\")), \"⬚ ─\", replaceAll(replaceAll(prop(\"↳세부칸2\"), \"^[, ]+|[, ]+$\", \"\"), \",( ,)+\", \",\")) + \"   \" + if(empty(replaceAll(replaceAll(prop(\"↳세부칸3\"), \"^[, ]+|[, ]+$\", \"\"), \",( ,)+\", \",\")), \"⬚ ─\", replaceAll(replaceAll(prop(\"↳세부칸3\"), \"^[, ]+|[, ]+$\", \"\"), \",( ,)+\", \",\")) + \"\\n\" + if(empty(replaceAll(replaceAll(prop(\"↳세부칸4\"), \"^[, ]+|[, ]+$\", \"\"), \",( ,)+\", \",\")), \"⬚ ─\", replaceAll(replaceAll(prop(\"↳세부칸4\"), \"^[, ]+|[, ]+$\", \"\"), \",( ,)+\", \",\")) + \"   \" + \"🎯 \" + prop(\"핵심목표\") + \"   \" + if(empty(replaceAll(replaceAll(prop(\"↳세부칸6\"), \"^[, ]+|[, ]+$\", \"\"), \",( ,)+\", \",\")), \"⬚ ─\", replaceAll(replaceAll(prop(\"↳세부칸6\"), \"^[, ]+|[, ]+$\", \"\"), \",( ,)+\", \",\")) + \"\\n\" + if(empty(replaceAll(replaceAll(prop(\"↳세부칸7\"), \"^[, ]+|[, ]+$\", \"\"), \",( ,)+\", \",\")), \"⬚ ─\", replaceAll(replaceAll(prop(\"↳세부칸7\"), \"^[, ]+|[, ]+$\", \"\"), \",( ,)+\", \",\")) + \"   \" + if(empty(replaceAll(replaceAll(prop(\"↳세부칸8\"), \"^[, ]+|[, ]+$\", \"\"), \",( ,)+\", \",\")), \"⬚ ─\", replaceAll(replaceAll(prop(\"↳세부칸8\"), \"^[, ]+|[, ]+$\", \"\"), \",( ,)+\", \",\")) + \"   \" + if(empty(replaceAll(replaceAll(prop(\"↳세부칸9\"), \"^[, ]+|[, ]+$\", \"\"), \",( ,)+\", \",\")), \"⬚ ─\", replaceAll(replaceAll(prop(\"↳세부칸9\"), \"^[, ]+|[, ]+$\", \"\"), \",( ,)+\", \",\"))')"
+ },
+ {
+  "db": "mandalart",
+  "ds": "42156dd3-dc58-813e-b08c-000bcf4b4517",
+  "s": "ADD COLUMN \"진행 바\" FORMULA('let(p, min(max(prop(\"전체 달성률\"), 0), 100), n, floor(p / 10), style(repeat(\"■\", n), \"blue\") + style(repeat(\"□\", 10 - n), \"gray\") + \"  \" + style(format(p) + \"%\", \"b\"))'); ADD COLUMN \"페이스\" FORMULA('let(d, prop(\"전체 달성률\") - prop(\"시간 경과율\"), ifs(empty(prop(\"시작일\")), style(\"⏳ 시작일을 입력하세요\", \"gray\"), prop(\"상태\") == \"완료\" or prop(\"상태\") == \"보관\", style(\"🏁 종료 · 최종 \" + format(prop(\"전체 달성률\")) + \"%\", \"b\", \"brown\"), d >= 5, style(\"🚀 앞서가는 중 (+\" + format(d) + \"%p)\", \"b\", \"green\"), d > -5, style(\"👍 페이스 유지\", \"b\", \"blue\"), style(\"⚠️ 뒤처짐 (\" + format(abs(d)) + \"%p)\", \"b\", \"red\")))'); ADD COLUMN \"성적표\" FORMULA('\"📈 \" + format(prop(\"전체 달성률\")) + \"%  ·  🔁 유지 \" + format(prop(\"습관 유지율\")) + \"%  ·  💤 \" + format(prop(\"방치 칸\")) + \"칸  ·  🔄 재시작 \" + format(prop(\"재시작 합계\")) + \"회  ·  📝 회고 \" + format(prop(\"회고 수\")) + \"회\"')"
+ },
+ {
+  "db": "goals",
+  "ds": "42156dd3-dc58-811a-bbc7-000b3ce53ab6",
+  "s": "ADD COLUMN \"↳전체 달성률\" ROLLUP('만다라트', '전체 달성률', 'sum'); ADD COLUMN \"↳중심 격자\" ROLLUP('만다라트', '중심 격자', 'show_original')"
+ },
+ {
+  "db": "goals",
+  "ds": "42156dd3-dc58-811a-bbc7-000b3ce53ab6",
+  "s": "ADD COLUMN \"진행 바\" FORMULA('let(p, min(max(if(prop(\"구분\") == \"중심\", prop(\"↳전체 달성률\"), prop(\"달성률\")), 0), 100), n, floor(p / 10), c, if(prop(\"구분\") == \"중심\", \"blue\", prop(\"색\")), style(repeat(\"■\", n), c) + style(repeat(\"□\", 10 - n), \"gray\") + \"  \" + style(format(p) + \"%\", \"b\"))'); ADD COLUMN \"미니 그리드\" FORMULA('if(prop(\"구분\") == \"중심\", prop(\"↳중심 격자\"), if(empty(replaceAll(replaceAll(prop(\"↳칸1\"), \"^[, ]+|[, ]+$\", \"\"), \",( ,)+\", \",\")), \"⬚ ─\", replaceAll(replaceAll(prop(\"↳칸1\"), \"^[, ]+|[, ]+$\", \"\"), \",( ,)+\", \",\")) + \"   \" + if(empty(replaceAll(replaceAll(prop(\"↳칸2\"), \"^[, ]+|[, ]+$\", \"\"), \",( ,)+\", \",\")), \"⬚ ─\", replaceAll(replaceAll(prop(\"↳칸2\"), \"^[, ]+|[, ]+$\", \"\"), \",( ,)+\", \",\")) + \"   \" + if(empty(replaceAll(replaceAll(prop(\"↳칸3\"), \"^[, ]+|[, ]+$\", \"\"), \",( ,)+\", \",\")), \"⬚ ─\", replaceAll(replaceAll(prop(\"↳칸3\"), \"^[, ]+|[, ]+$\", \"\"), \",( ,)+\", \",\")) + \"\\n\" + if(empty(replaceAll(replaceAll(prop(\"↳칸4\"), \"^[, ]+|[, ]+$\", \"\"), \",( ,)+\", \",\")), \"⬚ ─\", replaceAll(replaceAll(prop(\"↳칸4\"), \"^[, ]+|[, ]+$\", \"\"), \",( ,)+\", \",\")) + \"   \" + style(\"◆ \" + if(empty(prop(\"짧은 이름\")), substring(prop(\"세부목표\"), 0, 6), prop(\"짧은 이름\")), \"b\", prop(\"색\")) + \"   \" + if(empty(replaceAll(replaceAll(prop(\"↳칸5\"), \"^[, ]+|[, ]+$\", \"\"), \",( ,)+\", \",\")), \"⬚ ─\", replaceAll(replaceAll(prop(\"↳칸5\"), \"^[, ]+|[, ]+$\", \"\"), \",( ,)+\", \",\")) + \"\\n\" + if(empty(replaceAll(replaceAll(prop(\"↳칸6\"), \"^[, ]+|[, ]+$\", \"\"), \",( ,)+\", \",\")), \"⬚ ─\", replaceAll(replaceAll(prop(\"↳칸6\"), \"^[, ]+|[, ]+$\", \"\"), \",( ,)+\", \",\")) + \"   \" + if(empty(replaceAll(replaceAll(prop(\"↳칸7\"), \"^[, ]+|[, ]+$\", \"\"), \",( ,)+\", \",\")), \"⬚ ─\", replaceAll(replaceAll(prop(\"↳칸7\"), \"^[, ]+|[, ]+$\", \"\"), \",( ,)+\", \",\")) + \"   \" + if(empty(replaceAll(replaceAll(prop(\"↳칸8\"), \"^[, ]+|[, ]+$\", \"\"), \",( ,)+\", \",\")), \"⬚ ─\", replaceAll(replaceAll(prop(\"↳칸8\"), \"^[, ]+|[, ]+$\", \"\"), \",( ,)+\", \",\")))')"
+ },
+ {
+  "db": "logs",
+  "ds": "42156dd3-dc58-81c0-9f3d-000bd50cb3b2",
+  "s": "ADD COLUMN \"세부목표\" ROLLUP('실천항목', '세부목표 색', 'show_original')"
+ },
+ {
+  "db": "todos",
+  "ds": "42156dd3-dc58-8138-a643-000b47ef2e6b",
+  "s": "ADD COLUMN \"세부목표\" ROLLUP('실천항목', '세부목표 색', 'show_original'); ADD COLUMN \"↳현재\" ROLLUP('실천항목', '현재값', 'sum'); ADD COLUMN \"라벨\" FORMULA('let(d, prop(\"날짜\"), m, toNumber(formatDate(d, \"M\")), if(empty(d), \"\", \"W\" + format(week(d)) + \" · \" + format(m) + \"월 · Q\" + format(ceil(m / 3))))'); ADD COLUMN \"지연\" FORMULA('if(prop(\"완료\") or empty(prop(\"날짜\")), \"\", let(g, dateBetween(today(), parseDate(formatDate(prop(\"날짜\"), \"YYYY-MM-DD\")), \"days\"), if(g > 0, style(\"🔴 지연 \" + format(g) + \"일\", \"b\", \"red\"), \"\")))'); ADD COLUMN \"요일\" FORMULA('if(empty(prop(\"날짜\")), \"📥 날짜 미정\", [\"① 월\", \"② 화\", \"③ 수\", \"④ 목\", \"⑤ 금\", \"⑥ 토\", \"⑦ 일\"].at((((dateBetween(parseDate(formatDate(prop(\"날짜\"), \"YYYY-MM-DD\")), parseDate(\"2024-01-01\"), \"days\") % 7) + 7) % 7)))')"
+ },
+ {
+  "db": "todos",
+  "ds": "42156dd3-dc58-8138-a643-000b47ef2e6b",
+  "s": "ADD COLUMN \"현재\" FORMULA('prop(\"실천항목\").length() == 0 or prop(\"↳현재\") > 0')"
+ },
+ {
+  "db": "periods",
+  "ds": "42156dd3-dc58-8187-a18f-000bd16dc303",
+  "s": "ADD COLUMN \"달성값\" FORMULA('if(prop(\"상태\") == \"달성\", 1, 0)'); ADD COLUMN \"↳할 일\" ROLLUP('할 일', '완료', 'percent_checked'); ADD COLUMN \"↳상위 이름\" ROLLUP('상위 기간 목표', '기간 목표', 'show_original'); ADD COLUMN \"기간 끝\" FORMULA('let(s, prop(\"기간 시작\"), u, prop(\"단위\"), if(empty(s), s, ifs(u == \"주\", dateAdd(s, 6, \"days\"), u == \"정비 주간\", dateAdd(s, 13, \"days\"), u == \"월\", dateSubtract(dateAdd(parseDate(formatDate(s, \"YYYY-MM\") + \"-01\"), 1, \"months\"), 1, \"days\"), u == \"분기\", dateSubtract(dateAdd(s, 3, \"months\"), 1, \"days\"), u == \"12주 스프린트\", dateAdd(s, 83, \"days\"), u == \"반기\", dateSubtract(dateAdd(s, 6, \"months\"), 1, \"days\"), s)))'); ADD COLUMN \"단위 순서\" FORMULA('ifs(prop(\"단위\") == \"반기\", 1, prop(\"단위\") == \"분기\" or prop(\"단위\") == \"12주 스프린트\", 2, prop(\"단위\") == \"정비 주간\", 3, prop(\"단위\") == \"월\", 4, 5)')"
+ },
+ {
+  "db": "periods",
+  "ds": "42156dd3-dc58-8187-a18f-000bd16dc303",
+  "s": "ADD COLUMN \"↳하위 달성\" ROLLUP('하위 기간 목표', '달성값', 'sum'); ADD COLUMN \"시점\" FORMULA('ifs(empty(prop(\"기간 시작\")), \"\", dateBetween(today(), prop(\"기간 시작\"), \"days\") < 0, \"⏳ 예정\", dateBetween(today(), prop(\"기간 끝\"), \"days\") > 0, \"⏹ 지남\", \"🟢 지금\")'); ADD COLUMN \"상위\" FORMULA('if(prop(\"상위 기간 목표\").length() == 0, \"🌳 최상위\", \"↳ \" + prop(\"↳상위 이름\"))'); ADD COLUMN \"자동 분해\" FORMULA('let(rem, prop(\"목표치\") - prop(\"현재치\"), days, dateBetween(prop(\"기간 끝\"), today(), \"days\") + 1, u, if(empty(prop(\"수치 단위\")), \"\", prop(\"수치 단위\")), ifs(empty(prop(\"목표치\")) or prop(\"목표치\") <= 0, \"\", rem <= 0, style(\"🏅 달성\", \"b\", \"green\"), days <= 0, \"⏹ 종료\", \"남은 \" + format(rem) + u + \" → 주 \" + format(round(rem / days * 70) / 10) + u + \" · 하루 \" + format(round(rem / days * 10) / 10) + u))')"
+ },
+ {
+  "db": "periods",
+  "ds": "42156dd3-dc58-8187-a18f-000bd16dc303",
+  "s": "ADD COLUMN \"달성률\" FORMULA('let(n, prop(\"하위 기간 목표\").length(), ifs(prop(\"목표치\") > 0, round(min(prop(\"현재치\") / prop(\"목표치\"), 1) * 100), prop(\"할 일\").length() > 0, round(prop(\"↳할 일\") * 100), n > 0, round(prop(\"↳하위 달성\") / n * 100), if(prop(\"상태\") == \"달성\", 100, 0)))'); ADD COLUMN \"남은 일수\" FORMULA('if(prop(\"시점\") == \"🟢 지금\", \"D-\" + format(dateBetween(prop(\"기간 끝\"), today(), \"days\")), \"\")')"
+ },
+ {
+  "db": "periods",
+  "ds": "42156dd3-dc58-8187-a18f-000bd16dc303",
+  "s": "ADD COLUMN \"진행 바\" FORMULA('let(p, min(max(prop(\"달성률\"), 0), 100), n, floor(p / 10), style(repeat(\"■\", n), \"purple\") + style(repeat(\"□\", 10 - n), \"gray\") + \"  \" + style(format(p) + \"%\", \"b\"))')"
+ },
+ {
+  "db": "retros",
+  "ds": "42156dd3-dc58-81a4-84c2-000b9a7ad0f6",
+  "s": "ADD COLUMN \"↳시작일\" ROLLUP('만다라트', '시작일', 'earliest_date'); ADD COLUMN \"현재 달성률(참고)\" ROLLUP('만다라트', '전체 달성률', 'sum')"
+ },
+ {
+  "db": "retros",
+  "ds": "42156dd3-dc58-81a4-84c2-000b9a7ad0f6",
+  "s": "ADD COLUMN \"경과 월\" FORMULA('let(s, prop(\"↳시작일\"), e, dateEnd(prop(\"기간\")), if(empty(s) or empty(e), -1, max(dateBetween(e, s, \"months\"), 0)))')"
+ },
+ {
+  "db": "retros",
+  "ds": "42156dd3-dc58-81a4-84c2-000b9a7ad0f6",
+  "s": "ADD COLUMN \"스냅샷 확인\" FORMULA('ifs(prop(\"유형\") != \"월간\", \"\", prop(\"누적 달성률\") > 0, style(\"📸 저장됨\", \"green\"), style(\"📸 누적 달성률 칸에 \" + format(prop(\"현재 달성률(참고)\")) + \" 입력\", \"b\", \"orange\"))'); ADD COLUMN \"스냅샷 키\" FORMULA('if(prop(\"유형\") == \"월간\" and prop(\"누적 달성률\") > 0, format(prop(\"경과 월\")) + \":\" + format(prop(\"누적 달성률\")), \"\")')"
+ },
+ {
+  "db": "mandalart",
+  "ds": "42156dd3-dc58-813e-b08c-000bcf4b4517",
+  "s": "ADD COLUMN \"↳스냅샷\" ROLLUP('회고', '스냅샷 키', 'show_original')"
+ },
+ {
+  "db": "mandalart",
+  "ds": "42156dd3-dc58-813e-b08c-000bcf4b4517",
+  "s": "ADD COLUMN \"스냅샷 목록\" FORMULA('replaceAll(prop(\"↳스냅샷\"), \" \", \"\")')"
+ },
+ {
+  "db": "mandalart",
+  "ds": "42156dd3-dc58-813e-b08c-000bcf4b4517",
+  "s": "ADD COLUMN \"↳이전 스냅샷\" ROLLUP('이전 만다라트', '스냅샷 목록', 'show_original'); ADD COLUMN \"↳이전 달성률\" ROLLUP('이전 만다라트', '전체 달성률', 'sum'); ADD COLUMN \"↳이전 이름\" ROLLUP('이전 만다라트', '핵심목표', 'show_original')"
+ },
+ {
+  "db": "mandalart",
+  "ds": "42156dd3-dc58-813e-b08c-000bcf4b4517",
+  "s": "ADD COLUMN \"이전 최종\" FORMULA('if(prop(\"이전 만다라트\").length() == 0, \"—\", prop(\"↳이전 이름\") + \" · 최종 \" + format(prop(\"↳이전 달성률\")) + \"%\")'); ADD COLUMN \"작년 이맘때 비교\" FORMULA('let(m, prop(\"경과 월\"), now, prop(\"전체 달성률\"), t, \",\" + replaceAll(prop(\"↳이전 스냅샷\"), \" \", \"\") + \",\", key, \",\" + format(m) + \":\", ifs(prop(\"이전 만다라트\").length() == 0, style(\"이전 만다라트를 연결하면 비교가 보여요\", \"gray\"), not t.contains(key), \"이전 최종 \" + format(prop(\"↳이전 달성률\")) + \"% · 지금 \" + format(now) + \"%\", let(b, toNumber(t.split(key).at(1).split(\",\").at(0)), d, now - b, \"같은 시점(\" + format(m + 1) + \"개월 차) \" + format(b) + \"% → 지금 \" + format(now) + \"%  \" + if(d >= 0, style(\"▲ \" + format(d) + \"%p\", \"b\", \"green\"), style(\"▼ \" + format(abs(d)) + \"%p\", \"b\", \"red\")))))')"
+ },
+ {
+  "db": "library",
+  "ds": "42156dd3-dc58-8145-8592-000b10aa9e37",
+  "s": "ADD COLUMN \"하위 수\" FORMULA('prop(\"하위 항목\").length()')"
+ },
+ {
+  "db": "library",
+  "ds": "42156dd3-dc58-8145-8592-000b10aa9e37",
+  "s": "ADD COLUMN \"↳손자 수\" ROLLUP('하위 항목', '하위 수', 'sum')"
+ },
+ {
+  "db": "library",
+  "ds": "42156dd3-dc58-8145-8592-000b10aa9e37",
+  "s": "ADD COLUMN \"요약\" FORMULA('ifs(prop(\"종류\") == \"실천항목 후보\", ifs(prop(\"유형\") == \"습관\", \"🔁 \", prop(\"유형\") == \"미션\", \"🎯 \", \"🧘 \") + prop(\"권장 빈도\") + \" · \" + prop(\"소요 시간\") + \" · 최소: \" + prop(\"최소 행동\"), prop(\"종류\") == \"세부목표 후보\", \"🧩 실천 후보 \" + format(prop(\"하위 수\")) + \"개\", \"🎯 세부 \" + format(prop(\"하위 수\")) + \" · 실천 \" + format(prop(\"↳손자 수\")))')"
+ },
+ {
+  "db": "lessons",
+  "ds": "42156dd3-dc58-81a3-acf4-000bfbd0e5a6",
+  "s": "ADD COLUMN \"설계 점수\" FORMULA('prop(\"실패 원인\").filter([\"목표가 모호했다\", \"측정할 수 없었다\", \"너무 컸다\", \"너무 많았다\", \"최소 행동이 없었다\"].includes(current)).length()'); ADD COLUMN \"실행 점수\" FORMULA('prop(\"실패 원인\").filter([\"기록·확인을 안 했다\", \"한 번 빠지고 무너졌다\", \"동기가 사라졌다\", \"회고를 안 했다\"].includes(current)).length()'); ADD COLUMN \"환경 점수\" FORMULA('prop(\"실패 원인\").filter([\"시간이 없었다\", \"체력·에너지 부족\", \"환경이 방해했다\", \"주변의 영향\", \"돈·비용 문제\", \"예상 못 한 사건\"].includes(current)).length()'); ADD COLUMN \"반영\" FORMULA('if(prop(\"반영할 만다라트\").length() > 0 or prop(\"반영한 세부목표\").length() > 0, style(\"✅ 반영됨\", \"b\", \"green\"), style(\"⏳ 아직 반영 안 됨\", \"orange\"))')"
+ },
+ {
+  "db": "lessons",
+  "ds": "42156dd3-dc58-81a3-acf4-000bfbd0e5a6",
+  "s": "ADD COLUMN \"주원인\" FORMULA('let(d, prop(\"설계 점수\"), x, prop(\"실행 점수\"), v, prop(\"환경 점수\"), ifs(d + x + v == 0, \"— 원인을 체크하세요\", d >= x and d >= v, \"🧩 설계 문제\", x >= v, \"🏃 실행 문제\", \"🌦 환경 문제\"))'); ADD COLUMN \"원인 분포\" FORMULA('let(d, prop(\"설계 점수\"), x, prop(\"실행 점수\"), v, prop(\"환경 점수\"), style(\"🧩 \" + repeat(\"■\", d), \"purple\") + \"  \" + style(\"🏃 \" + repeat(\"■\", x), \"orange\") + \"  \" + style(\"🌦 \" + repeat(\"■\", v), \"blue\"))')"
+ },
+ {
+  "db": "lessons",
+  "ds": "42156dd3-dc58-81a3-acf4-000bfbd0e5a6",
+  "s": "ADD COLUMN \"처방\" FORMULA('ifs(prop(\"주원인\") == \"🧩 설계 문제\", \"목표를 숫자로 바꾸고, 실천항목마다 최소 행동을 정하기 → Step 1·3\", prop(\"주원인\") == \"🏃 실행 문제\", \"✅ 원탭 기록 + 일요일 15분 주간 회고 고정 → Step 5·6\", prop(\"주원인\") == \"🌦 환경 문제\", \"시간 블록·0원 대안·재시작 규칙을 먼저 정하기 → 재시작 센터\", \"\")')"
+ }
+]

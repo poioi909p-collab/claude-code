@@ -53,7 +53,7 @@
 		<callout icon="💡" color="yellow_bg">
 			**추천**
 			{{page:library}}
-			0원 실천 768개 · 프리셋 12개
+			0원 실천 484개 (+CSV 284) · 프리셋 12개
 		</callout>
 	</column>
 </columns>

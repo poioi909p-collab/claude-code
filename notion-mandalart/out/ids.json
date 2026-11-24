@@ -1,0 +1,70 @@
+{
+ "pages": {
+  "root": "42156dd3-dc58-8193-880e-c848041180e2",
+  "home": "42156dd3-dc58-81a4-a465-e91c84822478",
+  "board": "42156dd3-dc58-8109-b7ec-f3522240f900",
+  "mobile": "42156dd3-dc58-817e-86d3-ed493a6f64a1",
+  "period": "42156dd3-dc58-8127-bc88-f0ceb0e645ba",
+  "todo": "42156dd3-dc58-81fe-9ea6-f865a4f76f0f",
+  "habit": "42156dd3-dc58-8199-91ba-d88fbcd7d10f",
+  "retro": "42156dd3-dc58-81a0-8998-eb23db77a3f3",
+  "compare": "42156dd3-dc58-81ae-8a92-f4b7c52840de",
+  "lastyear": "42156dd3-dc58-8116-8a73-de707b72add5",
+  "restart": "42156dd3-dc58-81ee-b496-d997f6d0dfd1",
+  "library": "42156dd3-dc58-8128-b066-c0e0a2e33c01",
+  "guide": "42156dd3-dc58-81d0-a718-c8a4affa1252",
+  "db": "42156dd3-dc58-819a-85ee-e21c9e1b4bf6",
+  "g_lastyear": "42156dd3-dc58-81ed-a36b-e6cfe20cad8b",
+  "g0": "42156dd3-dc58-81d2-8259-d6213878573b",
+  "g1": "42156dd3-dc58-81b1-b8ee-e1df9c763e99",
+  "g2": "42156dd3-dc58-81bd-be55-d9158928ae96",
+  "g3": "42156dd3-dc58-81c7-9b99-c1ba22f4a8a1",
+  "g4": "42156dd3-dc58-817b-94a4-f7462083604b",
+  "g5": "42156dd3-dc58-8198-acf7-eb6bffd3bae4",
+  "g6": "42156dd3-dc58-813b-9081-e093675f8fe8",
+  "g7": "42156dd3-dc58-81fe-a9b2-ce56071a6f72",
+  "g8": "42156dd3-dc58-8117-a26d-f87b13244c98",
+  "g_restart": "42156dd3-dc58-812e-a66f-e2773a6da9c8",
+  "g_ai": "42156dd3-dc58-8137-9089-d0e184bc2de3",
+  "g_faq": "42156dd3-dc58-81c7-bc21-fcc48b2a499f"
+ },
+ "dbs": {
+  "mandalart": {
+   "db": "42156dd3dc5881ee8eb6e8a8a72d795a",
+   "ds": "42156dd3-dc58-813e-b08c-000bcf4b4517"
+  },
+  "goals": {
+   "db": "42156dd3dc5881a59d3cf585d30fdb5b",
+   "ds": "42156dd3-dc58-811a-bbc7-000b3ce53ab6"
+  },
+  "actions": {
+   "db": "42156dd3dc588107a9add1c91ad5b1be",
+   "ds": "42156dd3-dc58-818c-afa5-000b89fb678c"
+  },
+  "periods": {
+   "db": "42156dd3dc58815bb421e7bba1cc631e",
+   "ds": "42156dd3-dc58-8187-a18f-000bd16dc303"
+  },
+  "todos": {
+   "db": "42156dd3dc58819abb9ff29f96352831",
+   "ds": "42156dd3-dc58-8138-a643-000b47ef2e6b"
+  },
+  "logs": {
+   "db": "42156dd3dc588101a065ece0e137c489",
+   "ds": "42156dd3-dc58-81c0-9f3d-000bd50cb3b2"
+  },
+  "retros": {
+   "db": "42156dd3dc58814990f3d5c818fa9e63",
+   "ds": "42156dd3-dc58-81a4-84c2-000b9a7ad0f6"
+  },
+  "library": {
+   "db": "42156dd3dc58816289ebc84dd4ffa935",
+   "ds": "42156dd3-dc58-8145-8592-000b10aa9e37"
+  },
+  "lessons": {
+   "db": "42156dd3dc5881488ff3ef4753740e14",
+   "ds": "42156dd3-dc58-81a3-acf4-000bfbd0e5a6"
+  }
+ },
+ "rows": {}
+}
