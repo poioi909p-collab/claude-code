@@ -15,32 +15,14 @@
 | 라이브러리 592행 (프리셋 12 · 세부 후보 96 · 실천 후보 484) | ✅ |
 | 샘플 만다라트 2개 + 세부 9 · 실천 64 · 기간 8 · 할 일 16 · 회고 9 · 해부 3 · 실행 기록 350 | ✅ |
 | 뷰 64개 (`pages/manifest.json` 기준) | ✅ (아래 3번의 제약은 수동 마감 필요) |
-| 본문: 루트, 홈, 보드, 모바일, 기간 계획, 할 일, 습관, 회고, 비교, 작년 해부, 재시작, 라이브러리, 시작 가이드, 데이터베이스 | ✅ |
+| 본문: 페이지 27개 전부 (가이드 하위 13개 포함) | ✅ |
+| `MANUAL_CHECKLIST.md` · `README.md` · `tools/schema_api.py`(필터용) 갱신 | ✅ |
 | DB마다 숨김 수식 칸 `필터용` 추가 (만다라트·세부목표·실천항목·할 일·실행 기록) | ✅ (이유는 3번) |
 
-## 2. 남은 일
+## 2. 남은 일 (전부 노션 UI에서 사람이 해야 하는 것)
 
-### 2-1. 가이드 하위 페이지 13개 본문 (지금은 빈 페이지)
-- 본문은 이미 변환해 둠: `handoff/guide_md/<key>.md` (Notion-flavored Markdown, 멘션 URL 포함)
-- 다시 만들려면: `python3 handoff/build.py <key> > out.md`
-- 넣는 방법: `notion-update-page` · `command: insert_content` · `content` = 파일 내용 · `allow_async: false`
-- 대상 (key → page id는 `out/ids.json` → `pages`):
-  `g_lastyear, g0, g1, g2, g3, g4, g5, g6, g7, g8, g_restart, g_ai, g_faq`
-
-### 2-2. DB 템플릿 (`templates/*.md`)
-- API로는 DB 템플릿을 만들 수 없어서 아직 손대지 않았어요. `MANUAL_CHECKLIST.md`에 "노션에서 직접 새 템플릿 → 본문 붙여넣기" 항목으로 넣어 주세요.
-
-### 2-3. `MANUAL_CHECKLIST.md` 갱신 (사람이 노션 UI에서 할 일)
-- 버튼 25개: `pages/manifest.json` → `buttons` (페이지 본문에는 회색 "버튼 자리" 콜아웃으로 표시해 둠). 버튼 속성(`✅ 오늘 했음` 등)도 API로 못 만들어서 뷰 SHOW 목록에서 뺐어요. 만든 뒤 홈 🔥 오늘의 행동, 습관 히트맵, 모바일 오늘 체크, 재시작 🚨 뷰에 보이게 켜야 해요.
-- 뷰 그룹 수동 설정: `handoff/manual_notes.md`를 그대로 옮기면 돼요.
-- 원인 유형별 보드(작년 해부): 그룹을 분야 → **주원인**으로 바꾸기
-- 수식 % 표시, 수식 값 눈으로 확인 (MCP는 수식 결과를 `formulaResult://` 참조로만 돌려줘서 검증할 수 없었음)
-- 라이브러리 실천 후보 중 빠진 284개는 `out/library.csv`에서 CSV로 병합 (세부목표 26~96은 4개씩만 넣었음: 0·1·2번과 마지막 마음가짐)
-
-### 2-4. 저장소 정리
-- `tools/schema_api.py`가 실제 노션 수식과 맞는지 확인하고 `필터용` 5개를 추가하기. 정의는 아래 3번에 있어요.
-- `README.md` 상태표 갱신
-- 브랜치 `ccr-1a2dde95-im06of`에 커밋
+`MANUAL_CHECKLIST.md`를 따라가면 돼요: A 버튼 25개 · B 뷰 그룹 손보기 · B-2 라이브러리 CSV(선택) · C DB 템플릿 · D 디자인 마감 · E 검증.
+`tools/schema_api.py`는 `필터용`을 반영했지만, 빌드 중에 노션에서 직접 고친 헬퍼 수식과 다를 수 있어요. 기준은 노션에 있는 수식이에요.
 
 ## 3. 작업하면서 확인한 API 제약
 
